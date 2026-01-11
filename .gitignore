@@ -1,0 +1,27 @@
+# IDE
+.vscode/
+.idea/
+
+# Java / Gradle
+backend/.gradle/
+backend/build/
+backend/out/
+backend/.project
+backend/.classpath
+backend/.settings/
+backend/bin/
+
+# Node / Next.js
+frontend/node_modules/
+frontend/.next/
+frontend/out/
+frontend/build/
+frontend/.env.local
+frontend/.env.*.local
+frontend/npm-debug.log*
+frontend/yarn-debug.log*
+frontend/yarn-error.log*
+
+# OS
+.DS_Store
+Thumbs.db

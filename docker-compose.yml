@@ -1,0 +1,56 @@
+version: '3.8'
+
+services:
+  # PostgreSQL with PostGIS
+  db:
+    image: postgis/postgis:15-3.3-alpine
+    container_name: runwar-db
+    environment:
+      POSTGRES_DB: runwar
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+    ports:
+      - "5432:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: [ "CMD-SHELL", "pg_isready -U postgres" ]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  # Backend (Kotlin/Spring Boot)
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: runwar-backend
+    environment:
+      DATABASE_URL: jdbc:postgresql://db:5432/runwar
+      DATABASE_USER: postgres
+      DATABASE_PASSWORD: postgres
+      JWT_SECRET: super-secret-key-for-development-only-256-bits-minimum
+      CORS_ORIGINS: http://localhost:3000
+      PORT: 8080
+    ports:
+      - "8080:8080"
+    depends_on:
+      db:
+        condition: service_healthy
+    restart: unless-stopped
+  # Frontend (Next.js) - for production
+  # frontend:
+  #   build:
+  #     context: ./frontend
+  #     dockerfile: Dockerfile
+  #   container_name: runwar-frontend
+  #   environment:
+  #     NEXT_PUBLIC_API_URL: http://localhost:8080
+  #     NEXT_PUBLIC_MAPBOX_TOKEN: ${MAPBOX_TOKEN}
+  #   ports:
+  #     - "3000:3000"
+  #   depends_on:
+  #     - backend
+
+volumes:
+  pgdata:
