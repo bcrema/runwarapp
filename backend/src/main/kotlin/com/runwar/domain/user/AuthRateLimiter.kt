@@ -4,18 +4,21 @@ import com.runwar.config.RateLimitExceededException
 import org.springframework.stereotype.Component
 import java.time.Duration
 import java.time.Instant
-import java.util.concurrent.ConcurrentHashMap
+import com.github.benmanes.caffeine.cache.Cache
+import com.github.benmanes.caffeine.cache.Caffeine
 
 @Component
 class AuthRateLimiter(
     private val maxAttempts: Int = 5,
     private val window: Duration = Duration.ofMinutes(10)
 ) {
-    private val attempts = ConcurrentHashMap<String, AttemptWindow>()
+    private val attempts: Cache<String, AttemptWindow> = Caffeine.newBuilder()
+        .expireAfterWrite(window)
+        .build()
 
     fun check(key: String) {
         val now = Instant.now()
-        val windowState = attempts.compute(key) { _, existing ->
+        val windowState = attempts.asMap().compute(key) { _, existing ->
             val current = existing ?: AttemptWindow(0, now)
             if (current.windowStart.plus(window).isBefore(now)) {
                 AttemptWindow(1, now)
