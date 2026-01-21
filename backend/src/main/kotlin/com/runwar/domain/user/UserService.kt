@@ -102,14 +102,12 @@ class UserService(
     fun findById(id: UUID): User? = userRepository.findById(id).orElse(null)
     
     fun getProfile(userId: UUID): UserDto {
-        val user = userRepository.findById(userId)
-            .orElseThrow { IllegalArgumentException("User not found") }
+        val user = findUser(userId)
         return UserDto.from(user)
     }
 
     fun getMe(userId: UUID): MeDto {
-        val user = userRepository.findById(userId)
-            .orElseThrow { IllegalArgumentException("User not found") }
+        val user = findUser(userId)
         return MeDto(
             id = user.id,
             name = user.username,
@@ -120,15 +118,9 @@ class UserService(
     
     @Transactional
     fun updateProfile(userId: UUID, username: String?, avatarUrl: String?, isPublic: Boolean?): UserDto {
-        val user = userRepository.findById(userId)
-            .orElseThrow { IllegalArgumentException("User not found") }
-        
-        username?.let {
-            if (it != user.username && userRepository.existsByUsername(it)) {
-                throw IllegalArgumentException("Username already taken")
-            }
-            user.username = it
-        }
+        val user = findUser(userId)
+
+        applyUsernameUpdate(user, username)
         
         avatarUrl?.let { user.avatarUrl = it }
         isPublic?.let { user.isPublic = it }
@@ -138,15 +130,9 @@ class UserService(
 
     @Transactional
     fun updateMe(userId: UUID, name: String?, profileVisibility: String?): MeDto {
-        val user = userRepository.findById(userId)
-            .orElseThrow { IllegalArgumentException("User not found") }
+        val user = findUser(userId)
 
-        name?.let {
-            if (it != user.username && userRepository.existsByUsername(it)) {
-                throw IllegalArgumentException("Username already taken")
-            }
-            user.username = it
-        }
+        applyUsernameUpdate(user, name)
 
         profileVisibility?.let { user.isPublic = toIsPublic(it) }
 
@@ -165,5 +151,19 @@ class UserService(
         "public" -> true
         "private" -> false
         else -> throw IllegalArgumentException("Invalid profile_visibility")
+    }
+
+    private fun findUser(userId: UUID): User {
+        return userRepository.findById(userId)
+            .orElseThrow { IllegalArgumentException("User not found") }
+    }
+
+    private fun applyUsernameUpdate(user: User, username: String?) {
+        username?.let {
+            if (it != user.username && userRepository.existsByUsername(it)) {
+                throw IllegalArgumentException("This username is already taken by another user")
+            }
+            user.username = it
+        }
     }
 }

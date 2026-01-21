@@ -113,9 +113,9 @@ class UserController(private val userService: UserService) {
     class UpdateMeRequest(
         @field:Size(min = 3, max = 30)
         val name: String? = null,
-        @JsonProperty("profile_visibility")
+        @field:JsonProperty("profile_visibility")
         @field:Pattern(
-            regexp = "^(public|private)$",
+            regexp = "^(?i)(public|private)$",
             message = "profile_visibility must be public or private"
         )
         val profileVisibility: String? = null
