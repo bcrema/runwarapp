@@ -1,6 +1,8 @@
 package com.runwar.domain.user
 
 import com.runwar.config.JwtService
+import com.runwar.config.JwtProperties
+import com.runwar.config.UnauthorizedException
 import com.runwar.config.UserPrincipal
 import org.springframework.security.core.userdetails.UserDetails
 import org.springframework.security.core.userdetails.UserDetailsService
@@ -8,18 +10,25 @@ import org.springframework.security.core.userdetails.UsernameNotFoundException
 import org.springframework.security.crypto.password.PasswordEncoder
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
+import java.security.MessageDigest
+import java.security.SecureRandom
+import java.time.Instant
+import java.util.Base64
 import java.util.*
 
 @Service
 class UserService(
     private val userRepository: UserRepository,
     private val passwordEncoder: PasswordEncoder,
-    private val jwtService: JwtService
+    private val jwtService: JwtService,
+    private val refreshTokenRepository: RefreshTokenRepository,
+    private val jwtProperties: JwtProperties
 ) : UserDetailsService {
     
     data class AuthResult(
         val user: UserDto,
-        val token: String
+        val accessToken: String,
+        val refreshToken: String
     )
     
     data class UserDto(
@@ -74,9 +83,9 @@ class UserService(
         )
         
         val savedUser = userRepository.save(user)
-        val token = jwtService.generateToken(savedUser.id, savedUser.email)
+        val tokens = issueTokens(savedUser)
         
-        return AuthResult(UserDto.from(savedUser), token)
+        return AuthResult(UserDto.from(savedUser), tokens.accessToken, tokens.refreshToken)
     }
     
     fun login(email: String, password: String): AuthResult {
@@ -87,9 +96,49 @@ class UserService(
             throw IllegalArgumentException("Invalid credentials")
         }
         
-        val token = jwtService.generateToken(user.id, user.email)
+        val tokens = issueTokens(user)
         
-        return AuthResult(UserDto.from(user), token)
+        return AuthResult(UserDto.from(user), tokens.accessToken, tokens.refreshToken)
+    }
+
+    @Transactional
+    fun refresh(refreshToken: String): AuthResult {
+        val tokenHash = hashToken(refreshToken)
+        val storedToken = refreshTokenRepository.findByTokenHash(tokenHash)
+            ?: throw UnauthorizedException("Invalid refresh token")
+
+        val now = Instant.now()
+        if (storedToken.revokedAt != null || storedToken.expiresAt.isBefore(now)) {
+            throw UnauthorizedException("Refresh token expired or revoked")
+        }
+
+        val user = storedToken.user
+        val newRefreshToken = generateRefreshToken()
+        val newRefreshHash = hashToken(newRefreshToken)
+
+        storedToken.revokedAt = now
+        storedToken.replacedByTokenHash = newRefreshHash
+        refreshTokenRepository.save(storedToken)
+
+        val newTokenRecord = RefreshToken(
+            user = user,
+            tokenHash = newRefreshHash,
+            expiresAt = now.plusMillis(jwtProperties.refreshExpiration)
+        )
+        refreshTokenRepository.save(newTokenRecord)
+
+        val accessToken = jwtService.generateToken(user.id, user.email)
+        return AuthResult(UserDto.from(user), accessToken, newRefreshToken)
+    }
+
+    @Transactional
+    fun logout(refreshToken: String) {
+        val tokenHash = hashToken(refreshToken)
+        val storedToken = refreshTokenRepository.findByTokenHash(tokenHash) ?: return
+        if (storedToken.revokedAt == null) {
+            storedToken.revokedAt = Instant.now()
+            refreshTokenRepository.save(storedToken)
+        }
     }
     
     fun findById(id: UUID): User? = userRepository.findById(id).orElse(null)
@@ -116,5 +165,39 @@ class UserService(
         isPublic?.let { user.isPublic = it }
         
         return UserDto.from(userRepository.save(user))
+    }
+
+    private data class TokenPair(
+        val accessToken: String,
+        val refreshToken: String
+    )
+
+    private fun issueTokens(user: User): TokenPair {
+        val accessToken = jwtService.generateToken(user.id, user.email)
+        val refreshToken = generateRefreshToken()
+        val refreshTokenHash = hashToken(refreshToken)
+        val tokenRecord = RefreshToken(
+            user = user,
+            tokenHash = refreshTokenHash,
+            expiresAt = Instant.now().plusMillis(jwtProperties.refreshExpiration)
+        )
+        refreshTokenRepository.save(tokenRecord)
+        return TokenPair(accessToken, refreshToken)
+    }
+
+    private fun generateRefreshToken(): String {
+        val randomBytes = ByteArray(64)
+        secureRandom.nextBytes(randomBytes)
+        return Base64.getUrlEncoder().withoutPadding().encodeToString(randomBytes)
+    }
+
+    private fun hashToken(token: String): String {
+        val digest = MessageDigest.getInstance("SHA-256")
+        val hashed = digest.digest(token.toByteArray(Charsets.UTF_8))
+        return hashed.joinToString("") { "%02x".format(it) }
+    }
+
+    companion object {
+        private val secureRandom = SecureRandom()
     }
 }

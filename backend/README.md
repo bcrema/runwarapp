@@ -27,6 +27,8 @@ export DATABASE_URL=jdbc:postgresql://localhost:5432/runwar
 export DATABASE_USER=postgres
 export DATABASE_PASSWORD=postgres
 export JWT_SECRET=sua-chave-secreta-256-bits-minimo
+export JWT_REFRESH_EXPIRATION=2592000000
+export JWT_EXPIRATION=900000
 export CORS_ORIGINS=http://localhost:3000
 ```
 
@@ -47,8 +49,10 @@ docker run -p 8080:8080 --env-file .env runwar-backend
 ## API Endpoints
 
 ### Auth (Público)
-- `POST /api/auth/register` - Registrar novo usuário
+- `POST /api/auth/signup` - Registrar novo usuário
 - `POST /api/auth/login` - Login
+- `POST /api/auth/refresh` - Renovar access token
+- `POST /api/auth/logout` - Logout (revoga refresh token)
 
 ### Users
 - `GET /api/users/me` - Perfil do usuário atual
