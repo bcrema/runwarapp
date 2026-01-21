@@ -222,6 +222,43 @@ final class APIClient {
         mimeType: String
     ) async throws -> T {
         let boundary = "Boundary-\(UUID().uuidString)"
+        let request = multipartURLRequest(
+            path: path,
+            boundary: boundary,
+            fileData: fileData,
+            fileName: fileName,
+            mimeType: mimeType
+        )
+
+        let (data, response) = try await session.data(for: request)
+        guard let httpResponse = response as? HTTPURLResponse else {
+            throw URLError(.badServerResponse)
+        }
+
+        if httpResponse.statusCode == 401, let refreshHandler {
+            if let refreshedToken = try? await refreshHandler(), refreshedToken != nil {
+                let retryRequest = multipartURLRequest(
+                    path: path,
+                    boundary: boundary,
+                    fileData: fileData,
+                    fileName: fileName,
+                    mimeType: mimeType
+                )
+                let (retryData, retryResponse) = try await session.data(for: retryRequest)
+                return try decode(T.self, data: retryData, response: retryResponse)
+            }
+        }
+
+        return try decode(T.self, data: data, response: response)
+    }
+
+    private func multipartURLRequest(
+        path: String,
+        boundary: String,
+        fileData: Data,
+        fileName: String,
+        mimeType: String
+    ) -> URLRequest {
         var request = URLRequest(url: baseURL.appendingPathComponent(path))
         request.httpMethod = "POST"
         request.setValue("multipart/form-data; boundary=\(boundary)", forHTTPHeaderField: "Content-Type")
@@ -236,20 +273,7 @@ final class APIClient {
         body.append(fileData)
         body.append("\r\n--\(boundary)--\r\n".data(using: .utf8)!)
         request.httpBody = body
-
-        let (data, response) = try await session.data(for: request)
-        guard let httpResponse = response as? HTTPURLResponse else {
-            throw URLError(.badServerResponse)
-        }
-
-        if httpResponse.statusCode == 401, let refreshHandler {
-            if let refreshedToken = try? await refreshHandler(), refreshedToken != nil {
-                let (retryData, retryResponse) = try await session.data(for: request)
-                return try decode(T.self, data: retryData, response: retryResponse)
-            }
-        }
-
-        return try decode(T.self, data: data, response: response)
+        return request
     }
 
     private func performRequest<Body: Encodable>(
