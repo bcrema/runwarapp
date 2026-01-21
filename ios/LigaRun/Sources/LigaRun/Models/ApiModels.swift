@@ -4,6 +4,12 @@ import CoreLocation
 struct AuthResponse: Codable {
     let user: User
     let token: String
+    let refreshToken: String?
+}
+
+struct TokenRefreshResponse: Codable {
+    let token: String
+    let refreshToken: String?
 }
 
 struct User: Codable, Identifiable {
