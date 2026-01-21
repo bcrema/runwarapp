@@ -14,4 +14,4 @@ CREATE TABLE refresh_tokens (
 );
 
 CREATE INDEX idx_refresh_tokens_user ON refresh_tokens (user_id);
-CREATE INDEX idx_refresh_tokens_revoked ON refresh_tokens (revoked_at) WHERE revoked_at IS NULL;
+CREATE INDEX idx_refresh_tokens_token_hash_expires_revoked ON refresh_tokens (token_hash, expires_at, revoked_at);
