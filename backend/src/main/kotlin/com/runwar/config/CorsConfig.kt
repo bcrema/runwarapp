@@ -9,10 +9,9 @@ import org.springframework.web.cors.UrlBasedCorsConfigurationSource
 
 @Configuration
 class CorsConfig {
-    
-    @Value("\${cors.allowed-origins}")
-    private lateinit var allowedOrigins: String
-    
+
+    @Value("\${cors.allowed-origins}") private lateinit var allowedOrigins: String
+
     @Bean
     fun corsConfigurationSource(): CorsConfigurationSource {
         val configuration = CorsConfiguration()
@@ -21,7 +20,7 @@ class CorsConfig {
         configuration.allowedHeaders = listOf("*")
         configuration.allowCredentials = true
         configuration.maxAge = 3600L
-        
+
         val source = UrlBasedCorsConfigurationSource()
         source.registerCorsConfiguration("/**", configuration)
         return source

@@ -1,6 +1,6 @@
-# RunWar Frontend
+# LigaRun Frontend
 
-Frontend Next.js para o jogo de conquista territorial RunWar.
+Frontend Next.js para o jogo de conquista territorial LigaRun.
 
 ## Requisitos
 

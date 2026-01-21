@@ -1,10 +1,10 @@
-# RunWar
+# LigaRun
 
 🏃 Um jogo de conquista territorial no mundo real para corredores.
 
 ## Sobre
 
-RunWar transforma corridas em batalhas épicas. Corredores conquistam tiles hexagonais em Curitiba através de loops GPS válidos, defendem seu território e competem por bandeiras (assessorias, academias, boxes).
+LigaRun transforma corridas em batalhas épicas. Corredores conquistam tiles hexagonais em Curitiba através de loops GPS válidos, defendem seu território e competem por bandeiras (assessorias, academias, boxes).
 
 ## Arquitetura
 
@@ -25,6 +25,10 @@ runwarapp/
 │   │   ├── components/
 │   │   └── lib/
 │   └── README.md
+├── ios/              # App iOS nativo (SwiftUI + Mapbox)
+│   └── LigaRun/
+│       ├── project.yml
+│       └── README.md
 └── docker-compose.yml
 ```
 
@@ -65,6 +69,17 @@ Para o mapa funcionar, obtenha um token em https://www.mapbox.com/ e configure:
 NEXT_PUBLIC_MAPBOX_TOKEN=seu_token_aqui
 ```
 
+### 5. iOS (MVP nativo)
+
+O app iOS nativo vive em `ios/LigaRun/` (SwiftUI + Mapbox), consumindo o mesmo backend. Para gerar o projeto:
+
+```bash
+cd ios/LigaRun
+# configure API_BASE_URL e MAPBOX_ACCESS_TOKEN em Config/*.xcconfig
+xcodegen generate
+open LigaRun.xcodeproj
+```
+
 ## Regras do Jogo
 
 | Ação | Efeito |
@@ -103,4 +118,4 @@ NEXT_PUBLIC_MAPBOX_TOKEN=seu_token_aqui
 
 ## Licença
 
-Proprietário - RunWar © 2026
+Proprietário - LigaRun © 2026

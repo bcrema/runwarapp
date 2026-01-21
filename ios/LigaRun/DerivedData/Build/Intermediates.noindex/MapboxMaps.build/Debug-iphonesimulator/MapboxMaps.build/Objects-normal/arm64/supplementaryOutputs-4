@@ -1,0 +1,177 @@
+{
+  "/Users/brunocrema/runwarapp/ios/LigaRun/SourcePackages/checkouts/mapbox-maps-ios/Sources/MapboxMaps/Camera/AnimationCompletion.swift" : {
+    "const-values" : "/Users/brunocrema/runwarapp/ios/LigaRun/DerivedData/Build/Intermediates.noindex/MapboxMaps.build/Debug-iphonesimulator/MapboxMaps.build/Objects-normal/arm64/AnimationCompletion.swiftconstvalues",
+    "dependencies" : "/Users/brunocrema/runwarapp/ios/LigaRun/DerivedData/Build/Intermediates.noindex/MapboxMaps.build/Debug-iphonesimulator/MapboxMaps.build/Objects-normal/arm64/AnimationCompletion.d",
+    "diagnostics" : "/Users/brunocrema/runwarapp/ios/LigaRun/DerivedData/Build/Intermediates.noindex/MapboxMaps.build/Debug-iphonesimulator/MapboxMaps.build/Objects-normal/arm64/AnimationCompletion.dia",
+    "object" : "/Users/brunocrema/runwarapp/ios/LigaRun/DerivedData/Build/Intermediates.noindex/MapboxMaps.build/Debug-iphonesimulator/MapboxMaps.build/Objects-normal/arm64/AnimationCompletion.o",
+    "swift-dependencies" : "/Users/brunocrema/runwarapp/ios/LigaRun/DerivedData/Build/Intermediates.noindex/MapboxMaps.build/Debug-iphonesimulator/MapboxMaps.build/Objects-normal/arm64/AnimationCompletion.swiftdeps"
+  },
+  "/Users/brunocrema/runwarapp/ios/LigaRun/SourcePackages/checkouts/mapbox-maps-ios/Sources/MapboxMaps/Camera/AnimationOwner.swift" : {
+    "const-values" : "/Users/brunocrema/runwarapp/ios/LigaRun/DerivedData/Build/Intermediates.noindex/MapboxMaps.build/Debug-iphonesimulator/MapboxMaps.build/Objects-normal/arm64/AnimationOwner.swiftconstvalues",
+    "dependencies" : "/Users/brunocrema/runwarapp/ios/LigaRun/DerivedData/Build/Intermediates.noindex/MapboxMaps.build/Debug-iphonesimulator/MapboxMaps.build/Objects-normal/arm64/AnimationOwner.d",
+    "diagnostics" : "/Users/brunocrema/runwarapp/ios/LigaRun/DerivedData/Build/Intermediates.noindex/MapboxMaps.build/Debug-iphonesimulator/MapboxMaps.build/Objects-normal/arm64/AnimationOwner.dia",
+    "object" : "/Users/brunocrema/runwarapp/ios/LigaRun/DerivedData/Build/Intermediates.noindex/MapboxMaps.build/Debug-iphonesimulator/MapboxMaps.build/Objects-normal/arm64/AnimationOwner.o",
+    "swift-dependencies" : "/Users/brunocrema/runwarapp/ios/LigaRun/DerivedData/Build/Intermediates.noindex/MapboxMaps.build/Debug-iphonesimulator/MapboxMaps.build/Objects-normal/arm64/AnimationOwner.swiftdeps"
+  },
+  "/Users/brunocrema/runwarapp/ios/LigaRun/SourcePackages/checkouts/mapbox-maps-ios/Sources/MapboxMaps/Camera/AnimationType.swift" : {
+    "const-values" : "/Users/brunocrema/runwarapp/ios/LigaRun/DerivedData/Build/Intermediates.noindex/MapboxMaps.build/Debug-iphonesimulator/MapboxMaps.build/Objects-normal/arm64/AnimationType.swiftconstvalues",
+    "dependencies" : "/Users/brunocrema/runwarapp/ios/LigaRun/DerivedData/Build/Intermediates.noindex/MapboxMaps.build/Debug-iphonesimulator/MapboxMaps.build/Objects-normal/arm64/AnimationType.d",
+    "diagnostics" : "/Users/brunocrema/runwarapp/ios/LigaRun/DerivedData/Build/Intermediates.noindex/MapboxMaps.build/Debug-iphonesimulator/MapboxMaps.build/Objects-normal/arm64/AnimationType.dia",
+    "object" : "/Users/brunocrema/runwarapp/ios/LigaRun/DerivedData/Build/Intermediates.noindex/MapboxMaps.build/Debug-iphonesimulator/MapboxMaps.build/Objects-normal/arm64/AnimationType.o",
+    "swift-dependencies" : "/Users/brunocrema/runwarapp/ios/LigaRun/DerivedData/Build/Intermediates.noindex/MapboxMaps.build/Debug-iphonesimulator/MapboxMaps.build/Objects-normal/arm64/AnimationType.swiftdeps"
+  },
+  "/Users/brunocrema/runwarapp/ios/LigaRun/SourcePackages/checkouts/mapbox-maps-ios/Sources/MapboxMaps/Camera/BasicCameraAnimator.swift" : {
+    "const-values" : "/Users/brunocrema/runwarapp/ios/LigaRun/DerivedData/Build/Intermediates.noindex/MapboxMaps.build/Debug-iphonesimulator/MapboxMaps.build/Objects-normal/arm64/BasicCameraAnimator.swiftconstvalues",
+    "dependencies" : "/Users/brunocrema/runwarapp/ios/LigaRun/DerivedData/Build/Intermediates.noindex/MapboxMaps.build/Debug-iphonesimulator/MapboxMaps.build/Objects-normal/arm64/BasicCameraAnimator.d",
+    "diagnostics" : "/Users/brunocrema/runwarapp/ios/LigaRun/DerivedData/Build/Intermediates.noindex/MapboxMaps.build/Debug-iphonesimulator/MapboxMaps.build/Objects-normal/arm64/BasicCameraAnimator.dia",
+    "object" : "/Users/brunocrema/runwarapp/ios/LigaRun/DerivedData/Build/Intermediates.noindex/MapboxMaps.build/Debug-iphonesimulator/MapboxMaps.build/Objects-normal/arm64/BasicCameraAnimator.o",
+    "swift-dependencies" : "/Users/brunocrema/runwarapp/ios/LigaRun/DerivedData/Build/Intermediates.noindex/MapboxMaps.build/Debug-iphonesimulator/MapboxMaps.build/Objects-normal/arm64/BasicCameraAnimator.swiftdeps"
+  },
+  "/Users/brunocrema/runwarapp/ios/LigaRun/SourcePackages/checkouts/mapbox-maps-ios/Sources/MapboxMaps/Camera/BasicCameraAnimatorImpl.swift" : {
+    "const-values" : "/Users/brunocrema/runwarapp/ios/LigaRun/DerivedData/Build/Intermediates.noindex/MapboxMaps.build/Debug-iphonesimulator/MapboxMaps.build/Objects-normal/arm64/BasicCameraAnimatorImpl.swiftconstvalues",
+    "dependencies" : "/Users/brunocrema/runwarapp/ios/LigaRun/DerivedData/Build/Intermediates.noindex/MapboxMaps.build/Debug-iphonesimulator/MapboxMaps.build/Objects-normal/arm64/BasicCameraAnimatorImpl.d",
+    "diagnostics" : "/Users/brunocrema/runwarapp/ios/LigaRun/DerivedData/Build/Intermediates.noindex/MapboxMaps.build/Debug-iphonesimulator/MapboxMaps.build/Objects-normal/arm64/BasicCameraAnimatorImpl.dia",
+    "object" : "/Users/brunocrema/runwarapp/ios/LigaRun/DerivedData/Build/Intermediates.noindex/MapboxMaps.build/Debug-iphonesimulator/MapboxMaps.build/Objects-normal/arm64/BasicCameraAnimatorImpl.o",
+    "swift-dependencies" : "/Users/brunocrema/runwarapp/ios/LigaRun/DerivedData/Build/Intermediates.noindex/MapboxMaps.build/Debug-iphonesimulator/MapboxMaps.build/Objects-normal/arm64/BasicCameraAnimatorImpl.swiftdeps"
+  },
+  "/Users/brunocrema/runwarapp/ios/LigaRun/SourcePackages/checkouts/mapbox-maps-ios/Sources/MapboxMaps/Camera/CameraAnimationsManager.swift" : {
+    "const-values" : "/Users/brunocrema/runwarapp/ios/LigaRun/DerivedData/Build/Intermediates.noindex/MapboxMaps.build/Debug-iphonesimulator/MapboxMaps.build/Objects-normal/arm64/CameraAnimationsManager.swiftconstvalues",
+    "dependencies" : "/Users/brunocrema/runwarapp/ios/LigaRun/DerivedData/Build/Intermediates.noindex/MapboxMaps.build/Debug-iphonesimulator/MapboxMaps.build/Objects-normal/arm64/CameraAnimationsManager.d",
+    "diagnostics" : "/Users/brunocrema/runwarapp/ios/LigaRun/DerivedData/Build/Intermediates.noindex/MapboxMaps.build/Debug-iphonesimulator/MapboxMaps.build/Objects-normal/arm64/CameraAnimationsManager.dia",
+    "object" : "/Users/brunocrema/runwarapp/ios/LigaRun/DerivedData/Build/Intermediates.noindex/MapboxMaps.build/Debug-iphonesimulator/MapboxMaps.build/Objects-normal/arm64/CameraAnimationsManager.o",
+    "swift-dependencies" : "/Users/brunocrema/runwarapp/ios/LigaRun/DerivedData/Build/Intermediates.noindex/MapboxMaps.build/Debug-iphonesimulator/MapboxMaps.build/Objects-normal/arm64/CameraAnimationsManager.swiftdeps"
+  },
+  "/Users/brunocrema/runwarapp/ios/LigaRun/SourcePackages/checkouts/mapbox-maps-ios/Sources/MapboxMaps/Camera/CameraAnimationsManagerImpl.swift" : {
+    "const-values" : "/Users/brunocrema/runwarapp/ios/LigaRun/DerivedData/Build/Intermediates.noindex/MapboxMaps.build/Debug-iphonesimulator/MapboxMaps.build/Objects-normal/arm64/CameraAnimationsManagerImpl.swiftconstvalues",
+    "dependencies" : "/Users/brunocrema/runwarapp/ios/LigaRun/DerivedData/Build/Intermediates.noindex/MapboxMaps.build/Debug-iphonesimulator/MapboxMaps.build/Objects-normal/arm64/CameraAnimationsManagerImpl.d",
+    "diagnostics" : "/Users/brunocrema/runwarapp/ios/LigaRun/DerivedData/Build/Intermediates.noindex/MapboxMaps.build/Debug-iphonesimulator/MapboxMaps.build/Objects-normal/arm64/CameraAnimationsManagerImpl.dia",
+    "object" : "/Users/brunocrema/runwarapp/ios/LigaRun/DerivedData/Build/Intermediates.noindex/MapboxMaps.build/Debug-iphonesimulator/MapboxMaps.build/Objects-normal/arm64/CameraAnimationsManagerImpl.o",
+    "swift-dependencies" : "/Users/brunocrema/runwarapp/ios/LigaRun/DerivedData/Build/Intermediates.noindex/MapboxMaps.build/Debug-iphonesimulator/MapboxMaps.build/Objects-normal/arm64/CameraAnimationsManagerImpl.swiftdeps"
+  },
+  "/Users/brunocrema/runwarapp/ios/LigaRun/SourcePackages/checkouts/mapbox-maps-ios/Sources/MapboxMaps/Camera/CameraAnimator.swift" : {
+    "const-values" : "/Users/brunocrema/runwarapp/ios/LigaRun/DerivedData/Build/Intermediates.noindex/MapboxMaps.build/Debug-iphonesimulator/MapboxMaps.build/Objects-normal/arm64/CameraAnimator.swiftconstvalues",
+    "dependencies" : "/Users/brunocrema/runwarapp/ios/LigaRun/DerivedData/Build/Intermediates.noindex/MapboxMaps.build/Debug-iphonesimulator/MapboxMaps.build/Objects-normal/arm64/CameraAnimator.d",
+    "diagnostics" : "/Users/brunocrema/runwarapp/ios/LigaRun/DerivedData/Build/Intermediates.noindex/MapboxMaps.build/Debug-iphonesimulator/MapboxMaps.build/Objects-normal/arm64/CameraAnimator.dia",
+    "object" : "/Users/brunocrema/runwarapp/ios/LigaRun/DerivedData/Build/Intermediates.noindex/MapboxMaps.build/Debug-iphonesimulator/MapboxMaps.build/Objects-normal/arm64/CameraAnimator.o",
+    "swift-dependencies" : "/Users/brunocrema/runwarapp/ios/LigaRun/DerivedData/Build/Intermediates.noindex/MapboxMaps.build/Debug-iphonesimulator/MapboxMaps.build/Objects-normal/arm64/CameraAnimator.swiftdeps"
+  },
+  "/Users/brunocrema/runwarapp/ios/LigaRun/SourcePackages/checkouts/mapbox-maps-ios/Sources/MapboxMaps/Camera/CameraAnimatorStatusObservable.swift" : {
+    "const-values" : "/Users/brunocrema/runwarapp/ios/LigaRun/DerivedData/Build/Intermediates.noindex/MapboxMaps.build/Debug-iphonesimulator/MapboxMaps.build/Objects-normal/arm64/CameraAnimatorStatusObservable.swiftconstvalues",
+    "dependencies" : "/Users/brunocrema/runwarapp/ios/LigaRun/DerivedData/Build/Intermediates.noindex/MapboxMaps.build/Debug-iphonesimulator/MapboxMaps.build/Objects-normal/arm64/CameraAnimatorStatusObservable.d",
+    "diagnostics" : "/Users/brunocrema/runwarapp/ios/LigaRun/DerivedData/Build/Intermediates.noindex/MapboxMaps.build/Debug-iphonesimulator/MapboxMaps.build/Objects-normal/arm64/CameraAnimatorStatusObservable.dia",
+    "object" : "/Users/brunocrema/runwarapp/ios/LigaRun/DerivedData/Build/Intermediates.noindex/MapboxMaps.build/Debug-iphonesimulator/MapboxMaps.build/Objects-normal/arm64/CameraAnimatorStatusObservable.o",
+    "swift-dependencies" : "/Users/brunocrema/runwarapp/ios/LigaRun/DerivedData/Build/Intermediates.noindex/MapboxMaps.build/Debug-iphonesimulator/MapboxMaps.build/Objects-normal/arm64/CameraAnimatorStatusObservable.swiftdeps"
+  },
+  "/Users/brunocrema/runwarapp/ios/LigaRun/SourcePackages/checkouts/mapbox-maps-ios/Sources/MapboxMaps/Camera/CameraAnimatorsFactory.swift" : {
+    "const-values" : "/Users/brunocrema/runwarapp/ios/LigaRun/DerivedData/Build/Intermediates.noindex/MapboxMaps.build/Debug-iphonesimulator/MapboxMaps.build/Objects-normal/arm64/CameraAnimatorsFactory.swiftconstvalues",
+    "dependencies" : "/Users/brunocrema/runwarapp/ios/LigaRun/DerivedData/Build/Intermediates.noindex/MapboxMaps.build/Debug-iphonesimulator/MapboxMaps.build/Objects-normal/arm64/CameraAnimatorsFactory.d",
+    "diagnostics" : "/Users/brunocrema/runwarapp/ios/LigaRun/DerivedData/Build/Intermediates.noindex/MapboxMaps.build/Debug-iphonesimulator/MapboxMaps.build/Objects-normal/arm64/CameraAnimatorsFactory.dia",
+    "object" : "/Users/brunocrema/runwarapp/ios/LigaRun/DerivedData/Build/Intermediates.noindex/MapboxMaps.build/Debug-iphonesimulator/MapboxMaps.build/Objects-normal/arm64/CameraAnimatorsFactory.o",
+    "swift-dependencies" : "/Users/brunocrema/runwarapp/ios/LigaRun/DerivedData/Build/Intermediates.noindex/MapboxMaps.build/Debug-iphonesimulator/MapboxMaps.build/Objects-normal/arm64/CameraAnimatorsFactory.swiftdeps"
+  },
+  "/Users/brunocrema/runwarapp/ios/LigaRun/SourcePackages/checkouts/mapbox-maps-ios/Sources/MapboxMaps/Camera/CameraAnimatorsRunner.swift" : {
+    "const-values" : "/Users/brunocrema/runwarapp/ios/LigaRun/DerivedData/Build/Intermediates.noindex/MapboxMaps.build/Debug-iphonesimulator/MapboxMaps.build/Objects-normal/arm64/CameraAnimatorsRunner.swiftconstvalues",
+    "dependencies" : "/Users/brunocrema/runwarapp/ios/LigaRun/DerivedData/Build/Intermediates.noindex/MapboxMaps.build/Debug-iphonesimulator/MapboxMaps.build/Objects-normal/arm64/CameraAnimatorsRunner.d",
+    "diagnostics" : "/Users/brunocrema/runwarapp/ios/LigaRun/DerivedData/Build/Intermediates.noindex/MapboxMaps.build/Debug-iphonesimulator/MapboxMaps.build/Objects-normal/arm64/CameraAnimatorsRunner.dia",
+    "object" : "/Users/brunocrema/runwarapp/ios/LigaRun/DerivedData/Build/Intermediates.noindex/MapboxMaps.build/Debug-iphonesimulator/MapboxMaps.build/Objects-normal/arm64/CameraAnimatorsRunner.o",
+    "swift-dependencies" : "/Users/brunocrema/runwarapp/ios/LigaRun/DerivedData/Build/Intermediates.noindex/MapboxMaps.build/Debug-iphonesimulator/MapboxMaps.build/Objects-normal/arm64/CameraAnimatorsRunner.swiftdeps"
+  },
+  "/Users/brunocrema/runwarapp/ios/LigaRun/SourcePackages/checkouts/mapbox-maps-ios/Sources/MapboxMaps/Camera/CameraOptionsInterpolator.swift" : {
+    "const-values" : "/Users/brunocrema/runwarapp/ios/LigaRun/DerivedData/Build/Intermediates.noindex/MapboxMaps.build/Debug-iphonesimulator/MapboxMaps.build/Objects-normal/arm64/CameraOptionsInterpolator.swiftconstvalues",
+    "dependencies" : "/Users/brunocrema/runwarapp/ios/LigaRun/DerivedData/Build/Intermediates.noindex/MapboxMaps.build/Debug-iphonesimulator/MapboxMaps.build/Objects-normal/arm64/CameraOptionsInterpolator.d",
+    "diagnostics" : "/Users/brunocrema/runwarapp/ios/LigaRun/DerivedData/Build/Intermediates.noindex/MapboxMaps.build/Debug-iphonesimulator/MapboxMaps.build/Objects-normal/arm64/CameraOptionsInterpolator.dia",
+    "object" : "/Users/brunocrema/runwarapp/ios/LigaRun/DerivedData/Build/Intermediates.noindex/MapboxMaps.build/Debug-iphonesimulator/MapboxMaps.build/Objects-normal/arm64/CameraOptionsInterpolator.o",
+    "swift-dependencies" : "/Users/brunocrema/runwarapp/ios/LigaRun/DerivedData/Build/Intermediates.noindex/MapboxMaps.build/Debug-iphonesimulator/MapboxMaps.build/Objects-normal/arm64/CameraOptionsInterpolator.swiftdeps"
+  },
+  "/Users/brunocrema/runwarapp/ios/LigaRun/SourcePackages/checkouts/mapbox-maps-ios/Sources/MapboxMaps/Camera/CameraTransition.swift" : {
+    "const-values" : "/Users/brunocrema/runwarapp/ios/LigaRun/DerivedData/Build/Intermediates.noindex/MapboxMaps.build/Debug-iphonesimulator/MapboxMaps.build/Objects-normal/arm64/CameraTransition.swiftconstvalues",
+    "dependencies" : "/Users/brunocrema/runwarapp/ios/LigaRun/DerivedData/Build/Intermediates.noindex/MapboxMaps.build/Debug-iphonesimulator/MapboxMaps.build/Objects-normal/arm64/CameraTransition.d",
+    "diagnostics" : "/Users/brunocrema/runwarapp/ios/LigaRun/DerivedData/Build/Intermediates.noindex/MapboxMaps.build/Debug-iphonesimulator/MapboxMaps.build/Objects-normal/arm64/CameraTransition.dia",
+    "object" : "/Users/brunocrema/runwarapp/ios/LigaRun/DerivedData/Build/Intermediates.noindex/MapboxMaps.build/Debug-iphonesimulator/MapboxMaps.build/Objects-normal/arm64/CameraTransition.o",
+    "swift-dependencies" : "/Users/brunocrema/runwarapp/ios/LigaRun/DerivedData/Build/Intermediates.noindex/MapboxMaps.build/Debug-iphonesimulator/MapboxMaps.build/Objects-normal/arm64/CameraTransition.swiftdeps"
+  },
+  "/Users/brunocrema/runwarapp/ios/LigaRun/SourcePackages/checkouts/mapbox-maps-ios/Sources/MapboxMaps/Camera/CameraView.swift" : {
+    "const-values" : "/Users/brunocrema/runwarapp/ios/LigaRun/DerivedData/Build/Intermediates.noindex/MapboxMaps.build/Debug-iphonesimulator/MapboxMaps.build/Objects-normal/arm64/CameraView.swiftconstvalues",
+    "dependencies" : "/Users/brunocrema/runwarapp/ios/LigaRun/DerivedData/Build/Intermediates.noindex/MapboxMaps.build/Debug-iphonesimulator/MapboxMaps.build/Objects-normal/arm64/CameraView.d",
+    "diagnostics" : "/Users/brunocrema/runwarapp/ios/LigaRun/DerivedData/Build/Intermediates.noindex/MapboxMaps.build/Debug-iphonesimulator/MapboxMaps.build/Objects-normal/arm64/CameraView.dia",
+    "object" : "/Users/brunocrema/runwarapp/ios/LigaRun/DerivedData/Build/Intermediates.noindex/MapboxMaps.build/Debug-iphonesimulator/MapboxMaps.build/Objects-normal/arm64/CameraView.o",
+    "swift-dependencies" : "/Users/brunocrema/runwarapp/ios/LigaRun/DerivedData/Build/Intermediates.noindex/MapboxMaps.build/Debug-iphonesimulator/MapboxMaps.build/Objects-normal/arm64/CameraView.swiftdeps"
+  },
+  "/Users/brunocrema/runwarapp/ios/LigaRun/SourcePackages/checkouts/mapbox-maps-ios/Sources/MapboxMaps/Camera/FlyToCameraAnimator.swift" : {
+    "const-values" : "/Users/brunocrema/runwarapp/ios/LigaRun/DerivedData/Build/Intermediates.noindex/MapboxMaps.build/Debug-iphonesimulator/MapboxMaps.build/Objects-normal/arm64/FlyToCameraAnimator.swiftconstvalues",
+    "dependencies" : "/Users/brunocrema/runwarapp/ios/LigaRun/DerivedData/Build/Intermediates.noindex/MapboxMaps.build/Debug-iphonesimulator/MapboxMaps.build/Objects-normal/arm64/FlyToCameraAnimator.d",
+    "diagnostics" : "/Users/brunocrema/runwarapp/ios/LigaRun/DerivedData/Build/Intermediates.noindex/MapboxMaps.build/Debug-iphonesimulator/MapboxMaps.build/Objects-normal/arm64/FlyToCameraAnimator.dia",
+    "object" : "/Users/brunocrema/runwarapp/ios/LigaRun/DerivedData/Build/Intermediates.noindex/MapboxMaps.build/Debug-iphonesimulator/MapboxMaps.build/Objects-normal/arm64/FlyToCameraAnimator.o",
+    "swift-dependencies" : "/Users/brunocrema/runwarapp/ios/LigaRun/DerivedData/Build/Intermediates.noindex/MapboxMaps.build/Debug-iphonesimulator/MapboxMaps.build/Objects-normal/arm64/FlyToCameraAnimator.swiftdeps"
+  },
+  "/Users/brunocrema/runwarapp/ios/LigaRun/SourcePackages/checkouts/mapbox-maps-ios/Sources/MapboxMaps/Camera/FlyToInterpolator.swift" : {
+    "const-values" : "/Users/brunocrema/runwarapp/ios/LigaRun/DerivedData/Build/Intermediates.noindex/MapboxMaps.build/Debug-iphonesimulator/MapboxMaps.build/Objects-normal/arm64/FlyToInterpolator.swiftconstvalues",
+    "dependencies" : "/Users/brunocrema/runwarapp/ios/LigaRun/DerivedData/Build/Intermediates.noindex/MapboxMaps.build/Debug-iphonesimulator/MapboxMaps.build/Objects-normal/arm64/FlyToInterpolator.d",
+    "diagnostics" : "/Users/brunocrema/runwarapp/ios/LigaRun/DerivedData/Build/Intermediates.noindex/MapboxMaps.build/Debug-iphonesimulator/MapboxMaps.build/Objects-normal/arm64/FlyToInterpolator.dia",
+    "object" : "/Users/brunocrema/runwarapp/ios/LigaRun/DerivedData/Build/Intermediates.noindex/MapboxMaps.build/Debug-iphonesimulator/MapboxMaps.build/Objects-normal/arm64/FlyToInterpolator.o",
+    "swift-dependencies" : "/Users/brunocrema/runwarapp/ios/LigaRun/DerivedData/Build/Intermediates.noindex/MapboxMaps.build/Debug-iphonesimulator/MapboxMaps.build/Objects-normal/arm64/FlyToInterpolator.swiftdeps"
+  },
+  "/Users/brunocrema/runwarapp/ios/LigaRun/SourcePackages/checkouts/mapbox-maps-ios/Sources/MapboxMaps/Camera/GestureDecelerationCameraAnimator.swift" : {
+    "const-values" : "/Users/brunocrema/runwarapp/ios/LigaRun/DerivedData/Build/Intermediates.noindex/MapboxMaps.build/Debug-iphonesimulator/MapboxMaps.build/Objects-normal/arm64/GestureDecelerationCameraAnimator.swiftconstvalues",
+    "dependencies" : "/Users/brunocrema/runwarapp/ios/LigaRun/DerivedData/Build/Intermediates.noindex/MapboxMaps.build/Debug-iphonesimulator/MapboxMaps.build/Objects-normal/arm64/GestureDecelerationCameraAnimator.d",
+    "diagnostics" : "/Users/brunocrema/runwarapp/ios/LigaRun/DerivedData/Build/Intermediates.noindex/MapboxMaps.build/Debug-iphonesimulator/MapboxMaps.build/Objects-normal/arm64/GestureDecelerationCameraAnimator.dia",
+    "object" : "/Users/brunocrema/runwarapp/ios/LigaRun/DerivedData/Build/Intermediates.noindex/MapboxMaps.build/Debug-iphonesimulator/MapboxMaps.build/Objects-normal/arm64/GestureDecelerationCameraAnimator.o",
+    "swift-dependencies" : "/Users/brunocrema/runwarapp/ios/LigaRun/DerivedData/Build/Intermediates.noindex/MapboxMaps.build/Debug-iphonesimulator/MapboxMaps.build/Objects-normal/arm64/GestureDecelerationCameraAnimator.swiftdeps"
+  },
+  "/Users/brunocrema/runwarapp/ios/LigaRun/SourcePackages/checkouts/mapbox-maps-ios/Sources/MapboxMaps/Camera/SimpleCameraAnimator.swift" : {
+    "const-values" : "/Users/brunocrema/runwarapp/ios/LigaRun/DerivedData/Build/Intermediates.noindex/MapboxMaps.build/Debug-iphonesimulator/MapboxMaps.build/Objects-normal/arm64/SimpleCameraAnimator.swiftconstvalues",
+    "dependencies" : "/Users/brunocrema/runwarapp/ios/LigaRun/DerivedData/Build/Intermediates.noindex/MapboxMaps.build/Debug-iphonesimulator/MapboxMaps.build/Objects-normal/arm64/SimpleCameraAnimator.d",
+    "diagnostics" : "/Users/brunocrema/runwarapp/ios/LigaRun/DerivedData/Build/Intermediates.noindex/MapboxMaps.build/Debug-iphonesimulator/MapboxMaps.build/Objects-normal/arm64/SimpleCameraAnimator.dia",
+    "object" : "/Users/brunocrema/runwarapp/ios/LigaRun/DerivedData/Build/Intermediates.noindex/MapboxMaps.build/Debug-iphonesimulator/MapboxMaps.build/Objects-normal/arm64/SimpleCameraAnimator.o",
+    "swift-dependencies" : "/Users/brunocrema/runwarapp/ios/LigaRun/DerivedData/Build/Intermediates.noindex/MapboxMaps.build/Debug-iphonesimulator/MapboxMaps.build/Objects-normal/arm64/SimpleCameraAnimator.swiftdeps"
+  },
+  "/Users/brunocrema/runwarapp/ios/LigaRun/SourcePackages/checkouts/mapbox-maps-ios/Sources/MapboxMaps/ContentBuilders/MapContent/ForEvery.swift" : {
+    "const-values" : "/Users/brunocrema/runwarapp/ios/LigaRun/DerivedData/Build/Intermediates.noindex/MapboxMaps.build/Debug-iphonesimulator/MapboxMaps.build/Objects-normal/arm64/ForEvery.swiftconstvalues",
+    "dependencies" : "/Users/brunocrema/runwarapp/ios/LigaRun/DerivedData/Build/Intermediates.noindex/MapboxMaps.build/Debug-iphonesimulator/MapboxMaps.build/Objects-normal/arm64/ForEvery.d",
+    "diagnostics" : "/Users/brunocrema/runwarapp/ios/LigaRun/DerivedData/Build/Intermediates.noindex/MapboxMaps.build/Debug-iphonesimulator/MapboxMaps.build/Objects-normal/arm64/ForEvery.dia",
+    "object" : "/Users/brunocrema/runwarapp/ios/LigaRun/DerivedData/Build/Intermediates.noindex/MapboxMaps.build/Debug-iphonesimulator/MapboxMaps.build/Objects-normal/arm64/ForEvery.o",
+    "swift-dependencies" : "/Users/brunocrema/runwarapp/ios/LigaRun/DerivedData/Build/Intermediates.noindex/MapboxMaps.build/Debug-iphonesimulator/MapboxMaps.build/Objects-normal/arm64/ForEvery.swiftdeps"
+  },
+  "/Users/brunocrema/runwarapp/ios/LigaRun/SourcePackages/checkouts/mapbox-maps-ios/Sources/MapboxMaps/ContentBuilders/MapContent/MapContent.swift" : {
+    "const-values" : "/Users/brunocrema/runwarapp/ios/LigaRun/DerivedData/Build/Intermediates.noindex/MapboxMaps.build/Debug-iphonesimulator/MapboxMaps.build/Objects-normal/arm64/MapContent.swiftconstvalues",
+    "dependencies" : "/Users/brunocrema/runwarapp/ios/LigaRun/DerivedData/Build/Intermediates.noindex/MapboxMaps.build/Debug-iphonesimulator/MapboxMaps.build/Objects-normal/arm64/MapContent.d",
+    "diagnostics" : "/Users/brunocrema/runwarapp/ios/LigaRun/DerivedData/Build/Intermediates.noindex/MapboxMaps.build/Debug-iphonesimulator/MapboxMaps.build/Objects-normal/arm64/MapContent.dia",
+    "object" : "/Users/brunocrema/runwarapp/ios/LigaRun/DerivedData/Build/Intermediates.noindex/MapboxMaps.build/Debug-iphonesimulator/MapboxMaps.build/Objects-normal/arm64/MapContent.o",
+    "swift-dependencies" : "/Users/brunocrema/runwarapp/ios/LigaRun/DerivedData/Build/Intermediates.noindex/MapboxMaps.build/Debug-iphonesimulator/MapboxMaps.build/Objects-normal/arm64/MapContent.swiftdeps"
+  },
+  "/Users/brunocrema/runwarapp/ios/LigaRun/SourcePackages/checkouts/mapbox-maps-ios/Sources/MapboxMaps/ContentBuilders/MapContent/MapContentBuilder.swift" : {
+    "const-values" : "/Users/brunocrema/runwarapp/ios/LigaRun/DerivedData/Build/Intermediates.noindex/MapboxMaps.build/Debug-iphonesimulator/MapboxMaps.build/Objects-normal/arm64/MapContentBuilder.swiftconstvalues",
+    "dependencies" : "/Users/brunocrema/runwarapp/ios/LigaRun/DerivedData/Build/Intermediates.noindex/MapboxMaps.build/Debug-iphonesimulator/MapboxMaps.build/Objects-normal/arm64/MapContentBuilder.d",
+    "diagnostics" : "/Users/brunocrema/runwarapp/ios/LigaRun/DerivedData/Build/Intermediates.noindex/MapboxMaps.build/Debug-iphonesimulator/MapboxMaps.build/Objects-normal/arm64/MapContentBuilder.dia",
+    "object" : "/Users/brunocrema/runwarapp/ios/LigaRun/DerivedData/Build/Intermediates.noindex/MapboxMaps.build/Debug-iphonesimulator/MapboxMaps.build/Objects-normal/arm64/MapContentBuilder.o",
+    "swift-dependencies" : "/Users/brunocrema/runwarapp/ios/LigaRun/DerivedData/Build/Intermediates.noindex/MapboxMaps.build/Debug-iphonesimulator/MapboxMaps.build/Objects-normal/arm64/MapContentBuilder.swiftdeps"
+  },
+  "/Users/brunocrema/runwarapp/ios/LigaRun/SourcePackages/checkouts/mapbox-maps-ios/Sources/MapboxMaps/ContentBuilders/MapContent/MapContentUniqueProperties.swift" : {
+    "const-values" : "/Users/brunocrema/runwarapp/ios/LigaRun/DerivedData/Build/Intermediates.noindex/MapboxMaps.build/Debug-iphonesimulator/MapboxMaps.build/Objects-normal/arm64/MapContentUniqueProperties.swiftconstvalues",
+    "dependencies" : "/Users/brunocrema/runwarapp/ios/LigaRun/DerivedData/Build/Intermediates.noindex/MapboxMaps.build/Debug-iphonesimulator/MapboxMaps.build/Objects-normal/arm64/MapContentUniqueProperties.d",
+    "diagnostics" : "/Users/brunocrema/runwarapp/ios/LigaRun/DerivedData/Build/Intermediates.noindex/MapboxMaps.build/Debug-iphonesimulator/MapboxMaps.build/Objects-normal/arm64/MapContentUniqueProperties.dia",
+    "object" : "/Users/brunocrema/runwarapp/ios/LigaRun/DerivedData/Build/Intermediates.noindex/MapboxMaps.build/Debug-iphonesimulator/MapboxMaps.build/Objects-normal/arm64/MapContentUniqueProperties.o",
+    "swift-dependencies" : "/Users/brunocrema/runwarapp/ios/LigaRun/DerivedData/Build/Intermediates.noindex/MapboxMaps.build/Debug-iphonesimulator/MapboxMaps.build/Objects-normal/arm64/MapContentUniqueProperties.swiftdeps"
+  },
+  "/Users/brunocrema/runwarapp/ios/LigaRun/SourcePackages/checkouts/mapbox-maps-ios/Sources/MapboxMaps/ContentBuilders/MapContent/MapStyleReconciler.swift" : {
+    "const-values" : "/Users/brunocrema/runwarapp/ios/LigaRun/DerivedData/Build/Intermediates.noindex/MapboxMaps.build/Debug-iphonesimulator/MapboxMaps.build/Objects-normal/arm64/MapStyleReconciler.swiftconstvalues",
+    "dependencies" : "/Users/brunocrema/runwarapp/ios/LigaRun/DerivedData/Build/Intermediates.noindex/MapboxMaps.build/Debug-iphonesimulator/MapboxMaps.build/Objects-normal/arm64/MapStyleReconciler.d",
+    "diagnostics" : "/Users/brunocrema/runwarapp/ios/LigaRun/DerivedData/Build/Intermediates.noindex/MapboxMaps.build/Debug-iphonesimulator/MapboxMaps.build/Objects-normal/arm64/MapStyleReconciler.dia",
+    "object" : "/Users/brunocrema/runwarapp/ios/LigaRun/DerivedData/Build/Intermediates.noindex/MapboxMaps.build/Debug-iphonesimulator/MapboxMaps.build/Objects-normal/arm64/MapStyleReconciler.o",
+    "swift-dependencies" : "/Users/brunocrema/runwarapp/ios/LigaRun/DerivedData/Build/Intermediates.noindex/MapboxMaps.build/Debug-iphonesimulator/MapboxMaps.build/Objects-normal/arm64/MapStyleReconciler.swiftdeps"
+  },
+  "/Users/brunocrema/runwarapp/ios/LigaRun/SourcePackages/checkouts/mapbox-maps-ios/Sources/MapboxMaps/ContentBuilders/MapContent/MountedAnnotationGroup.swift" : {
+    "const-values" : "/Users/brunocrema/runwarapp/ios/LigaRun/DerivedData/Build/Intermediates.noindex/MapboxMaps.build/Debug-iphonesimulator/MapboxMaps.build/Objects-normal/arm64/MountedAnnotationGroup.swiftconstvalues",
+    "dependencies" : "/Users/brunocrema/runwarapp/ios/LigaRun/DerivedData/Build/Intermediates.noindex/MapboxMaps.build/Debug-iphonesimulator/MapboxMaps.build/Objects-normal/arm64/MountedAnnotationGroup.d",
+    "diagnostics" : "/Users/brunocrema/runwarapp/ios/LigaRun/DerivedData/Build/Intermediates.noindex/MapboxMaps.build/Debug-iphonesimulator/MapboxMaps.build/Objects-normal/arm64/MountedAnnotationGroup.dia",
+    "object" : "/Users/brunocrema/runwarapp/ios/LigaRun/DerivedData/Build/Intermediates.noindex/MapboxMaps.build/Debug-iphonesimulator/MapboxMaps.build/Objects-normal/arm64/MountedAnnotationGroup.o",
+    "swift-dependencies" : "/Users/brunocrema/runwarapp/ios/LigaRun/DerivedData/Build/Intermediates.noindex/MapboxMaps.build/Debug-iphonesimulator/MapboxMaps.build/Objects-normal/arm64/MountedAnnotationGroup.swiftdeps"
+  },
+  "/Users/brunocrema/runwarapp/ios/LigaRun/SourcePackages/checkouts/mapbox-maps-ios/Sources/MapboxMaps/ContentBuilders/MapContent/MountedFeatureState.swift" : {
+    "const-values" : "/Users/brunocrema/runwarapp/ios/LigaRun/DerivedData/Build/Intermediates.noindex/MapboxMaps.build/Debug-iphonesimulator/MapboxMaps.build/Objects-normal/arm64/MountedFeatureState.swiftconstvalues",
+    "dependencies" : "/Users/brunocrema/runwarapp/ios/LigaRun/DerivedData/Build/Intermediates.noindex/MapboxMaps.build/Debug-iphonesimulator/MapboxMaps.build/Objects-normal/arm64/MountedFeatureState.d",
+    "diagnostics" : "/Users/brunocrema/runwarapp/ios/LigaRun/DerivedData/Build/Intermediates.noindex/MapboxMaps.build/Debug-iphonesimulator/MapboxMaps.build/Objects-normal/arm64/MountedFeatureState.dia",
+    "object" : "/Users/brunocrema/runwarapp/ios/LigaRun/DerivedData/Build/Intermediates.noindex/MapboxMaps.build/Debug-iphonesimulator/MapboxMaps.build/Objects-normal/arm64/MountedFeatureState.o",
+    "swift-dependencies" : "/Users/brunocrema/runwarapp/ios/LigaRun/DerivedData/Build/Intermediates.noindex/MapboxMaps.build/Debug-iphonesimulator/MapboxMaps.build/Objects-normal/arm64/MountedFeatureState.swiftdeps"
+  }
+}

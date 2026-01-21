@@ -2,12 +2,12 @@ import '@/styles/globals.css'
 import type { Metadata } from 'next'
 
 export const metadata: Metadata = {
-    title: 'RunWar - Conquiste Territórios Correndo',
+    title: 'LigaRun - Conquiste Territórios Correndo',
     description: 'Um jogo de conquista territorial no mundo real para corredores. Conquiste, ataque e defenda tiles hexagonais com suas corridas.',
     keywords: ['corrida', 'GPS', 'território', 'jogo', 'running', 'fitness'],
-    authors: [{ name: 'RunWar' }],
+    authors: [{ name: 'LigaRun' }],
     openGraph: {
-        title: 'RunWar - Conquiste Territórios Correndo',
+        title: 'LigaRun - Conquiste Territórios Correndo',
         description: 'Um jogo de conquista territorial no mundo real para corredores.',
         type: 'website',
     },

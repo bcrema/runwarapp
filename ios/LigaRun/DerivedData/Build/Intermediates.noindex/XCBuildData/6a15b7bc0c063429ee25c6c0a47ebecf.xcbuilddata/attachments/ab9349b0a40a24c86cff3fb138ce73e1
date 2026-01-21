@@ -1,0 +1,4 @@
+module MapboxMaps {
+header "MapboxMaps-Swift.h"
+export *
+}

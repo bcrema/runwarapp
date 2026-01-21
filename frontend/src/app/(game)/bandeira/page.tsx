@@ -7,7 +7,7 @@ import styles from './page.module.css'
 import { useRouter } from 'next/navigation'
 
 export default function BandeiraPage() {
-    const { user, mutateUser } = useAuth()
+    const { user, loadUser } = useAuth()
     const router = useRouter()
     const [bandeiras, setBandeiras] = useState<Bandeira[]>([])
     const [loading, setLoading] = useState(true)
@@ -35,7 +35,7 @@ export default function BandeiraPage() {
         setJoiningId(id)
         try {
             await api.joinBandeira(id)
-            await mutateUser() // Refresh user data to update bandeira status
+            await loadUser() // Refresh user data to update bandeira status
             router.push('/profile')
         } catch (error) {
             console.error('Failed to join bandeira:', error)
@@ -50,7 +50,7 @@ export default function BandeiraPage() {
 
         try {
             await api.leaveBandeira()
-            await mutateUser()
+            await loadUser()
         } catch (error) {
             console.error('Failed to leave bandeira:', error)
             alert('Erro ao sair da bandeira.')
@@ -117,7 +117,7 @@ export default function BandeiraPage() {
 
                         <div className={styles.statsRow}>
                             <div className={styles.stat}>
-                                <span className={styles.statVal}>{bandeira.totalMembers}</span>
+                                <span className={styles.statVal}>{bandeira.memberCount}</span>
                                 <span className={styles.statLbl}>Membros</span>
                             </div>
                             <div className={styles.stat}>

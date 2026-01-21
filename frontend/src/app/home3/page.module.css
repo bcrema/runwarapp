@@ -1,0 +1,262 @@
+.main {
+    min-height: 100vh;
+    min-height: 100dvh;
+    background: var(--color-bg-primary);
+}
+
+.hero {
+    position: relative;
+    padding: var(--space-2xl) var(--space-md);
+    overflow: hidden;
+}
+
+.heroBackground {
+    position: absolute;
+    inset: 0;
+    background:
+        radial-gradient(circle at 15% 20%, rgba(34, 197, 94, 0.15), transparent 45%),
+        radial-gradient(circle at 85% 10%, rgba(59, 130, 246, 0.18), transparent 40%),
+        repeating-linear-gradient(110deg, rgba(255, 255, 255, 0.03) 0 1px, transparent 1px 26px),
+        repeating-linear-gradient(20deg, rgba(255, 255, 255, 0.025) 0 1px, transparent 1px 32px),
+        url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='420' height='260' viewBox='0 0 420 260'%3E%3Cpath d='M10 210c60-40 110-20 170-70 70-60 120-30 220-90' fill='none' stroke='rgba(255,255,255,0.08)' stroke-width='2' stroke-dasharray='6 8'/%3E%3Ccircle cx='180' cy='110' r='6' fill='rgba(34,197,94,0.4)'/%3E%3Ccircle cx='330' cy='60' r='5' fill='rgba(59,130,246,0.4)'/%3E%3C/svg%3E");
+    opacity: 0.9;
+    pointer-events: none;
+}
+
+.heroContent {
+    position: relative;
+    z-index: 1;
+    max-width: 1000px;
+    margin: 0 auto;
+    text-align: left;
+    display: grid;
+    gap: var(--space-lg);
+}
+
+.kicker {
+    display: inline-flex;
+    align-items: center;
+    padding: var(--space-xs) var(--space-md);
+    border-radius: var(--radius-full);
+    border: 1px solid rgba(99, 102, 241, 0.3);
+    background: rgba(99, 102, 241, 0.08);
+    color: var(--color-text-secondary);
+    font-size: var(--text-sm);
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    width: fit-content;
+}
+
+.heroContent h1 {
+    font-size: clamp(2.5rem, 6vw, 4.5rem);
+    letter-spacing: -0.02em;
+}
+
+.heroContent p {
+    color: var(--color-text-secondary);
+    font-size: var(--text-lg);
+    max-width: 600px;
+}
+
+.heroActions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-md);
+}
+
+.heroMetrics {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+    gap: var(--space-lg);
+    max-width: 700px;
+}
+
+.heroMetrics strong {
+    display: block;
+    font-size: var(--text-2xl);
+    color: var(--color-text-primary);
+}
+
+.heroMetrics span {
+    color: var(--color-text-muted);
+    font-size: var(--text-sm);
+}
+
+.pillars {
+    padding: var(--space-2xl) var(--space-md);
+    background: var(--color-bg-secondary);
+}
+
+.pillarGrid {
+    max-width: 1100px;
+    margin: 0 auto;
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    gap: var(--space-lg);
+}
+
+.pillarCard {
+    background: var(--color-bg-tertiary);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: var(--radius-lg);
+    padding: var(--space-lg);
+    display: grid;
+    gap: var(--space-sm);
+}
+
+.pillarCard span {
+    font-size: 1.8rem;
+}
+
+.pillarCard p {
+    color: var(--color-text-secondary);
+    font-size: var(--text-sm);
+}
+
+.steps {
+    padding: var(--space-2xl) var(--space-md);
+    background: var(--color-bg-primary);
+}
+
+.stepHeader {
+    max-width: 800px;
+    margin: 0 auto var(--space-xl);
+    display: grid;
+    gap: var(--space-sm);
+}
+
+.stepHeader p {
+    color: var(--color-text-secondary);
+}
+
+.stepGrid {
+    max-width: 900px;
+    margin: 0 auto;
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    gap: var(--space-lg);
+}
+
+.stepIndex {
+    font-size: var(--text-sm);
+    letter-spacing: 0.2em;
+    color: var(--color-accent-secondary);
+    display: inline-block;
+    margin-bottom: var(--space-xs);
+}
+
+.stepGrid p {
+    color: var(--color-text-secondary);
+    font-size: var(--text-sm);
+}
+
+.map {
+    padding: var(--space-2xl) var(--space-md);
+    background: var(--color-bg-secondary);
+}
+
+.mapCard {
+    max-width: 1100px;
+    margin: 0 auto;
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+    gap: var(--space-xl);
+    align-items: center;
+    background: var(--color-bg-tertiary);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: var(--radius-xl);
+    padding: var(--space-2xl);
+}
+
+.mapCard p {
+    color: var(--color-text-secondary);
+    margin: var(--space-sm) 0 var(--space-lg);
+}
+
+.mapPreview {
+    position: relative;
+    border-radius: var(--radius-lg);
+    border: 1px solid rgba(99, 102, 241, 0.2);
+    min-height: 220px;
+    overflow: hidden;
+    display: grid;
+    place-items: center;
+    color: var(--color-text-secondary);
+    text-align: center;
+    font-size: var(--text-sm);
+}
+
+.mapLines {
+    position: absolute;
+    inset: 0;
+    background:
+        repeating-linear-gradient(0deg, rgba(255, 255, 255, 0.05) 0 1px, transparent 1px 22px),
+        repeating-linear-gradient(90deg, rgba(255, 255, 255, 0.05) 0 1px, transparent 1px 22px);
+    opacity: 0.5;
+}
+
+.mapDot {
+    position: absolute;
+    width: 16px;
+    height: 16px;
+    border-radius: 50%;
+    background: rgba(239, 68, 68, 0.8);
+    box-shadow: 0 0 14px rgba(239, 68, 68, 0.5);
+}
+
+.mapDot:nth-child(2) {
+    top: 30%;
+    left: 25%;
+}
+
+.mapDot:nth-child(3) {
+    bottom: 30%;
+    right: 35%;
+    background: rgba(34, 197, 94, 0.8);
+    box-shadow: 0 0 14px rgba(34, 197, 94, 0.4);
+}
+
+.mapDot:nth-child(4) {
+    top: 40%;
+    right: 20%;
+    background: rgba(59, 130, 246, 0.8);
+    box-shadow: 0 0 14px rgba(59, 130, 246, 0.4);
+}
+
+.cta {
+    padding: var(--space-2xl) var(--space-md);
+    background: var(--color-bg-primary);
+}
+
+.ctaCard {
+    max-width: 900px;
+    margin: 0 auto;
+    text-align: center;
+    padding: var(--space-2xl);
+    border-radius: var(--radius-xl);
+    border: 1px solid rgba(99, 102, 241, 0.2);
+    background: linear-gradient(140deg, rgba(99, 102, 241, 0.16), rgba(10, 10, 15, 0.9));
+}
+
+.ctaCard p {
+    color: var(--color-text-secondary);
+    margin: var(--space-sm) 0 var(--space-lg);
+}
+
+@media (max-width: 768px) {
+    .heroContent {
+        text-align: left;
+    }
+
+    .heroActions {
+        flex-direction: column;
+    }
+
+    .heroActions a {
+        width: 100%;
+    }
+
+    .mapCard {
+        padding: var(--space-xl);
+    }
+}

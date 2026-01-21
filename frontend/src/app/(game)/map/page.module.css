@@ -1,5 +1,6 @@
 .container {
     height: calc(100vh - 60px);
+    height: calc(100dvh - 60px);
     display: flex;
     flex-direction: column;
     position: relative;
@@ -115,6 +116,7 @@
 @media (max-width: 768px) {
     .container {
         height: calc(100vh - 60px - 65px);
+        height: calc(100dvh - 60px - 65px);
         /* Header + bottom nav */
     }
 

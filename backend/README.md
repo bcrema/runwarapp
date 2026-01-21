@@ -1,6 +1,6 @@
-# RunWar Backend
+# LigaRun Backend
 
-Backend em Kotlin/Spring Boot para o jogo de conquista territorial RunWar.
+Backend em Kotlin/Spring Boot para o jogo de conquista territorial LigaRun.
 
 ## Requisitos
 

@@ -1,0 +1,19 @@
+{
+  "" : {
+    "diagnostics" : "/Users/brunocrema/runwarapp/ios/LigaRun/DerivedData/Build/Intermediates.noindex/MapboxCoreMaps.build/Debug-iphonesimulator/MapboxCoreMapsWrapper.build/Objects-normal/x86_64/MapboxCoreMapsWrapper-primary.dia",
+    "emit-module-dependencies" : "/Users/brunocrema/runwarapp/ios/LigaRun/DerivedData/Build/Intermediates.noindex/MapboxCoreMaps.build/Debug-iphonesimulator/MapboxCoreMapsWrapper.build/Objects-normal/x86_64/MapboxCoreMapsWrapper-primary-emit-module.d",
+    "emit-module-diagnostics" : "/Users/brunocrema/runwarapp/ios/LigaRun/DerivedData/Build/Intermediates.noindex/MapboxCoreMaps.build/Debug-iphonesimulator/MapboxCoreMapsWrapper.build/Objects-normal/x86_64/MapboxCoreMapsWrapper-primary-emit-module.dia",
+    "pch" : "/Users/brunocrema/runwarapp/ios/LigaRun/DerivedData/Build/Intermediates.noindex/MapboxCoreMaps.build/Debug-iphonesimulator/MapboxCoreMapsWrapper.build/Objects-normal/x86_64/MapboxCoreMapsWrapper-primary-Bridging-header.pch",
+    "swift-dependencies" : "/Users/brunocrema/runwarapp/ios/LigaRun/DerivedData/Build/Intermediates.noindex/MapboxCoreMaps.build/Debug-iphonesimulator/MapboxCoreMapsWrapper.build/Objects-normal/x86_64/MapboxCoreMapsWrapper-primary.swiftdeps"
+  },
+  "/Users/brunocrema/runwarapp/ios/LigaRun/SourcePackages/checkouts/mapbox-core-maps-ios/Sources/MapboxCoreMapsWrapper/Placeholder.swift" : {
+    "const-values" : "/Users/brunocrema/runwarapp/ios/LigaRun/DerivedData/Build/Intermediates.noindex/MapboxCoreMaps.build/Debug-iphonesimulator/MapboxCoreMapsWrapper.build/Objects-normal/x86_64/Placeholder.swiftconstvalues",
+    "dependencies" : "/Users/brunocrema/runwarapp/ios/LigaRun/DerivedData/Build/Intermediates.noindex/MapboxCoreMaps.build/Debug-iphonesimulator/MapboxCoreMapsWrapper.build/Objects-normal/x86_64/Placeholder.d",
+    "diagnostics" : "/Users/brunocrema/runwarapp/ios/LigaRun/DerivedData/Build/Intermediates.noindex/MapboxCoreMaps.build/Debug-iphonesimulator/MapboxCoreMapsWrapper.build/Objects-normal/x86_64/Placeholder.dia",
+    "index-unit-output-path" : "/MapboxCoreMaps.build/Debug-iphonesimulator/MapboxCoreMapsWrapper.build/Objects-normal/x86_64/Placeholder.o",
+    "llvm-bc" : "/Users/brunocrema/runwarapp/ios/LigaRun/DerivedData/Build/Intermediates.noindex/MapboxCoreMaps.build/Debug-iphonesimulator/MapboxCoreMapsWrapper.build/Objects-normal/x86_64/Placeholder.bc",
+    "object" : "/Users/brunocrema/runwarapp/ios/LigaRun/DerivedData/Build/Intermediates.noindex/MapboxCoreMaps.build/Debug-iphonesimulator/MapboxCoreMapsWrapper.build/Objects-normal/x86_64/Placeholder.o",
+    "swift-dependencies" : "/Users/brunocrema/runwarapp/ios/LigaRun/DerivedData/Build/Intermediates.noindex/MapboxCoreMaps.build/Debug-iphonesimulator/MapboxCoreMapsWrapper.build/Objects-normal/x86_64/Placeholder.swiftdeps",
+    "swiftmodule" : "/Users/brunocrema/runwarapp/ios/LigaRun/DerivedData/Build/Intermediates.noindex/MapboxCoreMaps.build/Debug-iphonesimulator/MapboxCoreMapsWrapper.build/Objects-normal/x86_64/Placeholder~partial.swiftmodule"
+  }
+}
