@@ -5,6 +5,4 @@ import java.util.*
 
 interface RefreshTokenRepository : JpaRepository<RefreshToken, UUID> {
     fun findByTokenHash(tokenHash: String): RefreshToken?
-    fun findByTokenHashAndRevokedAtIsNull(tokenHash: String): RefreshToken?
-    fun findAllByUserIdAndRevokedAtIsNull(userId: UUID): List<RefreshToken>
 }
