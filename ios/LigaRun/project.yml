@@ -1,0 +1,39 @@
+name: LigaRun
+options:
+  bundleIdPrefix: com.runwar
+  deploymentTarget:
+    iOS: 16.0
+packages:
+  MapboxMaps:
+    url: https://github.com/mapbox/mapbox-maps-ios.git
+    from: 11.7.0
+targets:
+  LigaRun:
+    type: application
+    platform: iOS
+    deploymentTarget: "16.0"
+    sources:
+      - path: Sources/LigaRun
+      - path: Resources
+    resources:
+      - path: Resources/Assets.xcassets
+    info:
+      path: Resources/Info.plist
+      properties:
+        CFBundleDisplayName: LigaRun
+        CFBundleIdentifier: com.runwar.ligarun
+        CFBundleName: LigaRun
+        UILaunchScreen:
+          UIColorName: LaunchBackground
+        UIUserInterfaceStyle: Dark
+        API_BASE_URL: $(API_BASE_URL)
+        MAPBOX_ACCESS_TOKEN: $(MAPBOX_ACCESS_TOKEN)
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: com.runwar.ligarun
+        SWIFT_VERSION: 6.0
+    configFiles:
+      Debug: Config/Debug.xcconfig
+      Release: Config/Release.xcconfig
+    dependencies:
+      - package: MapboxMaps

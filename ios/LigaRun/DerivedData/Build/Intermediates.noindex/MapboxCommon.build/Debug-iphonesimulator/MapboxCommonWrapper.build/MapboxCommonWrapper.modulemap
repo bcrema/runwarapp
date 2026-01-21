@@ -1,4 +1,0 @@
-module MapboxCommonWrapper {
-header "MapboxCommonWrapper-Swift.h"
-export *
-}

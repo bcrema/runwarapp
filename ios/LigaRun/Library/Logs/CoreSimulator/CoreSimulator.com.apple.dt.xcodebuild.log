@@ -1,0 +1,33 @@
+Jan 19 23:31:22 MacBook-Pro-de-Bruno com.apple.dt.xcodebuild[88265] <Error>: Unable to deliver request ({
+	    "developer_dir" = "/Applications/Xcode.app/Contents/Developer";
+	    request = "set_developer_dir";
+	}) because we are not connected to CoreSimulatorService.
+Jan 19 23:31:22 MacBook-Pro-de-Bruno com.apple.dt.xcodebuild[88265] <Error>: Error Domain=com.apple.CoreSimulator.SimError Code=402 "Unable to determine supported architectures for device type (/Library/Developer/CoreSimulator/Profiles/DeviceTypes/Apple Vision Pro (at 2732x2048).simdevicetype/Contents/Resources/profile.plist)" UserInfo={NSLocalizedDescription=Unable to determine supported architectures for device type (/Library/Developer/CoreSimulator/Profiles/DeviceTypes/Apple Vision Pro (at 2732x2048).simdevicetype/Contents/Resources/profile.plist)}
+Jan 19 23:31:22 MacBook-Pro-de-Bruno com.apple.dt.xcodebuild[88265] <Error>: Error Domain=com.apple.CoreSimulator.SimError Code=402 "Unable to determine supported architectures for device type (/Library/Developer/CoreSimulator/Profiles/DeviceTypes/Apple Vision Pro.simdevicetype/Contents/Resources/profile.plist)" UserInfo={NSLocalizedDescription=Unable to determine supported architectures for device type (/Library/Developer/CoreSimulator/Profiles/DeviceTypes/Apple Vision Pro.simdevicetype/Contents/Resources/profile.plist)}
+Jan 19 23:31:22 MacBook-Pro-de-Bruno com.apple.dt.xcodebuild[88265] <Error>: Lost connection to com.apple.CoreSimulator.SimLaunchHost-x86 (invalidated: failed at lookup with error 159 - Sandbox restriction)
+Jan 19 23:31:22 MacBook-Pro-de-Bruno com.apple.dt.xcodebuild[88265] <Error>: Failed to setup launchHostClient for runtime com.apple.CoreSimulator.SimRuntime.iOS-13-3: Error Domain=NSPOSIXErrorDomain Code=53 "Software caused connection abort" UserInfo={NSLocalizedFailureReason=XPC error talking to SimLaunchHostService: <dictionary: 0x7ff85239eed0> { count = 1, transaction: 0, voucher = 0x0, contents =
+		"XPCErrorDescription" => <string: 0x7ff85239f068> { length = 18, contents = "Connection invalid" }
+	}}
+Jan 19 23:31:22 MacBook-Pro-de-Bruno com.apple.dt.xcodebuild[88265] <Error>: Failed to load liblaunch for runtime com.apple.CoreSimulator.SimRuntime.iOS-13-3: Error Domain=NSPOSIXErrorDomain Code=53 "Software caused connection abort" UserInfo={NSLocalizedFailureReason=XPC error talking to SimLaunchHostService: <dictionary: 0x7ff85239eed0> { count = 1, transaction: 0, voucher = 0x0, contents =
+		"XPCErrorDescription" => <string: 0x7ff85239f068> { length = 18, contents = "Connection invalid" }
+	}}
+Jan 19 23:31:22 MacBook-Pro-de-Bruno com.apple.dt.xcodebuild[88265] <Error>: Failed to load runtime matching data from server: Error Domain=NSPOSIXErrorDomain Code=61 "Connection refused" UserInfo={NSLocalizedDescription=CoreSimulatorService connection became invalid.  Simulator services will no longer be available.}
+Jan 19 23:31:22 MacBook-Pro-de-Bruno com.apple.dt.xcodebuild[88265] <Error>: Unable to deliver request ({
+	    request = "get_runtime_sdk_map";
+	}) because we are not connected to CoreSimulatorService.
+Jan 19 23:31:22 MacBook-Pro-de-Bruno com.apple.dt.xcodebuild[88265] <Error>: Lost connection to com.apple.CoreSimulator.SimLaunchHost-x86 (invalidated: failed at lookup with error 159 - Sandbox restriction)
+Jan 19 23:31:22 MacBook-Pro-de-Bruno com.apple.dt.xcodebuild[88265] <Error>: Failed to unload libLaunch instance (null) from com.apple.CoreSimulator.SimLaunchHost-x86: <OS_xpc_error: <dictionary: 0x7ff85239eed0> { count = 1, transaction: 0, voucher = 0x0, contents =
+		"XPCErrorDescription" => <string: 0x7ff85239f068> { length = 18, contents = "Connection invalid" }
+	}>
+Jan 19 23:31:22 MacBook-Pro-de-Bruno com.apple.dt.xcodebuild[88265] <Error>: Could not kickstart simdiskimaged; SimDiskImageManager services will not be available: Error Domain=NSPOSIXErrorDomain Code=53 "Software caused connection abort" UserInfo={NSLocalizedDescription=Error returned in reply from CoreSimulatorService: Connection invalid}
+Jan 19 23:31:22 MacBook-Pro-de-Bruno com.apple.dt.xcodebuild[88265] <Error>: Unable to deliver request ({
+	    request = "notification_subscription";
+	    "set_path" = "/Users/brunocrema/Library/Developer/CoreSimulator/Devices";
+	}) because we are not connected to CoreSimulatorService.
+Jan 19 23:31:22 MacBook-Pro-de-Bruno com.apple.dt.xcodebuild[88265] <Error>: simdiskimaged returned error (invalid), marking disconnected.
+Jan 19 23:31:22 MacBook-Pro-de-Bruno com.apple.dt.xcodebuild[88265] <Error>: simdiskimaged returned error (invalid), marking disconnected.
+Jan 19 23:31:22 MacBook-Pro-de-Bruno com.apple.dt.xcodebuild[88265] <Error>: Could not get list of trusted mount directories: Error Domain=com.apple.CoreSimulator.SimError Code=410 "The service used to manage runtime disk images (simdiskimaged) crashed or is not responding" UserInfo={NSLocalizedDescription=The service used to manage runtime disk images (simdiskimaged) crashed or is not responding}
+Jan 19 23:31:22 MacBook-Pro-de-Bruno com.apple.dt.xcodebuild[88265] <Error>: Unable to deliver request ({
+	    request = "notification_subscription";
+	    "set_path" = "/Users/brunocrema/Library/Developer/CoreSimulator/Devices";
+	}) because we are not connected to CoreSimulatorService.

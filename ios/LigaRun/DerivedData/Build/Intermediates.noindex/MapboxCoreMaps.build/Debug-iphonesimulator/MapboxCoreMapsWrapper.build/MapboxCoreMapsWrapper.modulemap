@@ -1,4 +1,0 @@
-module MapboxCoreMapsWrapper {
-header "MapboxCoreMapsWrapper-Swift.h"
-export *
-}
