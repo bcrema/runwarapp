@@ -1,4 +1,5 @@
 import Foundation
+import OSLog
 
 @MainActor
 final class SessionStore: ObservableObject {
@@ -7,6 +8,7 @@ final class SessionStore: ObservableObject {
     @Published var currentUser: User?
 
     private let keychain = KeychainStore(service: AppEnvironment.keychainService)
+    private let logger = Logger(subsystem: AppEnvironment.keychainService, category: "SessionStore")
 
     lazy var api: APIClient = {
         APIClient(
@@ -19,8 +21,8 @@ final class SessionStore: ObservableObject {
     }()
 
     init() {
-        self.token = try? keychain.read(account: AppEnvironment.accessTokenKey)
-        self.refreshToken = try? keychain.read(account: AppEnvironment.refreshTokenKey)
+        self.token = readToken(account: AppEnvironment.accessTokenKey)
+        self.refreshToken = readToken(account: AppEnvironment.refreshTokenKey)
     }
 
     func bootstrap() async {
@@ -58,20 +60,20 @@ final class SessionStore: ObservableObject {
         token = nil
         refreshToken = nil
         currentUser = nil
-        try? keychain.delete(account: AppEnvironment.accessTokenKey)
-        try? keychain.delete(account: AppEnvironment.refreshTokenKey)
+        deleteToken(account: AppEnvironment.accessTokenKey)
+        deleteToken(account: AppEnvironment.refreshTokenKey)
     }
 
     private func setSession(from auth: AuthResponse) {
         token = auth.token
         currentUser = auth.user
-        try? keychain.save(auth.token, account: AppEnvironment.accessTokenKey)
+        saveToken(auth.token, account: AppEnvironment.accessTokenKey)
         if let refreshToken = auth.refreshToken {
             self.refreshToken = refreshToken
-            try? keychain.save(refreshToken, account: AppEnvironment.refreshTokenKey)
+            saveToken(refreshToken, account: AppEnvironment.refreshTokenKey)
         } else {
             self.refreshToken = nil
-            try? keychain.delete(account: AppEnvironment.refreshTokenKey)
+            deleteToken(account: AppEnvironment.refreshTokenKey)
         }
     }
 
@@ -82,14 +84,39 @@ final class SessionStore: ObservableObject {
 
         let response = try await api.refreshToken(refreshToken)
         token = response.token
-        try? keychain.save(response.token, account: AppEnvironment.accessTokenKey)
+        saveToken(response.token, account: AppEnvironment.accessTokenKey)
 
         if let newRefreshToken = response.refreshToken {
             refreshToken = newRefreshToken
-            try? keychain.save(newRefreshToken, account: AppEnvironment.refreshTokenKey)
+            saveToken(newRefreshToken, account: AppEnvironment.refreshTokenKey)
         }
 
         return token
+    }
+
+    private func readToken(account: String) -> String? {
+        do {
+            return try keychain.read(account: account)
+        } catch {
+            logger.error("Failed to read keychain item for account '\(account)': \(error.localizedDescription)")
+            return nil
+        }
+    }
+
+    private func saveToken(_ token: String, account: String) {
+        do {
+            try keychain.save(token, account: account)
+        } catch {
+            logger.error("Failed to save keychain item for account '\(account)': \(error.localizedDescription)")
+        }
+    }
+
+    private func deleteToken(account: String) {
+        do {
+            try keychain.delete(account: account)
+        } catch {
+            logger.error("Failed to delete keychain item for account '\(account)': \(error.localizedDescription)")
+        }
     }
 }
 
