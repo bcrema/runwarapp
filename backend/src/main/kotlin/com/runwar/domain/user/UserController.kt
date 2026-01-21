@@ -3,11 +3,16 @@ package com.runwar.domain.user
 import jakarta.validation.Valid
 import jakarta.validation.constraints.Email
 import jakarta.validation.constraints.NotBlank
+import jakarta.validation.constraints.Pattern
 import jakarta.validation.constraints.Size
 import org.springframework.http.ResponseEntity
 import org.springframework.security.core.annotation.AuthenticationPrincipal
 import org.springframework.web.bind.annotation.*
 import com.runwar.config.UserPrincipal
+import com.fasterxml.jackson.annotation.JsonAnySetter
+import com.fasterxml.jackson.annotation.JsonIgnore
+import com.fasterxml.jackson.annotation.JsonProperty
+import jakarta.validation.constraints.AssertTrue
 
 @RestController
 @RequestMapping("/api")
@@ -62,6 +67,27 @@ class UserController(private val userService: UserService) {
         val profile = userService.getProfile(principal.user.id)
         return ResponseEntity.ok(profile)
     }
+
+    data class MeResponse(
+        val id: java.util.UUID,
+        val name: String,
+        val email: String,
+        @JsonProperty("profile_visibility")
+        val profileVisibility: String
+    )
+
+    @GetMapping("/me")
+    fun getMe(@AuthenticationPrincipal principal: UserPrincipal): ResponseEntity<MeResponse> {
+        val profile = userService.getMe(principal.user.id)
+        return ResponseEntity.ok(
+            MeResponse(
+                id = profile.id,
+                name = profile.name,
+                email = profile.email,
+                profileVisibility = profile.profileVisibility
+            )
+        )
+    }
     
     data class UpdateProfileRequest(
         @field:Size(min = 3, max = 30)
@@ -82,5 +108,47 @@ class UserController(private val userService: UserService) {
             request.isPublic
         )
         return ResponseEntity.ok(updated)
+    }
+
+    class UpdateMeRequest(
+        @field:Size(min = 3, max = 30)
+        val name: String? = null,
+        @JsonProperty("profile_visibility")
+        @field:Pattern(
+            regexp = "^(public|private)$",
+            message = "profile_visibility must be public or private"
+        )
+        val profileVisibility: String? = null
+    ) {
+        @JsonIgnore
+        private val unknownFields: MutableSet<String> = mutableSetOf()
+
+        @JsonAnySetter
+        fun setUnknownField(key: String, value: Any?) {
+            unknownFields.add(key)
+        }
+
+        @AssertTrue(message = "Only name and profile_visibility can be updated")
+        fun hasOnlyKnownFields(): Boolean = unknownFields.isEmpty()
+    }
+
+    @PatchMapping("/me")
+    fun updateMe(
+        @AuthenticationPrincipal principal: UserPrincipal,
+        @Valid @RequestBody request: UpdateMeRequest
+    ): ResponseEntity<MeResponse> {
+        val updated = userService.updateMe(
+            principal.user.id,
+            request.name,
+            request.profileVisibility
+        )
+        return ResponseEntity.ok(
+            MeResponse(
+                id = updated.id,
+                name = updated.name,
+                email = updated.email,
+                profileVisibility = updated.profileVisibility
+            )
+        )
     }
 }
