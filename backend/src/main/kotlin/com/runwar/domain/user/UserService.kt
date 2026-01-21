@@ -108,7 +108,7 @@ class UserService(
             ?: throw UnauthorizedException("Invalid refresh token")
 
         val now = Instant.now()
-        if (storedToken.revokedAt != null || storedToken.expiresAt.isBefore(now)) {
+        if (storedToken.revokedAt != null || !storedToken.expiresAt.isAfter(now)) {
             throw UnauthorizedException("Refresh token expired or revoked")
         }
 
