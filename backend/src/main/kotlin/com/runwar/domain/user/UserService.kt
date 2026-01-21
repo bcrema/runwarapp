@@ -101,8 +101,19 @@ class UserService(
         return AuthResult(UserDto.from(user), tokens.accessToken, tokens.refreshToken)
     }
 
+    private fun validateRefreshTokenFormat(refreshToken: String) {
+        // Expect a Base64 URL-encoded string (~86 chars for 64 random bytes)
+        if (refreshToken.length !in 80..100) {
+            throw UnauthorizedException("Invalid refresh token")
+        }
+        if (!refreshToken.matches(Regex("^[A-Za-z0-9_-]+$"))) {
+            throw UnauthorizedException("Invalid refresh token")
+        }
+    }
+
     @Transactional
     fun refresh(refreshToken: String): AuthResult {
+        validateRefreshTokenFormat(refreshToken)
         val tokenHash = hashToken(refreshToken)
         val storedToken = refreshTokenRepository.findByTokenHash(tokenHash)
             ?: throw UnauthorizedException("Invalid refresh token")
