@@ -7,6 +7,10 @@ import java.util.*
 @RestController
 @RequestMapping("/api/tiles")
 class TileController(private val tileService: TileService) {
+
+    companion object {
+        private const val MAX_RADIUS_METERS = 50_000.0
+    }
     
     /**
      * Get tiles within a bounding box (for map display)
@@ -30,6 +34,9 @@ class TileController(private val tileService: TileService) {
     fun getViewportTiles(@RequestParam bbox: String): ResponseEntity<List<TileService.ViewportTileDto>> {
         val bounds = parseBbox(bbox)
             ?: return ResponseEntity.badRequest().build()
+        if (!isValidBounds(bounds)) {
+            return ResponseEntity.badRequest().build()
+        }
         return ResponseEntity.ok(tileService.getViewportTiles(bounds))
     }
 
@@ -42,7 +49,16 @@ class TileController(private val tileService: TileService) {
         @RequestParam centerLng: Double,
         @RequestParam radiusMeters: Double
     ): ResponseEntity<List<TileService.ViewportTileDto>> {
+        if (!isValidLat(centerLat) || !isValidLng(centerLng)) {
+            return ResponseEntity.badRequest().build()
+        }
+        if (radiusMeters <= 0 || radiusMeters > MAX_RADIUS_METERS) {
+            return ResponseEntity.badRequest().build()
+        }
         val bounds = tileService.toBoundingBox(centerLat, centerLng, radiusMeters)
+        if (!isValidBounds(bounds)) {
+            return ResponseEntity.badRequest().build()
+        }
         return ResponseEntity.ok(tileService.getViewportTiles(bounds))
     }
     
@@ -111,5 +127,18 @@ class TileController(private val tileService: TileService) {
             maxLng = values[2],
             maxLat = values[3]
         )
+    }
+
+    private fun isValidLat(lat: Double): Boolean = lat in -90.0..90.0
+
+    private fun isValidLng(lng: Double): Boolean = lng in -180.0..180.0
+
+    private fun isValidBounds(bounds: TileService.BoundingBox): Boolean {
+        return isValidLat(bounds.minLat) &&
+            isValidLat(bounds.maxLat) &&
+            isValidLng(bounds.minLng) &&
+            isValidLng(bounds.maxLng) &&
+            bounds.minLat < bounds.maxLat &&
+            bounds.minLng < bounds.maxLng
     }
 }

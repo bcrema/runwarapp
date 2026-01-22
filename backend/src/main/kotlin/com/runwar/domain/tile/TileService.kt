@@ -6,6 +6,7 @@ import com.runwar.domain.user.UserRepository
 import com.runwar.game.H3GridService
 import org.springframework.stereotype.Service
 import java.time.Duration
+import java.time.Instant
 import java.util.*
 import java.util.concurrent.ConcurrentHashMap
 
@@ -52,7 +53,7 @@ class TileService(
     )
 
     private data class CachedViewportTiles(
-        val createdAt: java.time.Instant,
+        val createdAt: Instant,
         val tiles: List<ViewportTileDto>
     )
 
@@ -77,23 +78,25 @@ class TileService(
      */
     fun getViewportTiles(bounds: BoundingBox): List<ViewportTileDto> {
         val cacheKey = buildCacheKey(bounds)
-        val cached = viewportCache[cacheKey]
-        if (cached != null && !isCacheExpired(cached)) {
-            return cached.tiles
-        }
+        return viewportCache.compute(cacheKey) { _, cached ->
+            if (cached != null && !isCacheExpired(cached)) {
+                cached
+            } else {
+                val tiles = tileRepository.findTilesInBoundingBox(
+                    bounds.minLat,
+                    bounds.minLng,
+                    bounds.maxLat,
+                    bounds.maxLng
+                )
 
-        val tiles = tileRepository.findTilesInBoundingBox(
-            bounds.minLat,
-            bounds.minLng,
-            bounds.maxLat,
-            bounds.maxLng
-        ).map { toViewportDto(it) }
+                val bandeiraColors = loadBandeiraColors(tiles)
 
-        viewportCache[cacheKey] = CachedViewportTiles(
-            createdAt = java.time.Instant.now(),
-            tiles = tiles
-        )
-        return tiles
+                CachedViewportTiles(
+                    createdAt = Instant.now(),
+                    tiles = tiles.map { toViewportDto(it, bandeiraColors) }
+                )
+            }
+        }!!.tiles
     }
 
     /**
@@ -242,15 +245,7 @@ class TileService(
         )
     }
 
-    private fun toViewportDto(tile: Tile): ViewportTileDto {
-        val colorKey = when (tile.ownerType) {
-            OwnerType.BANDEIRA -> tile.ownerId?.let { id ->
-                bandeiraRepository.findById(id).map { it.color }.orElse(null)
-            }
-            OwnerType.SOLO -> null
-            null -> null
-        }
-
+    private fun toViewportDto(tile: Tile, bandeiraColors: Map<UUID, String>): ViewportTileDto {
         return ViewportTileDto(
             h3Index = tile.id,
             ownerType = tile.ownerType?.name,
@@ -258,7 +253,7 @@ class TileService(
             shield = tile.shield,
             dispute = tile.isInDispute(gameProperties.disputeThreshold),
             cooldownUntil = tile.cooldownUntil,
-            colorKey = colorKey
+            colorKey = tile.ownerId?.let { bandeiraColors[it] }
         )
     }
 
@@ -273,6 +268,21 @@ class TileService(
     private fun formatCoord(value: Double): String = String.format(Locale.US, "%.6f", value)
 
     private fun isCacheExpired(cached: CachedViewportTiles): Boolean {
-        return Duration.between(cached.createdAt, java.time.Instant.now()) > viewportCacheTtl
+        return Duration.between(cached.createdAt, Instant.now()) > viewportCacheTtl
+    }
+
+    private fun loadBandeiraColors(tiles: List<Tile>): Map<UUID, String> {
+        val bandeiraIds = tiles.asSequence()
+            .filter { it.ownerType == OwnerType.BANDEIRA }
+            .mapNotNull { it.ownerId }
+            .distinct()
+            .toList()
+
+        if (bandeiraIds.isEmpty()) {
+            return emptyMap()
+        }
+
+        return bandeiraRepository.findAllById(bandeiraIds)
+            .associate { it.id to it.color }
     }
 }
