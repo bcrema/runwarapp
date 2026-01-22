@@ -19,6 +19,10 @@ import org.springframework.web.multipart.MultipartFile
 @RequestMapping("/runs")
 class RunIngestionController(private val runService: RunService) {
 
+    data class ValidationErrorResponse(
+            val message: String
+    )
+
     data class RunIngestionResponse(
             val runId: UUID,
             val status: RunStatus
@@ -41,9 +45,10 @@ class RunIngestionController(private val runService: RunService) {
             @AuthenticationPrincipal principal: UserPrincipal,
             @RequestParam("file") gpxFile: MultipartFile,
             @RequestParam(required = false, defaultValue = "IMPORT") origin: RunOrigin
-    ): ResponseEntity<RunIngestionResponse> {
+    ): ResponseEntity<Any> {
         if (gpxFile.isEmpty) {
-            return ResponseEntity.badRequest().build()
+            return ResponseEntity.badRequest()
+                    .body(ValidationErrorResponse("GPX file is empty."))
         }
 
         val result = runService.submitRun(principal.user, gpxFile, origin)
@@ -54,13 +59,15 @@ class RunIngestionController(private val runService: RunService) {
     fun submitRunWithCoordinates(
             @AuthenticationPrincipal principal: UserPrincipal,
             @RequestBody request: SubmitRunRequest
-    ): ResponseEntity<RunIngestionResponse> {
+    ): ResponseEntity<Any> {
         if (request.coordinates.size < 2) {
-            return ResponseEntity.badRequest().build()
+            return ResponseEntity.badRequest()
+                    .body(ValidationErrorResponse("At least two coordinates are required."))
         }
 
         if (request.coordinates.size != request.timestamps.size) {
-            return ResponseEntity.badRequest().build()
+            return ResponseEntity.badRequest()
+                    .body(ValidationErrorResponse("Coordinates and timestamps must have the same length."))
         }
 
         val coordinates = request.coordinates.map { LatLngPoint(it.lat, it.lng) }
