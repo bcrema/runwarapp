@@ -33,14 +33,34 @@ class ShieldMechanics(
         val actionType: TerritoryActionType? = null,
         val reason: String? = null,
         val ownerChanged: Boolean = false,
+        val previousOwnerId: UUID? = null,
+        val previousOwnerType: OwnerType? = null,
+        val newOwnerId: UUID? = null,
+        val newOwnerType: OwnerType? = null,
         val shieldChange: Int = 0,
         val shieldBefore: Int = 0,
         val shieldAfter: Int = 0,
         val inDispute: Boolean = false,
-        val tileId: String? = null
+        val tileId: String? = null,
+        val cooldownUntil: Instant? = null
     ) {
         companion object {
             fun failure(reason: String) = ActionResult(success = false, reason = reason)
+
+            fun failureWithTile(reason: String, tile: Tile, disputeThreshold: Int) =
+                ActionResult(
+                    success = false,
+                    reason = reason,
+                    previousOwnerId = tile.ownerId,
+                    previousOwnerType = tile.ownerType,
+                    newOwnerId = tile.ownerId,
+                    newOwnerType = tile.ownerType,
+                    shieldBefore = tile.shield,
+                    shieldAfter = tile.shield,
+                    inDispute = tile.isInDispute(disputeThreshold),
+                    tileId = tile.id,
+                    cooldownUntil = tile.cooldownUntil
+                )
         }
     }
     
@@ -71,18 +91,28 @@ class ShieldMechanics(
         
         // Determine action type if not provided
         val actionType = providedActionType ?: determineActionType(tile, user)
-            ?: return ActionResult.failure("cannot_determine_action")
+            ?: return ActionResult.failureWithTile(
+                "cannot_determine_action",
+                tile,
+                gameProperties.disputeThreshold
+            )
         
         // Validate action is allowed
         val validationError = validateAction(tile, user, actionType)
         if (validationError != null) {
-            return ActionResult.failure(validationError)
+            return ActionResult.failureWithTile(
+                validationError,
+                tile,
+                gameProperties.disputeThreshold
+            )
         }
         
         val bandeira = user.bandeira
         val shieldBefore = tile.shield
         var shieldChange = 0
         var ownerChanged = false
+        val previousOwnerId = tile.ownerId
+        val previousOwnerType = tile.ownerType
         var newOwnerId = tile.ownerId
         var newOwnerType = tile.ownerType
         
@@ -124,9 +154,6 @@ class ShieldMechanics(
         // Update tile
         tile.shield = shieldAfter
         if (ownerChanged) {
-            val previousOwnerId = tile.ownerId
-            val previousOwnerType = tile.ownerType
-            
             tile.ownerId = newOwnerId
             tile.ownerType = newOwnerType
             tile.cooldownUntil = Instant.now().plus(gameProperties.cooldownHours, ChronoUnit.HOURS)
@@ -175,11 +202,16 @@ class ShieldMechanics(
             success = true,
             actionType = actionType,
             ownerChanged = ownerChanged,
+            previousOwnerId = previousOwnerId,
+            previousOwnerType = previousOwnerType,
+            newOwnerId = newOwnerId,
+            newOwnerType = newOwnerType,
             shieldChange = shieldChange,
             shieldBefore = shieldBefore,
             shieldAfter = shieldAfter,
             inDispute = inDispute,
-            tileId = tileId
+            tileId = tileId,
+            cooldownUntil = tile.cooldownUntil
         )
     }
     
