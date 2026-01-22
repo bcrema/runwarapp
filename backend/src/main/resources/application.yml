@@ -32,7 +32,8 @@ server:
 # JWT Configuration
 jwt:
   secret: ${JWT_SECRET:your-256-bit-secret-key-for-development-only-change-in-production}
-  expiration: 86400000 # 24 hours in milliseconds
+  expiration: 900000 # 15 minutes in milliseconds
+  refresh-expiration: 2592000000 # 30 days in milliseconds
 
 # RunWar Game Parameters
 runwar:

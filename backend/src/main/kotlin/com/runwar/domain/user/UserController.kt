@@ -4,6 +4,7 @@ import jakarta.validation.Valid
 import jakarta.validation.constraints.Email
 import jakarta.validation.constraints.NotBlank
 import jakarta.validation.constraints.Size
+import jakarta.servlet.http.HttpServletRequest
 import org.springframework.http.ResponseEntity
 import org.springframework.security.core.annotation.AuthenticationPrincipal
 import org.springframework.web.bind.annotation.*
@@ -11,7 +12,10 @@ import com.runwar.config.UserPrincipal
 
 @RestController
 @RequestMapping("/api")
-class UserController(private val userService: UserService) {
+class UserController(
+    private val userService: UserService,
+    private val authRateLimiter: AuthRateLimiter
+) {
     
     // ===== Auth Endpoints (Public) =====
     
@@ -40,19 +44,50 @@ class UserController(private val userService: UserService) {
     
     data class AuthResponse(
         val user: UserService.UserDto,
-        val token: String
+        val accessToken: String,
+        val refreshToken: String
+    )
+
+    data class RefreshRequest(
+        @field:NotBlank
+        val refreshToken: String
+    )
+
+    data class LogoutRequest(
+        @field:NotBlank
+        val refreshToken: String
     )
     
-    @PostMapping("/auth/register")
-    fun register(@Valid @RequestBody request: RegisterRequest): ResponseEntity<AuthResponse> {
+    @PostMapping("/auth/signup", "/auth/register")
+    fun signup(
+        @Valid @RequestBody request: RegisterRequest,
+        httpRequest: HttpServletRequest
+    ): ResponseEntity<AuthResponse> {
+        enforceRateLimit("signup", request.email, httpRequest)
         val result = userService.register(request.email, request.username, request.password)
-        return ResponseEntity.ok(AuthResponse(result.user, result.token))
+        return ResponseEntity.ok(AuthResponse(result.user, result.accessToken, result.refreshToken))
     }
     
     @PostMapping("/auth/login")
-    fun login(@Valid @RequestBody request: LoginRequest): ResponseEntity<AuthResponse> {
+    fun login(
+        @Valid @RequestBody request: LoginRequest,
+        httpRequest: HttpServletRequest
+    ): ResponseEntity<AuthResponse> {
+        enforceRateLimit("login", request.email, httpRequest)
         val result = userService.login(request.email, request.password)
-        return ResponseEntity.ok(AuthResponse(result.user, result.token))
+        return ResponseEntity.ok(AuthResponse(result.user, result.accessToken, result.refreshToken))
+    }
+
+    @PostMapping("/auth/refresh")
+    fun refresh(@Valid @RequestBody request: RefreshRequest): ResponseEntity<AuthResponse> {
+        val result = userService.refresh(request.refreshToken)
+        return ResponseEntity.ok(AuthResponse(result.user, result.accessToken, result.refreshToken))
+    }
+
+    @PostMapping("/auth/logout")
+    fun logout(@Valid @RequestBody request: LogoutRequest): ResponseEntity<Void> {
+        userService.logout(request.refreshToken)
+        return ResponseEntity.noContent().build()
     }
     
     // ===== User Endpoints (Authenticated) =====
@@ -82,5 +117,18 @@ class UserController(private val userService: UserService) {
             request.isPublic
         )
         return ResponseEntity.ok(updated)
+    }
+
+    private fun enforceRateLimit(action: String, email: String, request: HttpServletRequest) {
+        val ip = resolveClientIp(request)
+        authRateLimiter.check("$action:ip:$ip")
+        authRateLimiter.check("$action:email:${email.lowercase()}")
+    }
+
+    private fun resolveClientIp(request: HttpServletRequest): String {
+        val forwarded = request.getHeader("X-Forwarded-For")
+        return forwarded?.split(",")?.firstOrNull()?.trim()?.takeIf { it.isNotBlank() }
+            ?: request.remoteAddr
+            ?: "unknown"
     }
 }
