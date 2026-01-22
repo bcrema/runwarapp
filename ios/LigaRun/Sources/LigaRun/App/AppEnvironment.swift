@@ -23,5 +23,10 @@ enum AppEnvironment {
         Bundle.main.object(forInfoDictionaryKey: "MAPBOX_ACCESS_TOKEN") as? String ?? ""
     }()
 
-    static let tokenStorageKey = "runwar_token"
+    static let keychainService: String = {
+        Bundle.main.bundleIdentifier ?? "com.runwar.ligarun"
+    }()
+
+    static let accessTokenKey = "runwar_access_token"
+    static let refreshTokenKey = "runwar_refresh_token"
 }

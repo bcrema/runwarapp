@@ -14,44 +14,52 @@ class GlobalExceptionHandler {
     
     private val logger = LoggerFactory.getLogger(GlobalExceptionHandler::class.java)
     
-    data class ErrorResponse(
-        val error: String,
-        val message: String,
-        val details: Map<String, String>? = null
-    )
-    
     @ExceptionHandler(IllegalArgumentException::class)
-    fun handleIllegalArgument(e: IllegalArgumentException): ResponseEntity<ErrorResponse> {
+    fun handleIllegalArgument(e: IllegalArgumentException): ResponseEntity<ApiErrorResponse> {
         logger.warn("Bad request: ${e.message}")
         return ResponseEntity.badRequest().body(
-            ErrorResponse("BAD_REQUEST", e.message ?: "Invalid request")
+            ApiErrorResponse("BAD_REQUEST", e.message ?: "Invalid request")
         )
     }
     
     @ExceptionHandler(IllegalStateException::class)
-    fun handleIllegalState(e: IllegalStateException): ResponseEntity<ErrorResponse> {
+    fun handleIllegalState(e: IllegalStateException): ResponseEntity<ApiErrorResponse> {
         logger.warn("Illegal state: ${e.message}")
         return ResponseEntity.status(HttpStatus.CONFLICT).body(
-            ErrorResponse("CONFLICT", e.message ?: "Operation not allowed in current state")
+            ApiErrorResponse("CONFLICT", e.message ?: "Operation not allowed in current state")
         )
     }
     
     @ExceptionHandler(BadCredentialsException::class)
-    fun handleBadCredentials(e: BadCredentialsException): ResponseEntity<ErrorResponse> {
+    fun handleBadCredentials(e: BadCredentialsException): ResponseEntity<ApiErrorResponse> {
         return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(
-            ErrorResponse("UNAUTHORIZED", "Invalid credentials")
+            ApiErrorResponse("UNAUTHORIZED", "Invalid credentials")
+        )
+    }
+
+    @ExceptionHandler(UnauthorizedException::class)
+    fun handleUnauthorized(e: UnauthorizedException): ResponseEntity<ApiErrorResponse> {
+        return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(
+            ApiErrorResponse("UNAUTHORIZED", e.message ?: "Unauthorized")
+        )
+    }
+
+    @ExceptionHandler(RateLimitExceededException::class)
+    fun handleRateLimitExceeded(e: RateLimitExceededException): ResponseEntity<ApiErrorResponse> {
+        return ResponseEntity.status(HttpStatus.TOO_MANY_REQUESTS).body(
+            ApiErrorResponse("RATE_LIMITED", e.message ?: "Too many requests")
         )
     }
     
     @ExceptionHandler(MethodArgumentNotValidException::class)
-    fun handleValidation(e: MethodArgumentNotValidException): ResponseEntity<ErrorResponse> {
+    fun handleValidation(e: MethodArgumentNotValidException): ResponseEntity<ApiErrorResponse> {
         val errors = e.bindingResult.allErrors.associate { error ->
             val fieldName = (error as? FieldError)?.field ?: "unknown"
             fieldName to (error.defaultMessage ?: "Invalid value")
         }
         
         return ResponseEntity.badRequest().body(
-            ErrorResponse(
+            ApiErrorResponse(
                 error = "VALIDATION_ERROR",
                 message = "Request validation failed",
                 details = errors
@@ -60,17 +68,17 @@ class GlobalExceptionHandler {
     }
     
     @ExceptionHandler(AccessDeniedException::class)
-    fun handleAccessDenied(e: AccessDeniedException): ResponseEntity<ErrorResponse> {
+    fun handleAccessDenied(e: AccessDeniedException): ResponseEntity<ApiErrorResponse> {
         return ResponseEntity.status(HttpStatus.FORBIDDEN).body(
-            ErrorResponse("FORBIDDEN", "Access denied")
+            ApiErrorResponse("FORBIDDEN", "Access denied")
         )
     }
     
     @ExceptionHandler(Exception::class)
-    fun handleGeneral(e: Exception): ResponseEntity<ErrorResponse> {
+    fun handleGeneral(e: Exception): ResponseEntity<ApiErrorResponse> {
         logger.error("Unhandled exception", e)
         return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(
-            ErrorResponse("INTERNAL_ERROR", "An unexpected error occurred")
+            ApiErrorResponse("INTERNAL_ERROR", "An unexpected error occurred")
         )
     }
 }
