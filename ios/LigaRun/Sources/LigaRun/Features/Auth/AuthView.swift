@@ -4,6 +4,7 @@ import Combine
 struct AuthView: View {
     @StateObject private var viewModel: AuthViewModel
     @State private var activeIndex = 0
+    private let timer = Timer.publish(every: 6, on: .main, in: .common).autoconnect()
 
     private let slides: [Slide] = [
         .init(kicker: "Conquista em tempo real",
@@ -29,6 +30,8 @@ struct AuthView: View {
         .init(title: "Ranking dinâmico", description: "Acompanhe a evolução por temporada e mostre consistência.")
     ]
 
+    private let palette = Palette()
+
     init(session: SessionStore) {
         _viewModel = StateObject(wrappedValue: AuthViewModel(session: session))
     }
@@ -52,10 +55,6 @@ struct AuthView: View {
         }
     }
 
-    private var timer: Publishers.Autoconnect<Timer.TimerPublisher> {
-        Timer.publish(every: 6, on: .main, in: .common).autoconnect()
-    }
-
     // MARK: - Sections
 
     private var heroSection: some View {
@@ -74,19 +73,19 @@ struct AuthView: View {
             VStack(alignment: .leading, spacing: 14) {
                 Text("LigaRun")
                     .font(.caption.weight(.medium))
-                    .foregroundColor(.white.opacity(0.7))
+                    .foregroundColor(palette.textSecondary)
                     .padding(.horizontal, 12)
                     .padding(.vertical, 6)
-                    .background(Color(hex: "#6366F1").opacity(0.15))
+                    .background(palette.accentPrimary.opacity(0.15))
                     .clipShape(Capsule())
 
                 Text("O mapa da cidade virou o seu campo de treino.")
                     .font(.system(size: 28, weight: .bold))
-                    .foregroundColor(.white)
+                    .foregroundColor(palette.textPrimary)
                     .fixedSize(horizontal: false, vertical: true)
 
                 Text("Capture áreas correndo, fortaleça sua bandeira e suba no ranking local em tempo real.")
-                    .foregroundColor(.white.opacity(0.75))
+                    .foregroundColor(palette.textSecondary)
                     .font(.callout)
 
                 HStack(spacing: 12) {
@@ -104,7 +103,7 @@ struct AuthView: View {
         VStack(alignment: .leading, spacing: 14) {
             Text("Como funciona")
                 .font(.headline)
-                .foregroundColor(.white)
+                .foregroundColor(palette.textPrimary)
                 .padding(.horizontal)
 
             TabView(selection: $activeIndex) {
@@ -113,26 +112,30 @@ struct AuthView: View {
                     VStack(alignment: .leading, spacing: 10) {
                         Text(slide.kicker.uppercased())
                             .font(.caption)
-                            .foregroundColor(Color(hex: "#34D399"))
+                            .foregroundColor(palette.success)
                         Text(slide.title)
                             .font(.title2.bold())
-                            .foregroundColor(.white)
+                            .foregroundColor(palette.textPrimary)
                         Text(slide.description)
                             .font(.callout)
-                            .foregroundColor(.white.opacity(0.75))
+                            .foregroundColor(palette.textSecondary)
                         VStack(alignment: .leading, spacing: 4) {
                             Text(slide.stat)
                                 .font(.largeTitle.weight(.semibold))
-                                .foregroundColor(Color(hex: "#A5B4FC"))
+                                .foregroundColor(palette.accentSecondary)
                             Text(slide.statLabel)
                                 .font(.subheadline)
-                                .foregroundColor(.white.opacity(0.6))
+                                .foregroundColor(palette.textMuted)
                         }
                         .padding(.top, 8)
                     }
                     .padding(20)
                     .frame(maxWidth: .infinity)
-                    .background(.ultraThinMaterial)
+                    .background(palette.bgTertiary.opacity(0.9))
+                    .overlay(
+                        RoundedRectangle(cornerRadius: 18)
+                            .stroke(palette.border, lineWidth: 1)
+                    )
                     .clipShape(RoundedRectangle(cornerRadius: 18))
                     .padding(.horizontal, 16)
                     .tag(index)
@@ -147,7 +150,7 @@ struct AuthView: View {
         VStack(alignment: .leading, spacing: 14) {
             Text("Por que usar")
                 .font(.headline)
-                .foregroundColor(.white)
+                .foregroundColor(palette.textPrimary)
                 .padding(.horizontal)
 
             LazyVGrid(columns: [GridItem(.flexible()), GridItem(.flexible())], spacing: 12) {
@@ -155,14 +158,18 @@ struct AuthView: View {
                     VStack(alignment: .leading, spacing: 6) {
                         Text(benefit.title)
                             .font(.subheadline.weight(.semibold))
-                            .foregroundColor(.white)
+                            .foregroundColor(palette.textPrimary)
                         Text(benefit.description)
                             .font(.caption)
-                            .foregroundColor(.white.opacity(0.7))
+                            .foregroundColor(palette.textSecondary)
                     }
                     .padding()
                     .frame(maxWidth: .infinity, alignment: .leading)
-                    .background(Color.white.opacity(0.05))
+                    .background(palette.bgTertiary)
+                    .overlay(
+                        RoundedRectangle(cornerRadius: 14)
+                            .stroke(palette.border, lineWidth: 1)
+                    )
                     .clipShape(RoundedRectangle(cornerRadius: 14))
                 }
             }
@@ -174,7 +181,7 @@ struct AuthView: View {
         VStack(alignment: .leading, spacing: 16) {
             Text(viewModel.isRegistering ? "Criar conta" : "Entrar")
                 .font(.headline)
-                .foregroundColor(.white)
+                .foregroundColor(palette.textPrimary)
 
             VStack(spacing: 14) {
                 textField("Email", text: $viewModel.email, keyboard: .emailAddress)
@@ -205,7 +212,9 @@ struct AuthView: View {
                 }
                 .frame(maxWidth: .infinity)
                 .padding()
-                .background(Color(hex: "#6366F1"))
+                .background(LinearGradient(colors: [palette.accentPrimary, palette.accentSecondary],
+                                           startPoint: .topLeading,
+                                           endPoint: .bottomTrailing))
                 .foregroundColor(.white)
                 .clipShape(RoundedRectangle(cornerRadius: 14))
             }
@@ -217,10 +226,14 @@ struct AuthView: View {
                 }
             }
             .font(.footnote.weight(.semibold))
-            .foregroundColor(.white.opacity(0.8))
+            .foregroundColor(palette.textSecondary)
         }
         .padding()
-        .background(Color.white.opacity(0.04))
+        .background(palette.bgTertiary)
+        .overlay(
+            RoundedRectangle(cornerRadius: 18)
+                .stroke(palette.border, lineWidth: 1)
+        )
         .clipShape(RoundedRectangle(cornerRadius: 18))
         .padding(.horizontal)
     }
@@ -229,11 +242,11 @@ struct AuthView: View {
         VStack(spacing: 8) {
             Text("Pronto para correr com propósito?")
                 .font(.headline)
-                .foregroundColor(.white)
+                .foregroundColor(palette.textPrimary)
             Text("Entre no LigaRun e transforme suas rotas em território conquistado.")
                 .font(.caption)
                 .multilineTextAlignment(.center)
-                .foregroundColor(.white.opacity(0.7))
+                .foregroundColor(palette.textSecondary)
             primaryCTA
         }
         .padding(.horizontal)
@@ -243,7 +256,7 @@ struct AuthView: View {
 
     private var appBackground: some View {
         LinearGradient(
-            colors: [Color(hex: "#0B0D14"), Color(hex: "#0F1627")],
+            colors: [palette.bgPrimary, palette.bgSecondary],
             startPoint: .topLeading,
             endPoint: .bottomTrailing
         )
@@ -272,7 +285,7 @@ struct AuthView: View {
     private var angularAccent: some View {
         LinearGradient(
             colors: [
-                Color(hex: "#34D399").opacity(0.25),
+                palette.success.opacity(0.25),
                 Color.clear
             ],
             startPoint: .topTrailing,
@@ -293,7 +306,9 @@ struct AuthView: View {
                 .fontWeight(.semibold)
                 .padding(.horizontal, 20)
                 .padding(.vertical, 12)
-                .background(Color(hex: "#6366F1"))
+                .background(LinearGradient(colors: [palette.accentPrimary, palette.accentSecondary],
+                                           startPoint: .topLeading,
+                                           endPoint: .bottomTrailing))
                 .foregroundColor(.white)
                 .clipShape(Capsule())
         }
@@ -309,8 +324,9 @@ struct AuthView: View {
                 .fontWeight(.semibold)
                 .padding(.horizontal, 18)
                 .padding(.vertical, 11)
-                .background(Color.white.opacity(0.08))
-                .foregroundColor(.white)
+                .background(palette.bgTertiary)
+                .overlay(Capsule().stroke(palette.border, lineWidth: 1))
+                .foregroundColor(palette.textPrimary)
                 .clipShape(Capsule())
         }
     }
@@ -321,7 +337,8 @@ struct AuthView: View {
             .textContentType(keyboard == .emailAddress ? .emailAddress : .username)
             .autocapitalization(.none)
             .padding()
-            .background(.ultraThinMaterial)
+            .background(palette.bgTertiary)
+            .overlay(RoundedRectangle(cornerRadius: 12).stroke(palette.border, lineWidth: 1))
             .clipShape(RoundedRectangle(cornerRadius: 12))
     }
 
@@ -329,7 +346,8 @@ struct AuthView: View {
         SecureField(title, text: text)
             .textContentType(.password)
             .padding()
-            .background(.ultraThinMaterial)
+            .background(palette.bgTertiary)
+            .overlay(RoundedRectangle(cornerRadius: 12).stroke(palette.border, lineWidth: 1))
             .clipShape(RoundedRectangle(cornerRadius: 12))
     }
 }
@@ -347,4 +365,17 @@ private struct Slide {
 private struct Benefit {
     let title: String
     let description: String
+}
+
+private struct Palette {
+    let bgPrimary = Color(hex: "#0A0A0F")
+    let bgSecondary = Color(hex: "#12121A")
+    let bgTertiary = Color(hex: "#1A1A24")
+    let accentPrimary = Color(hex: "#6366F1")
+    let accentSecondary = Color(hex: "#8B5CF6")
+    let textPrimary = Color(hex: "#F8FAFC")
+    let textSecondary = Color(hex: "#94A3B8")
+    let textMuted = Color(hex: "#64748B")
+    let border = Color.white.opacity(0.08)
+    let success = Color(hex: "#22C55E")
 }
