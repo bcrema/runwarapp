@@ -19,7 +19,7 @@ class UserService(
 
     data class MeDto(
         val id: UUID,
-        val name: String,
+        val username: String,
         val email: String,
         val profileVisibility: String
     )
@@ -108,12 +108,7 @@ class UserService(
 
     fun getMe(userId: UUID): MeDto {
         val user = findUser(userId)
-        return MeDto(
-            id = user.id,
-            name = user.username,
-            email = user.email,
-            profileVisibility = toProfileVisibility(user.isPublic)
-        )
+        return toMeDto(user)
     }
     
     @Transactional
@@ -129,25 +124,20 @@ class UserService(
     }
 
     @Transactional
-    fun updateMe(userId: UUID, name: String?, profileVisibility: String?): MeDto {
+    fun updateMe(userId: UUID, username: String?, profileVisibility: String?): MeDto {
         val user = findUser(userId)
 
-        applyUsernameUpdate(user, name)
+        applyUsernameUpdate(user, username)
 
         profileVisibility?.let { user.isPublic = toIsPublic(it) }
 
         val savedUser = userRepository.save(user)
-        return MeDto(
-            id = savedUser.id,
-            name = savedUser.username,
-            email = savedUser.email,
-            profileVisibility = toProfileVisibility(savedUser.isPublic)
-        )
+        return toMeDto(savedUser)
     }
 
     private fun toProfileVisibility(isPublic: Boolean): String = if (isPublic) "public" else "private"
 
-    private fun toIsPublic(profileVisibility: String): Boolean = when (profileVisibility.lowercase()) {
+    private fun toIsPublic(profileVisibility: String): Boolean = when (profileVisibility) {
         "public" -> true
         "private" -> false
         else -> throw IllegalArgumentException("Invalid profile_visibility")
@@ -166,4 +156,11 @@ class UserService(
             user.username = it
         }
     }
+
+    private fun toMeDto(user: User): MeDto = MeDto(
+        id = user.id,
+        username = user.username,
+        email = user.email,
+        profileVisibility = toProfileVisibility(user.isPublic)
+    )
 }

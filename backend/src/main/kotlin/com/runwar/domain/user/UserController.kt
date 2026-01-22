@@ -62,27 +62,21 @@ class UserController(private val userService: UserService) {
     
     // ===== User Endpoints (Authenticated) =====
     
-    @GetMapping("/users/me")
-    fun getCurrentUser(@AuthenticationPrincipal principal: UserPrincipal): ResponseEntity<UserService.UserDto> {
-        val profile = userService.getProfile(principal.user.id)
-        return ResponseEntity.ok(profile)
-    }
-
     data class MeResponse(
         val id: java.util.UUID,
-        val name: String,
+        val username: String,
         val email: String,
-        @JsonProperty("profile_visibility")
+        @field:JsonProperty("profile_visibility")
         val profileVisibility: String
     )
 
-    @GetMapping("/me")
+    @GetMapping("/me", "/users/me")
     fun getMe(@AuthenticationPrincipal principal: UserPrincipal): ResponseEntity<MeResponse> {
         val profile = userService.getMe(principal.user.id)
         return ResponseEntity.ok(
             MeResponse(
                 id = profile.id,
-                name = profile.name,
+                username = profile.username,
                 email = profile.email,
                 profileVisibility = profile.profileVisibility
             )
@@ -112,10 +106,10 @@ class UserController(private val userService: UserService) {
 
     class UpdateMeRequest(
         @field:Size(min = 3, max = 30)
-        val name: String? = null,
+        val username: String? = null,
         @field:JsonProperty("profile_visibility")
         @field:Pattern(
-            regexp = "^(?i)(public|private)$",
+            regexp = "^(public|private)$",
             message = "profile_visibility must be public or private"
         )
         val profileVisibility: String? = null
@@ -128,24 +122,24 @@ class UserController(private val userService: UserService) {
             unknownFields.add(key)
         }
 
-        @AssertTrue(message = "Only name and profile_visibility can be updated")
-        fun hasOnlyKnownFields(): Boolean = unknownFields.isEmpty()
+        @AssertTrue(message = "Only username and profile_visibility can be updated")
+        fun isHasOnlyKnownFields(): Boolean = unknownFields.isEmpty()
     }
 
-    @PatchMapping("/me")
+    @PatchMapping("/me", "/users/me")
     fun updateMe(
         @AuthenticationPrincipal principal: UserPrincipal,
         @Valid @RequestBody request: UpdateMeRequest
     ): ResponseEntity<MeResponse> {
         val updated = userService.updateMe(
             principal.user.id,
-            request.name,
+            request.username,
             request.profileVisibility
         )
         return ResponseEntity.ok(
             MeResponse(
                 id = updated.id,
-                name = updated.name,
+                username = updated.username,
                 email = updated.email,
                 profileVisibility = updated.profileVisibility
             )
