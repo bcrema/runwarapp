@@ -70,6 +70,18 @@ class RunIngestionController(private val runService: RunService) {
                     .body(ValidationErrorResponse("Coordinates and timestamps must have the same length."))
         }
 
+        val hasInvalidCoordinate = request.coordinates.any { point ->
+            point.lat !in -90.0..90.0 || point.lng !in -180.0..180.0
+        }
+
+        if (hasInvalidCoordinate) {
+            return ResponseEntity.badRequest()
+                    .body(
+                            ValidationErrorResponse(
+                                    "Invalid coordinate values. Latitude must be between -90 and 90, and longitude between -180 and 180."
+                            )
+                    )
+        }
         val timestampsMillis = request.timestamps
 
         // Ensure timestamps are in non-decreasing chronological order
