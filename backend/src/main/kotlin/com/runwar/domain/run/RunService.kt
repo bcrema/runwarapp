@@ -2,8 +2,8 @@ package com.runwar.domain.run
 
 import com.runwar.config.GameProperties
 import com.runwar.domain.territory.TerritoryActionRepository
+import com.runwar.domain.tile.TileRepository
 import com.runwar.domain.user.User
-import com.runwar.game.H3GridService
 import com.runwar.game.LatLngPoint
 import com.runwar.game.LoopValidator
 import com.runwar.game.ShieldMechanics
@@ -25,8 +25,8 @@ class RunService(
         private val gpxParser: GpxParser,
         private val loopValidator: LoopValidator,
         private val shieldMechanics: ShieldMechanics,
-        private val h3GridService: H3GridService,
-        private val gameProperties: GameProperties
+        private val gameProperties: GameProperties,
+        private val tileRepository: TileRepository
 ) {
 
     data class RunDto(
@@ -79,8 +79,7 @@ class RunService(
     data class RunSubmissionResult(
             val run: RunDto,
             val loopValidation: LoopValidator.ValidationResult,
-            val territoryResult: ShieldMechanics.ActionResult?,
-            val dailyActionsRemaining: Int
+            val turnResult: TurnResult
     )
 
     /** Submit a new run from GPX file */
@@ -92,19 +91,12 @@ class RunService(
     ): RunSubmissionResult {
         // Check daily cap
         val actionsToday = getDailyActionCount(user)
-        if (actionsToday >= gameProperties.userDailyActionCap) {
-            throw IllegalStateException(
-                    "Daily action cap reached (${gameProperties.userDailyActionCap} actions)"
-            )
-        }
-
-        // Check bandeira daily cap if applicable
-        user.bandeira?.let { bandeira ->
-            val bandeiraActionsToday = getBandeiraDailyActionCount(bandeira.id)
-            if (bandeiraActionsToday >= bandeira.dailyActionCap) {
-                throw IllegalStateException("Bandeira daily action cap reached")
-            }
-        }
+        val userCapReached = actionsToday >= gameProperties.userDailyActionCap
+        val bandeiraActionsToday = user.bandeira?.let { getBandeiraDailyActionCount(it.id) }
+        val bandeiraCapReached =
+                user.bandeira?.let { bandeira ->
+                    (bandeiraActionsToday ?: 0) >= bandeira.dailyActionCap
+                } ?: false
 
         // Parse GPX
         val parsed = gpxParser.parse(gpxFile)
@@ -140,9 +132,11 @@ class RunService(
         if (validation.isValid && validation.primaryTile != null) {
             run.isValidForTerritory = true
 
-            territoryResult = shieldMechanics.processAction(validation.primaryTile, user)
+            if (!userCapReached && !bandeiraCapReached) {
+                territoryResult = shieldMechanics.processAction(validation.primaryTile, user)
+            }
 
-            if (territoryResult.success) {
+            if (territoryResult?.success == true) {
                 run.territoryAction = territoryResult.actionType
                 run.targetTile = null // Will be set by repository
             }
@@ -154,16 +148,13 @@ class RunService(
         user.totalRuns++
         user.totalDistance = user.totalDistance.add(BigDecimal.valueOf(parsed.totalDistance))
 
-        val remainingActions =
-                gameProperties.userDailyActionCap -
-                        actionsToday -
-                        (if (territoryResult?.success == true) 1 else 0)
+        val turnResult =
+                buildTurnResult(validation, territoryResult, user, actionsToday, bandeiraActionsToday)
 
         return RunSubmissionResult(
                 run = RunDto.from(savedRun),
                 loopValidation = validation,
-                territoryResult = territoryResult,
-                dailyActionsRemaining = remainingActions
+                turnResult = turnResult
         )
     }
 
@@ -177,9 +168,12 @@ class RunService(
     ): RunSubmissionResult {
         // Check daily cap
         val actionsToday = getDailyActionCount(user)
-        if (actionsToday >= gameProperties.userDailyActionCap) {
-            throw IllegalStateException("Daily action cap reached")
-        }
+        val userCapReached = actionsToday >= gameProperties.userDailyActionCap
+        val bandeiraActionsToday = user.bandeira?.let { getBandeiraDailyActionCount(it.id) }
+        val bandeiraCapReached =
+                user.bandeira?.let { bandeira ->
+                    (bandeiraActionsToday ?: 0) >= bandeira.dailyActionCap
+                } ?: false
 
         // Validate loop
         val validation = loopValidator.validate(coordinates, timestamps)
@@ -214,25 +208,25 @@ class RunService(
 
         if (validation.isValid && validation.primaryTile != null) {
             run.isValidForTerritory = true
-            territoryResult = shieldMechanics.processAction(validation.primaryTile, user)
 
-            if (territoryResult.success) {
+            if (!userCapReached && !bandeiraCapReached) {
+                territoryResult = shieldMechanics.processAction(validation.primaryTile, user)
+            }
+
+            if (territoryResult?.success == true) {
                 run.territoryAction = territoryResult.actionType
             }
         }
 
         val savedRun = runRepository.save(run)
 
-        val remainingActions =
-                gameProperties.userDailyActionCap -
-                        actionsToday -
-                        (if (territoryResult?.success == true) 1 else 0)
+        val turnResult =
+                buildTurnResult(validation, territoryResult, user, actionsToday, bandeiraActionsToday)
 
         return RunSubmissionResult(
                 run = RunDto.from(savedRun),
                 loopValidation = validation,
-                territoryResult = territoryResult,
-                dailyActionsRemaining = remainingActions
+                turnResult = turnResult
         )
     }
 
