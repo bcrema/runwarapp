@@ -41,7 +41,7 @@ class TileService(
         val ownerId: UUID?,
         val shield: Int,
         val dispute: Boolean,
-        val cooldownUntil: java.time.Instant?,
+        val cooldownUntil: Instant?,
         val colorKey: String?
     )
 
