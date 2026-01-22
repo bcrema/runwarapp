@@ -5,11 +5,22 @@ struct AuthResponse: Codable {
     let user: User
     let token: String
     let refreshToken: String?
+
+    enum CodingKeys: String, CodingKey {
+        case user
+        case token = "accessToken"
+        case refreshToken
+    }
 }
 
 struct TokenRefreshResponse: Codable {
     let token: String
     let refreshToken: String?
+
+    enum CodingKeys: String, CodingKey {
+        case token = "accessToken"
+        case refreshToken
+    }
 }
 
 struct User: Codable, Identifiable {
