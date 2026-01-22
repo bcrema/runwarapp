@@ -14,11 +14,21 @@ class Run(
         @ManyToOne(fetch = FetchType.LAZY)
         @JoinColumn(name = "user_id", nullable = false)
         val user: User,
+        @Enumerated(EnumType.STRING)
+        @Column(nullable = false)
+        var origin: RunOrigin = RunOrigin.IMPORT,
+        @Enumerated(EnumType.STRING)
+        @Column(nullable = false)
+        var status: RunStatus = RunStatus.RECEIVED,
         @Column(name = "gpx_url") var gpxUrl: String? = null,
         @Column(nullable = false) val distance: BigDecimal, // meters
         @Column(nullable = false) val duration: Int, // seconds
         @Column(name = "start_time") val startTime: Instant,
         @Column(name = "end_time") val endTime: Instant,
+        @Column(name = "min_lat") val minLat: Double? = null,
+        @Column(name = "min_lng") val minLng: Double? = null,
+        @Column(name = "max_lat") val maxLat: Double? = null,
+        @Column(name = "max_lng") val maxLng: Double? = null,
         @Column(name = "is_loop_valid") var isLoopValid: Boolean = false,
         @Column(name = "loop_distance") var loopDistance: BigDecimal? = null,
         @Column(name = "closing_distance") var closingDistance: BigDecimal? = null,
@@ -48,4 +58,16 @@ enum class TerritoryActionType {
     CONQUEST,
     ATTACK,
     DEFENSE
+}
+
+enum class RunOrigin {
+    IOS,
+    WEB,
+    IMPORT
+}
+
+enum class RunStatus {
+    RECEIVED,
+    VALIDATED,
+    REJECTED
 }

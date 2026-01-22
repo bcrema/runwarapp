@@ -59,7 +59,8 @@ class RunController(private val runService: RunService) {
         val coordinates = request.coordinates.map { LatLngPoint(it.lat, it.lng) }
         val timestamps = request.timestamps.map { Instant.ofEpochMilli(it) }
         
-        val result = runService.submitRunFromCoordinates(principal.user, coordinates, timestamps)
+        val result =
+            runService.submitRunFromCoordinates(principal.user, coordinates, timestamps, RunOrigin.WEB)
         return ResponseEntity.ok(result)
     }
     

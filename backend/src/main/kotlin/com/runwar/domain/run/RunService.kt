@@ -32,10 +32,16 @@ class RunService(
     data class RunDto(
             val id: UUID,
             val userId: UUID,
+            val origin: RunOrigin,
+            val status: RunStatus,
             val distance: Double,
             val duration: Int,
             val startTime: Instant,
             val endTime: Instant,
+            val minLat: Double?,
+            val minLng: Double?,
+            val maxLat: Double?,
+            val maxLng: Double?,
             val isLoopValid: Boolean,
             val loopDistance: Double?,
             val territoryAction: String?,
@@ -49,10 +55,16 @@ class RunService(
                     RunDto(
                             id = run.id,
                             userId = run.user.id,
+                            origin = run.origin,
+                            status = run.status,
                             distance = run.distance.toDouble(),
                             duration = run.duration,
                             startTime = run.startTime,
                             endTime = run.endTime,
+                            minLat = run.minLat,
+                            minLng = run.minLng,
+                            maxLat = run.maxLat,
+                            maxLng = run.maxLng,
                             isLoopValid = run.isLoopValid,
                             loopDistance = run.loopDistance?.toDouble(),
                             territoryAction = run.territoryAction?.name,
@@ -73,7 +85,11 @@ class RunService(
 
     /** Submit a new run from GPX file */
     @Transactional
-    fun submitRun(user: User, gpxFile: MultipartFile): RunSubmissionResult {
+    fun submitRun(
+            user: User,
+            gpxFile: MultipartFile,
+            origin: RunOrigin = RunOrigin.IMPORT
+    ): RunSubmissionResult {
         // Check daily cap
         val actionsToday = getDailyActionCount(user)
         if (actionsToday >= gameProperties.userDailyActionCap) {
@@ -95,15 +111,23 @@ class RunService(
 
         // Validate loop
         val validation = loopValidator.validate(parsed.coordinates, parsed.timestamps)
+        val boundingBox = calculateBoundingBox(parsed.coordinates)
+        val status = resolveStatus(validation.isValid)
 
         // Create run record
         val run =
                 Run(
                         user = user,
+                        origin = origin,
+                        status = status,
                         distance = BigDecimal.valueOf(parsed.totalDistance),
                         duration = parsed.totalDuration,
                         startTime = parsed.startTime,
                         endTime = parsed.endTime,
+                        minLat = boundingBox.minLat,
+                        minLng = boundingBox.minLng,
+                        maxLat = boundingBox.maxLat,
+                        maxLng = boundingBox.maxLng,
                         isLoopValid = validation.isValid,
                         loopDistance = validation.distance.let { BigDecimal.valueOf(it) },
                         closingDistance = BigDecimal.valueOf(validation.closingDistance),
@@ -148,7 +172,8 @@ class RunService(
     fun submitRunFromCoordinates(
             user: User,
             coordinates: List<LatLngPoint>,
-            timestamps: List<Instant>
+            timestamps: List<Instant>,
+            origin: RunOrigin = RunOrigin.WEB
     ): RunSubmissionResult {
         // Check daily cap
         val actionsToday = getDailyActionCount(user)
@@ -158,6 +183,8 @@ class RunService(
 
         // Validate loop
         val validation = loopValidator.validate(coordinates, timestamps)
+        val boundingBox = calculateBoundingBox(coordinates)
+        val status = resolveStatus(validation.isValid)
 
         val startTime = timestamps.firstOrNull() ?: Instant.now()
         val endTime = timestamps.lastOrNull() ?: Instant.now()
@@ -167,10 +194,16 @@ class RunService(
         val run =
                 Run(
                         user = user,
+                        origin = origin,
+                        status = status,
                         distance = BigDecimal.valueOf(validation.distance),
                         duration = duration,
                         startTime = startTime,
                         endTime = endTime,
+                        minLat = boundingBox.minLat,
+                        minLng = boundingBox.minLng,
+                        maxLat = boundingBox.maxLat,
+                        maxLng = boundingBox.maxLng,
                         isLoopValid = validation.isValid,
                         loopDistance = BigDecimal.valueOf(validation.distance),
                         closingDistance = BigDecimal.valueOf(validation.closingDistance),
@@ -225,4 +258,23 @@ class RunService(
         val startOfDay = LocalDate.now().atStartOfDay(ZoneId.systemDefault()).toInstant()
         return territoryActionRepository.countBandeiraActionsToday(bandeiraId, startOfDay)
     }
+
+    private fun resolveStatus(isValid: Boolean): RunStatus {
+        return if (isValid) RunStatus.VALIDATED else RunStatus.REJECTED
+    }
+
+    private fun calculateBoundingBox(coordinates: List<LatLngPoint>): BoundingBox {
+        val minLat = coordinates.minOf { it.lat }
+        val minLng = coordinates.minOf { it.lng }
+        val maxLat = coordinates.maxOf { it.lat }
+        val maxLng = coordinates.maxOf { it.lng }
+        return BoundingBox(minLat, minLng, maxLat, maxLng)
+    }
+
+    private data class BoundingBox(
+            val minLat: Double,
+            val minLng: Double,
+            val maxLat: Double,
+            val maxLng: Double
+    )
 }
