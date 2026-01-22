@@ -139,6 +139,6 @@ class TileController(private val tileService: TileService) {
             isValidLng(bounds.minLng) &&
             isValidLng(bounds.maxLng) &&
             bounds.minLat < bounds.maxLat &&
-            bounds.minLng < bounds.maxLng
+            bounds.minLng != bounds.maxLng
     }
 }
