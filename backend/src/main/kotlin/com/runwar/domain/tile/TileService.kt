@@ -1,13 +1,14 @@
 package com.runwar.domain.tile
 
 import com.runwar.config.GameProperties
-import com.runwar.domain.bandeira.Bandeira
 import com.runwar.domain.bandeira.BandeiraRepository
-import com.runwar.domain.user.User
 import com.runwar.domain.user.UserRepository
 import com.runwar.game.H3GridService
 import org.springframework.stereotype.Service
+import java.time.Duration
+import java.time.Instant
 import java.util.*
+import java.util.concurrent.ConcurrentHashMap
 
 @Service
 class TileService(
@@ -33,6 +34,31 @@ class TileService(
         val guardianId: UUID?,
         val guardianName: String?
     )
+
+    data class ViewportTileDto(
+        val h3Index: String,
+        val ownerType: String?,
+        val ownerId: UUID?,
+        val shield: Int,
+        val dispute: Boolean,
+        val cooldownUntil: Instant?,
+        val colorKey: String?
+    )
+
+    data class BoundingBox(
+        val minLng: Double,
+        val minLat: Double,
+        val maxLng: Double,
+        val maxLat: Double
+    )
+
+    private data class CachedViewportTiles(
+        val createdAt: Instant,
+        val tiles: List<ViewportTileDto>
+    )
+
+    private val viewportCache = ConcurrentHashMap<String, CachedViewportTiles>()
+    private val viewportCacheTtl = Duration.ofSeconds(5)
     
     /**
      * Get tiles within a bounding box for map display
@@ -45,6 +71,48 @@ class TileService(
     ): List<TileDto> {
         val tiles = tileRepository.findTilesInBoundingBox(minLat, minLng, maxLat, maxLng)
         return tiles.map { toDto(it) }
+    }
+
+    /**
+     * Get tiles within a bounding box with lightweight fields for map viewport rendering.
+     */
+    fun getViewportTiles(bounds: BoundingBox): List<ViewportTileDto> {
+        val cacheKey = buildCacheKey(bounds)
+        return viewportCache.compute(cacheKey) { _, cached ->
+            if (cached != null && !isCacheExpired(cached)) {
+                cached
+            } else {
+                val tiles = tileRepository.findTilesInBoundingBox(
+                    bounds.minLat,
+                    bounds.minLng,
+                    bounds.maxLat,
+                    bounds.maxLng
+                )
+
+                val bandeiraColors = loadBandeiraColors(tiles)
+
+                CachedViewportTiles(
+                    createdAt = Instant.now(),
+                    tiles = tiles.map { toViewportDto(it, bandeiraColors) }
+                )
+            }
+        }!!.tiles
+    }
+
+    /**
+     * Convert a center point + radius (meters) to a bounding box.
+     */
+    fun toBoundingBox(centerLat: Double, centerLng: Double, radiusMeters: Double): BoundingBox {
+        val metersPerDegreeLat = 111_320.0
+        val deltaLat = radiusMeters / metersPerDegreeLat
+        val deltaLng = radiusMeters / (metersPerDegreeLat * kotlin.math.cos(Math.toRadians(centerLat)))
+
+        return BoundingBox(
+            minLng = centerLng - deltaLng,
+            minLat = centerLat - deltaLat,
+            maxLng = centerLng + deltaLng,
+            maxLat = centerLat + deltaLat
+        )
     }
     
     /**
@@ -175,5 +243,47 @@ class TileService(
             guardianId = tile.guardian?.id,
             guardianName = tile.guardian?.username
         )
+    }
+
+    private fun toViewportDto(tile: Tile, bandeiraColors: Map<UUID, String>): ViewportTileDto {
+        return ViewportTileDto(
+            h3Index = tile.id,
+            ownerType = tile.ownerType?.name,
+            ownerId = tile.ownerId,
+            shield = tile.shield,
+            dispute = tile.isInDispute(gameProperties.disputeThreshold),
+            cooldownUntil = tile.cooldownUntil,
+            colorKey = tile.ownerId?.let { bandeiraColors[it] }
+        )
+    }
+
+    private fun buildCacheKey(bounds: BoundingBox): String {
+        return "res:${h3GridService.resolution}-" +
+            "bbox:${formatCoord(bounds.minLng)}," +
+            "${formatCoord(bounds.minLat)}," +
+            "${formatCoord(bounds.maxLng)}," +
+            "${formatCoord(bounds.maxLat)}-" +
+            "dt:${gameProperties.disputeThreshold}"
+    }
+
+    private fun formatCoord(value: Double): String = String.format(Locale.US, "%.6f", value)
+
+    private fun isCacheExpired(cached: CachedViewportTiles): Boolean {
+        return Duration.between(cached.createdAt, Instant.now()) > viewportCacheTtl
+    }
+
+    private fun loadBandeiraColors(tiles: List<Tile>): Map<UUID, String> {
+        val bandeiraIds = tiles.asSequence()
+            .filter { it.ownerType == OwnerType.BANDEIRA }
+            .mapNotNull { it.ownerId }
+            .distinct()
+            .toList()
+
+        if (bandeiraIds.isEmpty()) {
+            return emptyMap()
+        }
+
+        return bandeiraRepository.findAllById(bandeiraIds)
+            .associate { it.id to it.color }
     }
 }

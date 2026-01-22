@@ -7,11 +7,15 @@ import java.util.*
 @RestController
 @RequestMapping("/api/tiles")
 class TileController(private val tileService: TileService) {
+
+    companion object {
+        private const val MAX_RADIUS_METERS = 50_000.0
+    }
     
     /**
      * Get tiles within a bounding box (for map display)
      */
-    @GetMapping
+    @GetMapping(params = ["minLat", "minLng", "maxLat", "maxLng"])
     fun getTiles(
         @RequestParam minLat: Double,
         @RequestParam minLng: Double,
@@ -20,6 +24,42 @@ class TileController(private val tileService: TileService) {
     ): ResponseEntity<List<TileService.TileDto>> {
         val tiles = tileService.getTilesInBounds(minLat, minLng, maxLat, maxLng)
         return ResponseEntity.ok(tiles)
+    }
+
+    /**
+     * Get tiles within a viewport bounding box (for map rendering)
+     * bbox format: minLng,minLat,maxLng,maxLat
+     */
+    @GetMapping(params = ["bbox"])
+    fun getViewportTiles(@RequestParam bbox: String): ResponseEntity<List<TileService.ViewportTileDto>> {
+        val bounds = parseBbox(bbox)
+            ?: return ResponseEntity.badRequest().build()
+        if (!isValidBounds(bounds)) {
+            return ResponseEntity.badRequest().build()
+        }
+        return ResponseEntity.ok(tileService.getViewportTiles(bounds))
+    }
+
+    /**
+     * Get tiles within a viewport defined by a center and radius (meters)
+     */
+    @GetMapping(params = ["centerLat", "centerLng", "radiusMeters"])
+    fun getViewportTilesByCenter(
+        @RequestParam centerLat: Double,
+        @RequestParam centerLng: Double,
+        @RequestParam radiusMeters: Double
+    ): ResponseEntity<List<TileService.ViewportTileDto>> {
+        if (!isValidLat(centerLat) || !isValidLng(centerLng)) {
+            return ResponseEntity.badRequest().build()
+        }
+        if (radiusMeters <= 0 || radiusMeters > MAX_RADIUS_METERS) {
+            return ResponseEntity.badRequest().build()
+        }
+        val bounds = tileService.toBoundingBox(centerLat, centerLng, radiusMeters)
+        if (!isValidBounds(bounds)) {
+            return ResponseEntity.badRequest().build()
+        }
+        return ResponseEntity.ok(tileService.getViewportTiles(bounds))
     }
     
     /**
@@ -74,5 +114,31 @@ class TileController(private val tileService: TileService) {
     @GetMapping("/stats")
     fun getStats(): ResponseEntity<TileService.GameStats> {
         return ResponseEntity.ok(tileService.getStats())
+    }
+
+    private fun parseBbox(raw: String): TileService.BoundingBox? {
+        val parts = raw.split(',').map { it.trim() }
+        if (parts.size != 4) return null
+        val values = parts.mapNotNull { it.toDoubleOrNull() }
+        if (values.size != 4) return null
+        return TileService.BoundingBox(
+            minLng = values[0],
+            minLat = values[1],
+            maxLng = values[2],
+            maxLat = values[3]
+        )
+    }
+
+    private fun isValidLat(lat: Double): Boolean = lat in -90.0..90.0
+
+    private fun isValidLng(lng: Double): Boolean = lng in -180.0..180.0
+
+    private fun isValidBounds(bounds: TileService.BoundingBox): Boolean {
+        return isValidLat(bounds.minLat) &&
+            isValidLat(bounds.maxLat) &&
+            isValidLng(bounds.minLng) &&
+            isValidLng(bounds.maxLng) &&
+            bounds.minLat < bounds.maxLat &&
+            bounds.minLng != bounds.maxLng
     }
 }
