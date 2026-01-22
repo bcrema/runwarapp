@@ -52,6 +52,9 @@ dependencies {
     
     // OpenAPI/Swagger
     implementation("org.springdoc:springdoc-openapi-starter-webmvc-ui:2.8.0")
+
+    // Rate limiting (AuthRateLimiter)
+    implementation("com.github.ben-manes.caffeine:caffeine:3.1.8")
     
     // Testing
     testImplementation("org.springframework.boot:spring-boot-starter-test")

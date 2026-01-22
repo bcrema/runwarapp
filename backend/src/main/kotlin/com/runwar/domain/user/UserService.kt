@@ -195,6 +195,15 @@ class UserService(
         return toMeDto(savedUser)
     }
 
+    private fun toMeDto(user: User): MeDto {
+        return MeDto(
+            id = user.id,
+            username = user.username,
+            email = user.email,
+            profileVisibility = toProfileVisibility(user.isPublic)
+        )
+    }
+
     private fun toProfileVisibility(isPublic: Boolean): String = if (isPublic) "public" else "private"
 
     private fun toIsPublic(profileVisibility: String): Boolean = when (profileVisibility) {

@@ -96,14 +96,17 @@ class ApiClient {
     }
 
     // Tiles
-    async getTiles(bounds: { minLat: number; minLng: number; maxLat: number; maxLng: number }) {
+    async getTiles(
+        bounds: { minLat: number; minLng: number; maxLat: number; maxLng: number },
+        options?: { signal?: AbortSignal }
+    ) {
         const params = new URLSearchParams({
             minLat: bounds.minLat.toString(),
             minLng: bounds.minLng.toString(),
             maxLat: bounds.maxLat.toString(),
             maxLng: bounds.maxLng.toString(),
         })
-        return this.request<Tile[]>(`/api/tiles?${params}`)
+        return this.request<Tile[]>(`/api/tiles?${params}`, { signal: options?.signal })
     }
 
     async getTile(id: string) {

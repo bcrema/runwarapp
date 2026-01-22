@@ -2,6 +2,7 @@
 
 import { useState, useRef, useCallback } from 'react'
 import { api, RunSubmissionResult } from '@/lib/api'
+import { requestTilesRefresh } from '@/lib/tilesRefresh'
 import styles from './page.module.css'
 
 export default function RunPage() {
@@ -46,6 +47,7 @@ export default function RunPage() {
                         try {
                             const result = await api.submitRunGpx(file)
                             setResult(result)
+                            if (result.territoryResult?.success) requestTilesRefresh()
                         } catch (err: any) {
                             setError(err.message || 'Erro ao enviar corrida')
                         } finally {
@@ -62,6 +64,7 @@ export default function RunPage() {
                         try {
                             const result = await api.submitRunCoordinates(coordinates, timestamps)
                             setResult(result)
+                            if (result.territoryResult?.success) requestTilesRefresh()
                         } catch (err: any) {
                             setError(err.message || 'Erro ao enviar corrida')
                         } finally {
@@ -151,6 +154,14 @@ function GpsRecorder({ onSubmit, isLoading }: GpsRecorderProps) {
     const [error, setError] = useState<string | null>(null)
     const watchIdRef = useRef<number | null>(null)
 
+    const stopRecording = useCallback(() => {
+        if (watchIdRef.current !== null) {
+            navigator.geolocation.clearWatch(watchIdRef.current)
+            watchIdRef.current = null
+        }
+        setIsRecording(false)
+    }, [])
+
     const startRecording = useCallback(() => {
         if (!navigator.geolocation) {
             setError('Geolocalização não suportada pelo navegador')
@@ -182,15 +193,7 @@ function GpsRecorder({ onSubmit, isLoading }: GpsRecorderProps) {
                 timeout: 5000,
             }
         )
-    }, [])
-
-    const stopRecording = useCallback(() => {
-        if (watchIdRef.current !== null) {
-            navigator.geolocation.clearWatch(watchIdRef.current)
-            watchIdRef.current = null
-        }
-        setIsRecording(false)
-    }, [])
+    }, [stopRecording])
 
     const handleSubmit = () => {
         if (points.length < 2) {
@@ -282,19 +285,36 @@ interface RunResultProps {
 function RunResult({ result, onReset }: RunResultProps) {
     const { run, loopValidation, territoryResult } = result
 
-    const getActionBadge = () => {
-        if (!territoryResult?.actionType) return null
+    type TurnOutcome = 'CONQUEST' | 'ATTACK' | 'DEFENSE' | 'NO_EFFECT'
 
-        const badges: Record<string, { class: string; label: string }> = {
-            CONQUEST: { class: 'badge-conquest', label: '🏴 Conquista!' },
-            ATTACK: { class: 'badge-attack', label: '⚔️ Ataque!' },
-            DEFENSE: { class: 'badge-defense', label: '🛡️ Defesa!' },
-        }
+    const outcome: TurnOutcome =
+        territoryResult?.success && territoryResult.actionType
+            ? (territoryResult.actionType as TurnOutcome)
+            : 'NO_EFFECT'
 
-        return badges[territoryResult.actionType]
+    const badges: Record<TurnOutcome, { class: string; label: string }> = {
+        CONQUEST: { class: 'badge-conquest', label: '🏴 Conquistou' },
+        ATTACK: { class: 'badge-attack', label: '⚔️ Atacou' },
+        DEFENSE: { class: 'badge-defense', label: '🛡️ Defendeu' },
+        NO_EFFECT: { class: 'badge-neutral', label: '😐 Sem efeito' },
     }
 
-    const actionBadge = getActionBadge()
+    const actionBadge = badges[outcome]
+
+    const reasons: string[] = []
+    if (territoryResult && !territoryResult.success && territoryResult.reason) {
+        reasons.push(translateTerritoryReason(territoryResult.reason))
+    }
+    if (loopValidation.failureReasons.length > 0) {
+        reasons.push(...loopValidation.failureReasons.map(translateReason))
+    }
+    if (outcome === 'NO_EFFECT' && reasons.length === 0) {
+        if (loopValidation.isValid && !loopValidation.primaryTile) {
+            reasons.push('Não foi possível determinar um tile principal para essa corrida.')
+        } else {
+            reasons.push('Nenhuma ação territorial foi aplicada.')
+        }
+    }
 
     return (
         <div className={styles.resultCard}>
@@ -312,28 +332,37 @@ function RunResult({ result, onReset }: RunResultProps) {
                 )}
             </div>
 
-            {actionBadge && (
-                <div className={styles.actionResult}>
-                    <span className={`badge ${actionBadge.class}`} style={{ fontSize: '1.2rem', padding: '0.5rem 1rem' }}>
-                        {actionBadge.label}
-                    </span>
+            <div className={styles.actionResult}>
+                <span
+                    className={`badge ${actionBadge.class}`}
+                    style={{ fontSize: '1.2rem', padding: '0.5rem 1rem' }}
+                >
+                    {actionBadge.label}
+                </span>
 
-                    {territoryResult && (
+                {territoryResult?.success && (
+                    <>
                         <div className={styles.shieldChange}>
                             <span>Escudo: {territoryResult.shieldBefore} → {territoryResult.shieldAfter}</span>
                             <span className={territoryResult.shieldChange > 0 ? styles.positive : styles.negative}>
                                 ({territoryResult.shieldChange > 0 ? '+' : ''}{territoryResult.shieldChange})
                             </span>
                         </div>
-                    )}
 
-                    {territoryResult?.ownerChanged && (
-                        <div className={styles.ownerChanged}>
-                            🎉 Tile conquistado!
-                        </div>
-                    )}
-                </div>
-            )}
+                        {territoryResult.tileId && (
+                            <div className={styles.shieldChange}>
+                                <span>Tile: {territoryResult.tileId}</span>
+                            </div>
+                        )}
+
+                        {territoryResult.ownerChanged && (
+                            <div className={styles.ownerChanged}>
+                                🎉 Tile conquistado!
+                            </div>
+                        )}
+                    </>
+                )}
+            </div>
 
             <div className={styles.resultStats}>
                 <div className={styles.resultStat}>
@@ -356,12 +385,12 @@ function RunResult({ result, onReset }: RunResultProps) {
                 </div>
             </div>
 
-            {!loopValidation.isValid && loopValidation.failureReasons.length > 0 && (
+            {outcome === 'NO_EFFECT' && reasons.length > 0 && (
                 <div className={styles.failureReasons}>
                     <h4>Por que não gerou ação territorial:</h4>
                     <ul>
-                        {loopValidation.failureReasons.map((reason) => (
-                            <li key={reason}>{translateReason(reason)}</li>
+                        {reasons.map((reason, idx) => (
+                            <li key={`${idx}-${reason}`}>{reason}</li>
                         ))}
                     </ul>
                 </div>
@@ -417,6 +446,18 @@ function translateReason(reason: string): string {
         insufficient_tile_coverage: 'Cobertura insuficiente do tile (mínimo 60%)',
         fraud_detected: 'Padrão suspeito detectado',
         outside_game_area: 'Fora da área do jogo (Curitiba)',
+    }
+    return translations[reason] || reason
+}
+
+function translateTerritoryReason(reason: string): string {
+    const translations: Record<string, string> = {
+        cannot_determine_action: 'Não foi possível determinar a ação (conquista/ataque/defesa).',
+        tile_already_owned: 'Tile já possui dono.',
+        cannot_attack_neutral: 'Não é possível atacar um tile neutro.',
+        cannot_attack_own_tile: 'Não é possível atacar o próprio tile.',
+        tile_in_cooldown: 'Tile em cooldown; ataque bloqueado no momento.',
+        cannot_defend_rival_tile: 'Não é possível defender um tile que não é seu.',
     }
     return translations[reason] || reason
 }
