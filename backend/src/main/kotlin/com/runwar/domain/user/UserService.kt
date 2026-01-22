@@ -24,6 +24,13 @@ class UserService(
     private val refreshTokenRepository: RefreshTokenRepository,
     private val jwtProperties: JwtProperties
 ) : UserDetailsService {
+
+    data class MeDto(
+        val id: UUID,
+        val username: String,
+        val email: String,
+        val profileVisibility: String
+    )
     
     data class AuthResult(
         val user: UserDto,
@@ -155,27 +162,59 @@ class UserService(
     fun findById(id: UUID): User? = userRepository.findById(id).orElse(null)
     
     fun getProfile(userId: UUID): UserDto {
-        val user = userRepository.findById(userId)
-            .orElseThrow { IllegalArgumentException("User not found") }
+        val user = findUser(userId)
         return UserDto.from(user)
+    }
+
+    fun getMe(userId: UUID): MeDto {
+        val user = findUser(userId)
+        return toMeDto(user)
     }
     
     @Transactional
     fun updateProfile(userId: UUID, username: String?, avatarUrl: String?, isPublic: Boolean?): UserDto {
-        val user = userRepository.findById(userId)
-            .orElseThrow { IllegalArgumentException("User not found") }
-        
-        username?.let {
-            if (it != user.username && userRepository.existsByUsername(it)) {
-                throw IllegalArgumentException("Username already taken")
-            }
-            user.username = it
-        }
+        val user = findUser(userId)
+
+        applyUsernameUpdate(user, username)
         
         avatarUrl?.let { user.avatarUrl = it }
         isPublic?.let { user.isPublic = it }
-        
+
         return UserDto.from(userRepository.save(user))
+    }
+
+    @Transactional
+    fun updateMe(userId: UUID, username: String?, profileVisibility: String?): MeDto {
+        val user = findUser(userId)
+
+        applyUsernameUpdate(user, username)
+
+        profileVisibility?.let { user.isPublic = toIsPublic(it) }
+
+        val savedUser = userRepository.save(user)
+        return toMeDto(savedUser)
+    }
+
+    private fun toProfileVisibility(isPublic: Boolean): String = if (isPublic) "public" else "private"
+
+    private fun toIsPublic(profileVisibility: String): Boolean = when (profileVisibility) {
+        "public" -> true
+        "private" -> false
+        else -> throw IllegalArgumentException("Invalid profile_visibility")
+    }
+
+    private fun findUser(userId: UUID): User {
+        return userRepository.findById(userId)
+            .orElseThrow { IllegalArgumentException("User not found") }
+    }
+
+    private fun applyUsernameUpdate(user: User, username: String?) {
+        username?.let {
+            if (it != user.username && userRepository.existsByUsername(it)) {
+                throw IllegalArgumentException("This username is already taken by another user")
+            }
+            user.username = it
+        }
     }
 
     private data class TokenPair(
