@@ -15,6 +15,14 @@ private struct RunCoordinatesRequest: Encodable {
     let timestamps: [Int]
 }
 
+private struct RefreshTokenRequest: Encodable {
+    let refreshToken: String
+}
+
+private struct LogoutRequest: Encodable {
+    let refreshToken: String?
+}
+
 @MainActor
 final class APIClient {
     private let baseURL: URL
@@ -22,10 +30,16 @@ final class APIClient {
     private let decoder: JSONDecoder
     private let encoder: JSONEncoder
     private let tokenProvider: () -> String?
+    private let refreshHandler: (() async throws -> String?)?
 
-    init(baseURL: URL, tokenProvider: @escaping () -> String?) {
+    init(
+        baseURL: URL,
+        tokenProvider: @escaping () -> String?,
+        refreshHandler: (() async throws -> String?)? = nil
+    ) {
         self.baseURL = baseURL
         self.tokenProvider = tokenProvider
+        self.refreshHandler = refreshHandler
         self.session = URLSession(configuration: .default)
 
         decoder = JSONDecoder()
@@ -43,6 +57,24 @@ final class APIClient {
 
     func register(email: String, username: String, password: String) async throws -> AuthResponse {
         try await request("/api/auth/register", method: "POST", body: ["email": email, "username": username, "password": password])
+    }
+
+    func refreshToken(_ refreshToken: String) async throws -> TokenRefreshResponse {
+        try await request(
+            "/api/auth/refresh",
+            method: "POST",
+            body: RefreshTokenRequest(refreshToken: refreshToken),
+            allowRefresh: false
+        )
+    }
+
+    func logout(refreshToken: String?) async throws {
+        _ = try await request(
+            "/api/auth/logout",
+            method: "POST",
+            body: LogoutRequest(refreshToken: refreshToken),
+            allowRefresh: false
+        ) as EmptyResponse
     }
 
     func getMe() async throws -> User {
@@ -135,16 +167,24 @@ final class APIClient {
     private func request<T: Decodable>(
         _ path: String,
         method: String = "GET",
-        query: [URLQueryItem]? = nil
+        query: [URLQueryItem]? = nil,
+        allowRefresh: Bool = true
     ) async throws -> T {
-        try await request(path, method: method, query: query, body: Optional<EmptyBody>.none as EmptyBody?)
+        try await request(
+            path,
+            method: method,
+            query: query,
+            body: Optional<EmptyBody>.none as EmptyBody?,
+            allowRefresh: allowRefresh
+        )
     }
 
     private func request<T: Decodable, Body: Encodable>(
         _ path: String,
         method: String = "GET",
         query: [URLQueryItem]? = nil,
-        body: Body? = nil
+        body: Body? = nil,
+        allowRefresh: Bool = true
     ) async throws -> T {
         var components = URLComponents(url: baseURL.appendingPathComponent(path), resolvingAgainstBaseURL: false)!
         if let query = query, !query.isEmpty {
@@ -155,20 +195,23 @@ final class APIClient {
             throw URLError(.badURL)
         }
 
-        var request = URLRequest(url: url)
-        request.httpMethod = method
-        request.timeoutInterval = 30
+        let (data, response) = try await performRequest(
+            url: url,
+            method: method,
+            body: body
+        )
 
-        if let body = body {
-            request.httpBody = try encoder.encode(body)
-            request.setValue("application/json", forHTTPHeaderField: "Content-Type")
+        if response.statusCode == 401, allowRefresh, let refreshHandler {
+            if let refreshedToken = try? await refreshHandler(), refreshedToken != nil {
+                let (retryData, retryResponse) = try await performRequest(
+                    url: url,
+                    method: method,
+                    body: body
+                )
+                return try decode(T.self, data: retryData, response: retryResponse)
+            }
         }
 
-        if let token = tokenProvider() {
-            request.setValue("Bearer \(token)", forHTTPHeaderField: "Authorization")
-        }
-
-        let (data, response) = try await session.data(for: request)
         return try decode(T.self, data: data, response: response)
     }
 
@@ -179,6 +222,43 @@ final class APIClient {
         mimeType: String
     ) async throws -> T {
         let boundary = "Boundary-\(UUID().uuidString)"
+        let request = multipartURLRequest(
+            path: path,
+            boundary: boundary,
+            fileData: fileData,
+            fileName: fileName,
+            mimeType: mimeType
+        )
+
+        let (data, response) = try await session.data(for: request)
+        guard let httpResponse = response as? HTTPURLResponse else {
+            throw URLError(.badServerResponse)
+        }
+
+        if httpResponse.statusCode == 401, let refreshHandler {
+            if let refreshedToken = try? await refreshHandler(), refreshedToken != nil {
+                let retryRequest = multipartURLRequest(
+                    path: path,
+                    boundary: boundary,
+                    fileData: fileData,
+                    fileName: fileName,
+                    mimeType: mimeType
+                )
+                let (retryData, retryResponse) = try await session.data(for: retryRequest)
+                return try decode(T.self, data: retryData, response: retryResponse)
+            }
+        }
+
+        return try decode(T.self, data: data, response: response)
+    }
+
+    private func multipartURLRequest(
+        path: String,
+        boundary: String,
+        fileData: Data,
+        fileName: String,
+        mimeType: String
+    ) -> URLRequest {
         var request = URLRequest(url: baseURL.appendingPathComponent(path))
         request.httpMethod = "POST"
         request.setValue("multipart/form-data; boundary=\(boundary)", forHTTPHeaderField: "Content-Type")
@@ -193,9 +273,32 @@ final class APIClient {
         body.append(fileData)
         body.append("\r\n--\(boundary)--\r\n".data(using: .utf8)!)
         request.httpBody = body
+        return request
+    }
+
+    private func performRequest<Body: Encodable>(
+        url: URL,
+        method: String,
+        body: Body?
+    ) async throws -> (Data, HTTPURLResponse) {
+        var request = URLRequest(url: url)
+        request.httpMethod = method
+        request.timeoutInterval = 30
+
+        if let body = body {
+            request.httpBody = try encoder.encode(body)
+            request.setValue("application/json", forHTTPHeaderField: "Content-Type")
+        }
+
+        if let token = tokenProvider() {
+            request.setValue("Bearer \(token)", forHTTPHeaderField: "Authorization")
+        }
 
         let (data, response) = try await session.data(for: request)
-        return try decode(T.self, data: data, response: response)
+        guard let httpResponse = response as? HTTPURLResponse else {
+            throw URLError(.badServerResponse)
+        }
+        return (data, httpResponse)
     }
 
     private func decode<T: Decodable>(_ type: T.Type, data: Data, response: URLResponse) throws -> T {
