@@ -262,7 +262,8 @@ class TileService(
             "bbox:${formatCoord(bounds.minLng)}," +
             "${formatCoord(bounds.minLat)}," +
             "${formatCoord(bounds.maxLng)}," +
-            "${formatCoord(bounds.maxLat)}"
+            "${formatCoord(bounds.maxLat)}-" +
+            "dt:${gameProperties.disputeThreshold}"
     }
 
     private fun formatCoord(value: Double): String = String.format(Locale.US, "%.6f", value)
