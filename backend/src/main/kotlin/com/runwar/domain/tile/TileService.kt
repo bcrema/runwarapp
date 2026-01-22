@@ -1,13 +1,13 @@
 package com.runwar.domain.tile
 
 import com.runwar.config.GameProperties
-import com.runwar.domain.bandeira.Bandeira
 import com.runwar.domain.bandeira.BandeiraRepository
-import com.runwar.domain.user.User
 import com.runwar.domain.user.UserRepository
 import com.runwar.game.H3GridService
 import org.springframework.stereotype.Service
+import java.time.Duration
 import java.util.*
+import java.util.concurrent.ConcurrentHashMap
 
 @Service
 class TileService(
@@ -33,6 +33,31 @@ class TileService(
         val guardianId: UUID?,
         val guardianName: String?
     )
+
+    data class ViewportTileDto(
+        val h3Index: String,
+        val ownerType: String?,
+        val ownerId: UUID?,
+        val shield: Int,
+        val dispute: Boolean,
+        val cooldownUntil: java.time.Instant?,
+        val colorKey: String?
+    )
+
+    data class BoundingBox(
+        val minLng: Double,
+        val minLat: Double,
+        val maxLng: Double,
+        val maxLat: Double
+    )
+
+    private data class CachedViewportTiles(
+        val createdAt: java.time.Instant,
+        val tiles: List<ViewportTileDto>
+    )
+
+    private val viewportCache = ConcurrentHashMap<String, CachedViewportTiles>()
+    private val viewportCacheTtl = Duration.ofSeconds(5)
     
     /**
      * Get tiles within a bounding box for map display
@@ -45,6 +70,46 @@ class TileService(
     ): List<TileDto> {
         val tiles = tileRepository.findTilesInBoundingBox(minLat, minLng, maxLat, maxLng)
         return tiles.map { toDto(it) }
+    }
+
+    /**
+     * Get tiles within a bounding box with lightweight fields for map viewport rendering.
+     */
+    fun getViewportTiles(bounds: BoundingBox): List<ViewportTileDto> {
+        val cacheKey = buildCacheKey(bounds)
+        val cached = viewportCache[cacheKey]
+        if (cached != null && !isCacheExpired(cached)) {
+            return cached.tiles
+        }
+
+        val tiles = tileRepository.findTilesInBoundingBox(
+            bounds.minLat,
+            bounds.minLng,
+            bounds.maxLat,
+            bounds.maxLng
+        ).map { toViewportDto(it) }
+
+        viewportCache[cacheKey] = CachedViewportTiles(
+            createdAt = java.time.Instant.now(),
+            tiles = tiles
+        )
+        return tiles
+    }
+
+    /**
+     * Convert a center point + radius (meters) to a bounding box.
+     */
+    fun toBoundingBox(centerLat: Double, centerLng: Double, radiusMeters: Double): BoundingBox {
+        val metersPerDegreeLat = 111_320.0
+        val deltaLat = radiusMeters / metersPerDegreeLat
+        val deltaLng = radiusMeters / (metersPerDegreeLat * kotlin.math.cos(Math.toRadians(centerLat)))
+
+        return BoundingBox(
+            minLng = centerLng - deltaLng,
+            minLat = centerLat - deltaLat,
+            maxLng = centerLng + deltaLng,
+            maxLat = centerLat + deltaLat
+        )
     }
     
     /**
@@ -175,5 +240,39 @@ class TileService(
             guardianId = tile.guardian?.id,
             guardianName = tile.guardian?.username
         )
+    }
+
+    private fun toViewportDto(tile: Tile): ViewportTileDto {
+        val colorKey = when (tile.ownerType) {
+            OwnerType.BANDEIRA -> tile.ownerId?.let { id ->
+                bandeiraRepository.findById(id).map { it.color }.orElse(null)
+            }
+            OwnerType.SOLO -> null
+            null -> null
+        }
+
+        return ViewportTileDto(
+            h3Index = tile.id,
+            ownerType = tile.ownerType?.name,
+            ownerId = tile.ownerId,
+            shield = tile.shield,
+            dispute = tile.isInDispute(gameProperties.disputeThreshold),
+            cooldownUntil = tile.cooldownUntil,
+            colorKey = colorKey
+        )
+    }
+
+    private fun buildCacheKey(bounds: BoundingBox): String {
+        return "res:${h3GridService.resolution}-" +
+            "bbox:${formatCoord(bounds.minLng)}," +
+            "${formatCoord(bounds.minLat)}," +
+            "${formatCoord(bounds.maxLng)}," +
+            "${formatCoord(bounds.maxLat)}"
+    }
+
+    private fun formatCoord(value: Double): String = String.format(Locale.US, "%.6f", value)
+
+    private fun isCacheExpired(cached: CachedViewportTiles): Boolean {
+        return Duration.between(cached.createdAt, java.time.Instant.now()) > viewportCacheTtl
     }
 }

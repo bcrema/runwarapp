@@ -11,7 +11,7 @@ class TileController(private val tileService: TileService) {
     /**
      * Get tiles within a bounding box (for map display)
      */
-    @GetMapping
+    @GetMapping(params = ["minLat", "minLng", "maxLat", "maxLng"])
     fun getTiles(
         @RequestParam minLat: Double,
         @RequestParam minLng: Double,
@@ -20,6 +20,30 @@ class TileController(private val tileService: TileService) {
     ): ResponseEntity<List<TileService.TileDto>> {
         val tiles = tileService.getTilesInBounds(minLat, minLng, maxLat, maxLng)
         return ResponseEntity.ok(tiles)
+    }
+
+    /**
+     * Get tiles within a viewport bounding box (for map rendering)
+     * bbox format: minLng,minLat,maxLng,maxLat
+     */
+    @GetMapping(params = ["bbox"])
+    fun getViewportTiles(@RequestParam bbox: String): ResponseEntity<List<TileService.ViewportTileDto>> {
+        val bounds = parseBbox(bbox)
+            ?: return ResponseEntity.badRequest().build()
+        return ResponseEntity.ok(tileService.getViewportTiles(bounds))
+    }
+
+    /**
+     * Get tiles within a viewport defined by a center and radius (meters)
+     */
+    @GetMapping(params = ["centerLat", "centerLng", "radiusMeters"])
+    fun getViewportTilesByCenter(
+        @RequestParam centerLat: Double,
+        @RequestParam centerLng: Double,
+        @RequestParam radiusMeters: Double
+    ): ResponseEntity<List<TileService.ViewportTileDto>> {
+        val bounds = tileService.toBoundingBox(centerLat, centerLng, radiusMeters)
+        return ResponseEntity.ok(tileService.getViewportTiles(bounds))
     }
     
     /**
@@ -74,5 +98,18 @@ class TileController(private val tileService: TileService) {
     @GetMapping("/stats")
     fun getStats(): ResponseEntity<TileService.GameStats> {
         return ResponseEntity.ok(tileService.getStats())
+    }
+
+    private fun parseBbox(raw: String): TileService.BoundingBox? {
+        val parts = raw.split(',').map { it.trim() }
+        if (parts.size != 4) return null
+        val values = parts.mapNotNull { it.toDoubleOrNull() }
+        if (values.size != 4) return null
+        return TileService.BoundingBox(
+            minLng = values[0],
+            minLat = values[1],
+            maxLng = values[2],
+            maxLat = values[3]
+        )
     }
 }
