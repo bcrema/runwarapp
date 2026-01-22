@@ -70,8 +70,32 @@ class RunIngestionController(private val runService: RunService) {
                     .body(ValidationErrorResponse("Coordinates and timestamps must have the same length."))
         }
 
+        val timestampsMillis = request.timestamps
+
+        // Ensure timestamps are in non-decreasing chronological order
+        val hasOutOfOrderTimestamps = timestampsMillis
+                .windowed(size = 2, step = 1, partialWindows = false)
+                .any { (prev, next) -> next < prev }
+        if (hasOutOfOrderTimestamps) {
+            return ResponseEntity.badRequest()
+                    .body(ValidationErrorResponse("Timestamps must be in non-decreasing chronological order."))
+        }
+
+        // Ensure timestamps are within a reasonable time range relative to now
+        val nowMillis = Instant.now().toEpochMilli()
+        val maxFutureOffsetMillis = 7L * 24 * 60 * 60 * 1000 // 7 days
+        val maxPastOffsetMillis = 365L * 24 * 60 * 60 * 1000 // 365 days
+
+        val hasUnreasonableTimestamp = timestampsMillis.any { ts ->
+            ts > nowMillis + maxFutureOffsetMillis || ts < nowMillis - maxPastOffsetMillis
+        }
+        if (hasUnreasonableTimestamp) {
+            return ResponseEntity.badRequest()
+                    .body(ValidationErrorResponse("Timestamp values are not within an acceptable range."))
+        }
+
         val coordinates = request.coordinates.map { LatLngPoint(it.lat, it.lng) }
-        val timestamps = request.timestamps.map { Instant.ofEpochMilli(it) }
+        val timestamps = timestampsMillis.map { Instant.ofEpochMilli(it) }
         val origin = request.origin ?: RunOrigin.IMPORT
 
         val result = runService.submitRunFromCoordinates(principal.user, coordinates, timestamps, origin)
