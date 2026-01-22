@@ -13,6 +13,10 @@ import java.util.*
 @RestController
 @RequestMapping("/api/runs")
 class RunController(private val runService: RunService) {
+
+    data class ValidationErrorResponse(
+        val message: String
+    )
     
     /**
      * Submit a run via GPX file upload
@@ -21,9 +25,10 @@ class RunController(private val runService: RunService) {
     fun submitRunWithGpx(
         @AuthenticationPrincipal principal: UserPrincipal,
         @RequestParam("file") gpxFile: MultipartFile
-    ): ResponseEntity<RunService.RunSubmissionResult> {
+    ): ResponseEntity<Any> {
         if (gpxFile.isEmpty) {
-            return ResponseEntity.badRequest().build()
+            return ResponseEntity.badRequest()
+                .body(ValidationErrorResponse("GPX file is empty."))
         }
         
         val result = runService.submitRun(principal.user, gpxFile)
@@ -47,19 +52,22 @@ class RunController(private val runService: RunService) {
     fun submitRunWithCoordinates(
         @AuthenticationPrincipal principal: UserPrincipal,
         @RequestBody request: SubmitCoordinatesRequest
-    ): ResponseEntity<RunService.RunSubmissionResult> {
+    ): ResponseEntity<Any> {
         if (request.coordinates.size < 2) {
-            return ResponseEntity.badRequest().build()
+            return ResponseEntity.badRequest()
+                .body(ValidationErrorResponse("At least two coordinates are required."))
         }
         
         if (request.coordinates.size != request.timestamps.size) {
-            return ResponseEntity.badRequest().build()
+            return ResponseEntity.badRequest()
+                .body(ValidationErrorResponse("Coordinates and timestamps must have the same length."))
         }
         
         val coordinates = request.coordinates.map { LatLngPoint(it.lat, it.lng) }
         val timestamps = request.timestamps.map { Instant.ofEpochMilli(it) }
         
-        val result = runService.submitRunFromCoordinates(principal.user, coordinates, timestamps)
+        val result =
+            runService.submitRunFromCoordinates(principal.user, coordinates, timestamps, RunOrigin.WEB)
         return ResponseEntity.ok(result)
     }
     

@@ -32,10 +32,16 @@ class RunService(
     data class RunDto(
             val id: UUID,
             val userId: UUID,
+            val origin: RunOrigin,
+            val status: RunStatus,
             val distance: Double,
             val duration: Int,
             val startTime: Instant,
             val endTime: Instant,
+            val minLat: Double?,
+            val minLng: Double?,
+            val maxLat: Double?,
+            val maxLng: Double?,
             val isLoopValid: Boolean,
             val loopDistance: Double?,
             val territoryAction: String?,
@@ -49,10 +55,16 @@ class RunService(
                     RunDto(
                             id = run.id,
                             userId = run.user.id,
+                            origin = run.origin,
+                            status = run.status,
                             distance = run.distance.toDouble(),
                             duration = run.duration,
                             startTime = run.startTime,
                             endTime = run.endTime,
+                            minLat = run.minLat,
+                            minLng = run.minLng,
+                            maxLat = run.maxLat,
+                            maxLng = run.maxLng,
                             isLoopValid = run.isLoopValid,
                             loopDistance = run.loopDistance?.toDouble(),
                             territoryAction = run.territoryAction?.name,
@@ -72,8 +84,12 @@ class RunService(
 
     /** Submit a new run from GPX file */
     @Transactional
-    fun submitRun(user: User, gpxFile: MultipartFile): RunSubmissionResult {
-        // Check daily caps
+    fun submitRun(
+            user: User,
+            gpxFile: MultipartFile,
+            origin: RunOrigin = RunOrigin.IMPORT
+    ): RunSubmissionResult {
+        // Check daily cap
         val actionsToday = getDailyActionCount(user)
         val userCapReached = actionsToday >= gameProperties.userDailyActionCap
         val bandeiraActionsToday = user.bandeira?.let { getBandeiraDailyActionCount(it.id) }
@@ -87,15 +103,23 @@ class RunService(
 
         // Validate loop
         val validation = loopValidator.validate(parsed.coordinates, parsed.timestamps)
+        val boundingBox = calculateBoundingBox(parsed.coordinates)
+        val status = resolveStatus(validation.isValid)
 
         // Create run record
         val run =
                 Run(
                         user = user,
+                        origin = origin,
+                        status = status,
                         distance = BigDecimal.valueOf(parsed.totalDistance),
                         duration = parsed.totalDuration,
                         startTime = parsed.startTime,
                         endTime = parsed.endTime,
+                        minLat = boundingBox.minLat,
+                        minLng = boundingBox.minLng,
+                        maxLat = boundingBox.maxLat,
+                        maxLng = boundingBox.maxLng,
                         isLoopValid = validation.isValid,
                         loopDistance = validation.distance.let { BigDecimal.valueOf(it) },
                         closingDistance = BigDecimal.valueOf(validation.closingDistance),
@@ -139,7 +163,8 @@ class RunService(
     fun submitRunFromCoordinates(
             user: User,
             coordinates: List<LatLngPoint>,
-            timestamps: List<Instant>
+            timestamps: List<Instant>,
+            origin: RunOrigin = RunOrigin.WEB
     ): RunSubmissionResult {
         // Check daily cap
         val actionsToday = getDailyActionCount(user)
@@ -152,6 +177,8 @@ class RunService(
 
         // Validate loop
         val validation = loopValidator.validate(coordinates, timestamps)
+        val boundingBox = calculateBoundingBox(coordinates)
+        val status = resolveStatus(validation.isValid)
 
         val startTime = timestamps.firstOrNull() ?: Instant.now()
         val endTime = timestamps.lastOrNull() ?: Instant.now()
@@ -161,10 +188,16 @@ class RunService(
         val run =
                 Run(
                         user = user,
+                        origin = origin,
+                        status = status,
                         distance = BigDecimal.valueOf(validation.distance),
                         duration = duration,
                         startTime = startTime,
                         endTime = endTime,
+                        minLat = boundingBox.minLat,
+                        minLng = boundingBox.minLng,
+                        maxLat = boundingBox.maxLat,
+                        maxLng = boundingBox.maxLng,
                         isLoopValid = validation.isValid,
                         loopDistance = BigDecimal.valueOf(validation.distance),
                         closingDistance = BigDecimal.valueOf(validation.closingDistance),
@@ -220,117 +253,22 @@ class RunService(
         return territoryActionRepository.countBandeiraActionsToday(bandeiraId, startOfDay)
     }
 
-    private fun buildTurnResult(
-            validation: LoopValidator.ValidationResult,
-            territoryResult: ShieldMechanics.ActionResult?,
-            user: User,
-            actionsToday: Int,
-            bandeiraActionsToday: Int?
-    ): TurnResult {
-        val userCapReached = actionsToday >= gameProperties.userDailyActionCap
-        val bandeiraCapReached =
-                user.bandeira?.let { bandeira ->
-                    (bandeiraActionsToday ?: 0) >= bandeira.dailyActionCap
-                } ?: false
-        val actionConsumed = territoryResult?.success == true
-        val userRemaining =
-                maxOf(
-                        0,
-                        gameProperties.userDailyActionCap -
-                                actionsToday -
-                                (if (actionConsumed) 1 else 0)
-                )
-        val bandeiraRemaining =
-                user.bandeira?.let { bandeira ->
-                    maxOf(
-                            0,
-                            bandeira.dailyActionCap -
-                                    (bandeiraActionsToday ?: 0) -
-                                    (if (actionConsumed) 1 else 0)
-                    )
-                }
-
-        val reasons = mutableListOf<String>()
-        if (!validation.isValid) {
-            reasons.addAll(validation.failureReasons)
-        }
-        if (validation.fraudFlags.isNotEmpty()) {
-            reasons.addAll(validation.fraudFlags.map { "fraud_flag:$it" })
-        }
-        if (territoryResult?.success == false && territoryResult.reason != null) {
-            reasons.add(territoryResult.reason)
-        }
-        if (validation.isValid && userCapReached) {
-            reasons.add("user_daily_action_cap_reached")
-        }
-        if (validation.isValid && bandeiraCapReached) {
-            reasons.add("bandeira_daily_action_cap_reached")
-        }
-        if (validation.isValid && (territoryResult == null || territoryResult.success == false)) {
-            reasons.add("valid_no_territorial_effect")
-        }
-
-        val tileId = territoryResult?.tileId ?: validation.primaryTile
-        val tileSnapshot =
-                if (territoryResult == null && tileId != null) {
-                    tileRepository.findById(tileId).orElse(null)
-                } else {
-                    null
-                }
-        val hasPreviousOwnerInfo =
-                territoryResult?.previousOwnerId != null || territoryResult?.previousOwnerType != null
-
-        val previousOwner =
-                if (hasPreviousOwnerInfo) {
-                    OwnerSnapshot(territoryResult?.previousOwnerId, territoryResult?.previousOwnerType)
-                } else if (tileSnapshot != null) {
-                    OwnerSnapshot(tileSnapshot.ownerId, tileSnapshot.ownerType)
-                } else {
-                    null
-                }
-        val newOwner =
-                if (territoryResult?.newOwnerId != null || territoryResult?.newOwnerType != null) {
-                    OwnerSnapshot(territoryResult?.newOwnerId, territoryResult?.newOwnerType)
-                } else if (tileSnapshot != null) {
-                    OwnerSnapshot(tileSnapshot.ownerId, tileSnapshot.ownerType)
-                } else {
-                    null
-                }
-
-        val disputeState =
-                if (tileId == null) {
-                    null
-                } else {
-                    val ownerType =
-                            territoryResult?.newOwnerType
-                                    ?: territoryResult?.previousOwnerType
-                                    ?: tileSnapshot?.ownerType
-                    when {
-                        ownerType == null -> DisputeState.NONE
-                        territoryResult?.inDispute == true ->
-                                DisputeState.DISPUTED
-                        tileSnapshot?.isInDispute(gameProperties.disputeThreshold) == true ->
-                                DisputeState.DISPUTED
-                        else -> DisputeState.STABLE
-                    }
-                }
-
-        return TurnResult(
-                actionType = territoryResult?.actionType,
-                tileId = tileId,
-                h3Index = tileId,
-                previousOwner = previousOwner,
-                newOwner = newOwner,
-                shieldBefore = territoryResult?.shieldBefore ?: tileSnapshot?.shield,
-                shieldAfter = territoryResult?.shieldAfter ?: tileSnapshot?.shield,
-                cooldownUntil = territoryResult?.cooldownUntil ?: tileSnapshot?.cooldownUntil,
-                disputeState = disputeState,
-                capsRemaining =
-                        CapsRemaining(
-                                userActionsRemaining = userRemaining,
-                                bandeiraActionsRemaining = bandeiraRemaining
-                        ),
-                reasons = reasons
-        )
+    private fun resolveStatus(isValid: Boolean): RunStatus {
+        return if (isValid) RunStatus.VALIDATED else RunStatus.REJECTED
     }
+
+    private fun calculateBoundingBox(coordinates: List<LatLngPoint>): BoundingBox {
+        val minLat = coordinates.minOf { it.lat }
+        val minLng = coordinates.minOf { it.lng }
+        val maxLat = coordinates.maxOf { it.lat }
+        val maxLng = coordinates.maxOf { it.lng }
+        return BoundingBox(minLat, minLng, maxLat, maxLng)
+    }
+
+    private data class BoundingBox(
+            val minLat: Double,
+            val minLng: Double,
+            val maxLat: Double,
+            val maxLng: Double
+    )
 }
