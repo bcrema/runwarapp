@@ -9,9 +9,12 @@ ALTER TABLE runs
 UPDATE runs
 SET status = 'VALIDATED';
 
+UPDATE runs
+SET origin = 'LEGACY';
+
 ALTER TABLE runs
     ALTER COLUMN status SET DEFAULT 'RECEIVED';
 
 ALTER TABLE runs
-    ADD CONSTRAINT check_run_origin CHECK (origin IN ('IOS', 'WEB', 'IMPORT')),
+    ADD CONSTRAINT check_run_origin CHECK (origin IN ('IOS', 'WEB', 'IMPORT', 'LEGACY')),
     ADD CONSTRAINT check_run_status CHECK (status IN ('RECEIVED', 'VALIDATED', 'REJECTED'));
