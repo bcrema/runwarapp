@@ -53,12 +53,12 @@ final class SessionStore: ObservableObject {
     }
 
     func logout() {
-        let refreshToken = refreshToken
-        Task {
+        let refreshToken = self.refreshToken
+        Task { [refreshToken] in
             try? await api.logout(refreshToken: refreshToken)
         }
         token = nil
-        refreshToken = nil
+        self.refreshToken = nil
         currentUser = nil
         deleteToken(account: AppEnvironment.accessTokenKey)
         deleteToken(account: AppEnvironment.refreshTokenKey)
@@ -87,7 +87,7 @@ final class SessionStore: ObservableObject {
         saveToken(response.token, account: AppEnvironment.accessTokenKey)
 
         if let newRefreshToken = response.refreshToken {
-            refreshToken = newRefreshToken
+            self.refreshToken = newRefreshToken
             saveToken(newRefreshToken, account: AppEnvironment.refreshTokenKey)
         }
 
