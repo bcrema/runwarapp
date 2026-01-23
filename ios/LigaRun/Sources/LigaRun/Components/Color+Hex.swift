@@ -2,7 +2,7 @@ import SwiftUI
 
 extension Color {
     init(hex: String) {
-        var hexSanitized = hex
+        let hexSanitized = hex
             .replacingOccurrences(of: "#", with: "")
             .trimmingCharacters(in: .whitespacesAndNewlines)
 

@@ -338,8 +338,10 @@ struct AuthView: View {
             .autocapitalization(.none)
             .padding()
             .background(palette.bgTertiary)
+            .foregroundColor(palette.textPrimary) // Force readable text color
             .overlay(RoundedRectangle(cornerRadius: 12).stroke(palette.border, lineWidth: 1))
             .clipShape(RoundedRectangle(cornerRadius: 12))
+            .accentColor(palette.accentPrimary) // Cursor color
     }
 
     private func secureField(_ title: String, text: Binding<String>) -> some View {
@@ -347,8 +349,10 @@ struct AuthView: View {
             .textContentType(.password)
             .padding()
             .background(palette.bgTertiary)
+            .foregroundColor(palette.textPrimary) // Force readable text color
             .overlay(RoundedRectangle(cornerRadius: 12).stroke(palette.border, lineWidth: 1))
             .clipShape(RoundedRectangle(cornerRadius: 12))
+            .accentColor(palette.accentPrimary) // Cursor color
     }
 }
 

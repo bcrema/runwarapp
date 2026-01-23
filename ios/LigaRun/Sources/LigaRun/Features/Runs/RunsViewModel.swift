@@ -24,8 +24,10 @@ final class RunsViewModel: ObservableObject {
             async let statusTask = session.api.getDailyStatus()
             runs = try await runsTask
             dailyStatus = try await statusTask
+        } catch let apiError as APIError {
+            errorMessage = "API Error: \(apiError.message)"
         } catch {
-            errorMessage = error.localizedDescription
+            errorMessage = "System Error: \(error.localizedDescription)"
         }
     }
 

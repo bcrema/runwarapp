@@ -21,15 +21,6 @@ struct HexMapView: UIViewRepresentable {
 
         context.coordinator.bind(mapView: mapView)
 
-        mapView.mapboxMap.onMapLoaded.observe { _ in
-            context.coordinator.configureStyle()
-        }
-
-        mapView.mapboxMap.onMapIdle.observe { _ in
-            let bounds = mapView.mapboxMap.coordinateBounds(for: mapView.bounds)
-            onVisibleRegionChanged?(bounds)
-        }
-
         return mapView
     }
 
@@ -37,6 +28,7 @@ struct HexMapView: UIViewRepresentable {
         context.coordinator.updateTiles(tiles)
         context.coordinator.onTileTapped = onTileTapped
         context.coordinator.selectedTile = selectedTile
+        context.coordinator.onVisibleRegionChanged = onVisibleRegionChanged
     }
 
     func makeCoordinator() -> Coordinator {
@@ -47,29 +39,32 @@ struct HexMapView: UIViewRepresentable {
     final class Coordinator {
         private weak var mapView: MapView?
         var onTileTapped: ((Tile) -> Void)?
+        var onVisibleRegionChanged: ((CoordinateBounds) -> Void)?
         var selectedTile: Tile?
         private var addedTapHandler = false
+        private var cancellables: [Cancelable] = []
 
         func bind(mapView: MapView) {
             self.mapView = mapView
+            setupObservers()
         }
 
         func configureStyle() {
             guard let mapView else { return }
             var source = GeoJSONSource(id: "hex-source")
             source.data = .featureCollection(.init(features: []))
-            try? mapView.mapboxMap.style.addSource(source)
+            try? mapView.mapboxMap.addSource(source)
 
             var fillLayer = FillLayer(id: "hex-fill", source: "hex-source")
             fillLayer.fillColor = .expression(Exp(.get) { "fillColor" })
             fillLayer.fillOpacity = .expression(Exp(.get) { "fillOpacity" })
-            try? mapView.mapboxMap.style.addLayer(fillLayer)
+            try? mapView.mapboxMap.addLayer(fillLayer)
 
             var outline = LineLayer(id: "hex-outline", source: "hex-source")
             outline.lineColor = .expression(Exp(.get) { "strokeColor" })
             outline.lineWidth = .constant(1.0)
             outline.lineOpacity = .constant(0.6)
-            try? mapView.mapboxMap.style.addLayer(outline)
+            try? mapView.mapboxMap.addLayer(outline)
 
             addTapHandlerIfNeeded()
         }
@@ -78,20 +73,20 @@ struct HexMapView: UIViewRepresentable {
             guard let mapView, !addedTapHandler else { return }
             addedTapHandler = true
 
-            mapView.gestures.onMapTap.observe { [weak self] context in
-                guard let self = self else { return }
-                let options = RenderedQueryOptions(layerIds: ["hex-fill"], filter: nil)
-                mapView.mapboxMap.queryRenderedFeatures(with: context.point, options: options) { result in
-                    guard case let .success(features) = result,
-                          let feature = features.first?.queriedFeature.feature,
-                          case let .string(id) = feature.identifier else { return }
+            let interaction = TapInteraction(.layer("hex-fill")) { [weak self] feature, _ in
+                guard
+                    let self,
+                    let id = feature.id?.id,
+                    let tile = self.currentTiles.first(where: { $0.id == id })
+                else { return false }
 
-                    if let tile = self.currentTiles.first(where: { $0.id == id }) {
-                        self.onTileTapped?(tile)
-                        self.selectedTile = tile
-                    }
-                }
+                self.onTileTapped?(tile)
+                self.selectedTile = tile
+                return true
             }
+
+            let tapCancelable = mapView.mapboxMap.addInteraction(interaction)
+            cancellables.append(tapCancelable)
         }
 
         private var currentTiles: [Tile] = []
@@ -99,12 +94,17 @@ struct HexMapView: UIViewRepresentable {
         func updateTiles(_ tiles: [Tile]) {
             currentTiles = tiles
             guard let mapView,
-                  mapView.mapboxMap.style.sourceExists(withId: "hex-source")
+                  mapView.mapboxMap.sourceExists(withId: "hex-source")
             else { return }
 
-            let features: [Feature] = tiles.map { tile in
+            let features: [Feature] = tiles.compactMap { tile in
                 var coords = tile.boundaryCoordinates
-                if let first = coords.first {
+
+                // Ensure we have a valid closed ring for fill polygons.
+                guard coords.count >= 3, let first = coords.first else {
+                    return nil
+                }
+                if coords.last != first {
                     coords.append(first)
                 }
 
@@ -127,7 +127,25 @@ struct HexMapView: UIViewRepresentable {
             }
 
             let collection = FeatureCollection(features: features)
-            mapView.mapboxMap.style.updateGeoJSONSource(withId: "hex-source", geoJSON: .featureCollection(collection))
+            mapView.mapboxMap.updateGeoJSONSource(withId: "hex-source", geoJSON: .featureCollection(collection))
+        }
+
+        private func setupObservers() {
+            guard let mapView else { return }
+
+            cancellables.append(
+                mapView.mapboxMap.onMapLoaded.observeNext { [weak self] _ in
+                    self?.configureStyle()
+                }
+            )
+
+            cancellables.append(
+                mapView.mapboxMap.onMapIdle.observeNext { [weak self, weak mapView] _ in
+                    guard let self, let mapView else { return }
+                    let bounds = mapView.mapboxMap.coordinateBounds(for: mapView.bounds)
+                    self.onVisibleRegionChanged?(bounds)
+                }
+            )
         }
     }
 }

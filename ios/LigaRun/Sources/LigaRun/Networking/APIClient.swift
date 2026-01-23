@@ -202,7 +202,7 @@ final class APIClient {
         )
 
         if response.statusCode == 401, allowRefresh, let refreshHandler {
-            if let refreshedToken = try? await refreshHandler(), refreshedToken != nil {
+            if (try? await refreshHandler()) != nil {
                 let (retryData, retryResponse) = try await performRequest(
                     url: url,
                     method: method,
@@ -236,7 +236,7 @@ final class APIClient {
         }
 
         if httpResponse.statusCode == 401, let refreshHandler {
-            if let refreshedToken = try? await refreshHandler(), refreshedToken != nil {
+            if (try? await refreshHandler()) != nil {
                 let retryRequest = multipartURLRequest(
                     path: path,
                     boundary: boundary,

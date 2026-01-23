@@ -29,7 +29,18 @@
 		<key>UIColorName</key>
 		<string>LaunchBackground</string>
 	</dict>
-	<key>UIUserInterfaceStyle</key>
-	<string>Dark</string>
+	<key>NSLocationWhenInUseUsageDescription</key>
+	<string>LigaRun needs your location to track your runs and conquer territories.</string>
+    <key>UIBackgroundModes</key>
+    <array>
+        <string>location</string>
+    </array>
+    <key>UIUserInterfaceStyle</key>
+	<string>Light</string>
+    <key>NSAppTransportSecurity</key>
+    <dict>
+        <key>NSAllowsArbitraryLoads</key>
+        <true/>
+    </dict>
 </dict>
 </plist>
