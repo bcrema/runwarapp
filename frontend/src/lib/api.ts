@@ -1,6 +1,10 @@
+const envApiUrl = process.env.NEXT_PUBLIC_API_URL
 const API_URL =
-    process.env.NEXT_PUBLIC_API_URL ??
-    (typeof window !== 'undefined' ? window.location.origin : 'http://localhost:8080')
+    envApiUrl && envApiUrl.trim().length > 0
+        ? envApiUrl
+        : typeof window !== 'undefined'
+            ? window.location.origin
+            : 'http://localhost:8080'
 
 interface ApiError {
     error: string
