@@ -245,10 +245,16 @@ export interface TileStats {
 export interface Run {
     id: string
     userId: string
+    origin: 'IOS' | 'WEB' | 'IMPORT'
+    status: 'RECEIVED' | 'VALIDATED' | 'REJECTED'
     distance: number
     duration: number
     startTime: string
     endTime: string
+    minLat: number | null
+    minLng: number | null
+    maxLat: number | null
+    maxLng: number | null
     isLoopValid: boolean
     loopDistance: number | null
     territoryAction: 'CONQUEST' | 'ATTACK' | 'DEFENSE' | null
@@ -271,18 +277,19 @@ export interface RunSubmissionResult {
         fraudFlags: string[]
         failureReasons: string[]
     }
-    territoryResult: {
-        success: boolean
-        actionType: string | null
-        reason: string | null
-        ownerChanged: boolean
-        shieldChange: number
-        shieldBefore: number
-        shieldAfter: number
-        inDispute: boolean
+    turnResult: {
+        actionType: 'CONQUEST' | 'ATTACK' | 'DEFENSE' | null
         tileId: string | null
-    } | null
-    dailyActionsRemaining: number
+        h3Index: string | null
+        previousOwner: { id: string | null; type: 'SOLO' | 'BANDEIRA' | null } | null
+        newOwner: { id: string | null; type: 'SOLO' | 'BANDEIRA' | null } | null
+        shieldBefore: number | null
+        shieldAfter: number | null
+        cooldownUntil: string | null
+        disputeState: 'NONE' | 'STABLE' | 'DISPUTED' | null
+        capsRemaining: { userActionsRemaining: number; bandeiraActionsRemaining: number | null }
+        reasons: string[]
+    }
 }
 
 export interface DailyStatus {

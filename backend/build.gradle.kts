@@ -32,7 +32,7 @@ dependencies {
     
     // Database
     runtimeOnly("org.postgresql:postgresql")
-    implementation("org.hibernate.orm:hibernate-spatial:7.0.0.Final")
+    implementation("org.hibernate.orm:hibernate-spatial:6.6.4.Final")
     implementation("com.google.cloud.sql:postgres-socket-factory:1.23.0")
     
     // H3 for hexagonal grid

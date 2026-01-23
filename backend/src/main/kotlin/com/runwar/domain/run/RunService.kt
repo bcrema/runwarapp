@@ -127,6 +127,10 @@ class RunService(
                 )
 
         var territoryResult: ShieldMechanics.ActionResult? = null
+        val previousOwner =
+                validation.primaryTile
+                        ?.let { tileRepository.findById(it).orElse(null) }
+                        ?.let { OwnerSnapshot(id = it.ownerId, type = it.ownerType) }
 
         // Process territory action if valid
         if (validation.isValid && validation.primaryTile != null) {
@@ -149,7 +153,14 @@ class RunService(
         user.totalDistance = user.totalDistance.add(BigDecimal.valueOf(parsed.totalDistance))
 
         val turnResult =
-                buildTurnResult(validation, territoryResult, user, actionsToday, bandeiraActionsToday)
+                buildTurnResult(
+                        validation,
+                        territoryResult,
+                        previousOwner,
+                        user,
+                        actionsToday,
+                        bandeiraActionsToday
+                )
 
         return RunSubmissionResult(
                 run = RunDto.from(savedRun),
@@ -205,6 +216,10 @@ class RunService(
                 )
 
         var territoryResult: ShieldMechanics.ActionResult? = null
+        val previousOwner =
+                validation.primaryTile
+                        ?.let { tileRepository.findById(it).orElse(null) }
+                        ?.let { OwnerSnapshot(id = it.ownerId, type = it.ownerType) }
 
         if (validation.isValid && validation.primaryTile != null) {
             run.isValidForTerritory = true
@@ -221,7 +236,14 @@ class RunService(
         val savedRun = runRepository.save(run)
 
         val turnResult =
-                buildTurnResult(validation, territoryResult, user, actionsToday, bandeiraActionsToday)
+                buildTurnResult(
+                        validation,
+                        territoryResult,
+                        previousOwner,
+                        user,
+                        actionsToday,
+                        bandeiraActionsToday
+                )
 
         return RunSubmissionResult(
                 run = RunDto.from(savedRun),
@@ -251,6 +273,77 @@ class RunService(
     fun getBandeiraDailyActionCount(bandeiraId: UUID): Int {
         val startOfDay = LocalDate.now().atStartOfDay(ZoneId.systemDefault()).toInstant()
         return territoryActionRepository.countBandeiraActionsToday(bandeiraId, startOfDay)
+    }
+
+    private fun buildTurnResult(
+            validation: LoopValidator.ValidationResult,
+            territoryResult: ShieldMechanics.ActionResult?,
+            previousOwner: OwnerSnapshot?,
+            user: User,
+            actionsToday: Int,
+            bandeiraActionsToday: Int?
+    ): TurnResult {
+        val tileId = territoryResult?.tileId ?: validation.primaryTile
+        val tile = tileId?.let { tileRepository.findById(it).orElse(null) }
+
+        val disputeState =
+                when {
+                    tile == null || tile.ownerType == null -> DisputeState.NONE
+                    tile.isInDispute(gameProperties.disputeThreshold) -> DisputeState.DISPUTED
+                    else -> DisputeState.STABLE
+                }
+
+        val actionConsumed = territoryResult?.success == true
+        val userActionsRemaining =
+                (gameProperties.userDailyActionCap - actionsToday - (if (actionConsumed) 1 else 0))
+                        .coerceAtLeast(0)
+
+        val bandeiraActionsRemaining =
+                user.bandeira?.let { bandeira ->
+                    val used = bandeiraActionsToday ?: 0
+                    (bandeira.dailyActionCap - used - (if (actionConsumed) 1 else 0)).coerceAtLeast(0)
+                }
+
+        val reasons = mutableListOf<String>()
+        if (!validation.isValid) {
+            reasons.addAll(validation.failureReasons)
+        }
+        if (validation.isValid && validation.primaryTile == null) {
+            reasons.add("no_primary_tile")
+        }
+
+        val userCapReached = actionsToday >= gameProperties.userDailyActionCap
+        val bandeiraCapReached =
+                user.bandeira?.let { bandeira ->
+                    val used = bandeiraActionsToday ?: 0
+                    used >= bandeira.dailyActionCap
+                } ?: false
+
+        if (userCapReached) reasons.add("user_daily_cap_reached")
+        if (bandeiraCapReached) reasons.add("bandeira_daily_cap_reached")
+
+        if (territoryResult != null && !territoryResult.success) {
+            territoryResult.reason?.let { reasons.add(it) }
+        }
+
+        return TurnResult(
+                actionType = if (territoryResult?.success == true) territoryResult.actionType else null,
+                tileId = tileId,
+                h3Index = tileId,
+                previousOwner = previousOwner,
+                newOwner =
+                        tile?.let { OwnerSnapshot(id = it.ownerId, type = it.ownerType) },
+                shieldBefore = territoryResult?.shieldBefore,
+                shieldAfter = territoryResult?.shieldAfter,
+                cooldownUntil = tile?.cooldownUntil,
+                disputeState = disputeState,
+                capsRemaining =
+                        CapsRemaining(
+                                userActionsRemaining = userActionsRemaining,
+                                bandeiraActionsRemaining = bandeiraActionsRemaining
+                        ),
+                reasons = reasons
+        )
     }
 
     private fun resolveStatus(isValid: Boolean): RunStatus {

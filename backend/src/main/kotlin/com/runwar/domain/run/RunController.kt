@@ -11,7 +11,7 @@ import java.time.Instant
 import java.util.*
 
 @RestController
-@RequestMapping("/api/runs")
+@RequestMapping(value = ["/api/runs", "/runs"])
 class RunController(private val runService: RunService) {
 
     data class ValidationErrorResponse(

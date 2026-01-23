@@ -47,7 +47,7 @@ export default function RunPage() {
                         try {
                             const result = await api.submitRunGpx(file)
                             setResult(result)
-                            if (result.territoryResult?.success) requestTilesRefresh()
+                            if (result.turnResult.actionType) requestTilesRefresh()
                         } catch (err: any) {
                             setError(err.message || 'Erro ao enviar corrida')
                         } finally {
@@ -64,7 +64,7 @@ export default function RunPage() {
                         try {
                             const result = await api.submitRunCoordinates(coordinates, timestamps)
                             setResult(result)
-                            if (result.territoryResult?.success) requestTilesRefresh()
+                            if (result.turnResult.actionType) requestTilesRefresh()
                         } catch (err: any) {
                             setError(err.message || 'Erro ao enviar corrida')
                         } finally {
@@ -283,14 +283,12 @@ interface RunResultProps {
 }
 
 function RunResult({ result, onReset }: RunResultProps) {
-    const { run, loopValidation, territoryResult } = result
+    const { loopValidation, turnResult } = result
 
     type TurnOutcome = 'CONQUEST' | 'ATTACK' | 'DEFENSE' | 'NO_EFFECT'
 
     const outcome: TurnOutcome =
-        territoryResult?.success && territoryResult.actionType
-            ? (territoryResult.actionType as TurnOutcome)
-            : 'NO_EFFECT'
+        turnResult.actionType ?? 'NO_EFFECT'
 
     const badges: Record<TurnOutcome, { class: string; label: string }> = {
         CONQUEST: { class: 'badge-conquest', label: '🏴 Conquistou' },
@@ -301,20 +299,19 @@ function RunResult({ result, onReset }: RunResultProps) {
 
     const actionBadge = badges[outcome]
 
-    const reasons: string[] = []
-    if (territoryResult && !territoryResult.success && territoryResult.reason) {
-        reasons.push(translateTerritoryReason(territoryResult.reason))
-    }
-    if (loopValidation.failureReasons.length > 0) {
-        reasons.push(...loopValidation.failureReasons.map(translateReason))
-    }
-    if (outcome === 'NO_EFFECT' && reasons.length === 0) {
-        if (loopValidation.isValid && !loopValidation.primaryTile) {
-            reasons.push('Não foi possível determinar um tile principal para essa corrida.')
-        } else {
-            reasons.push('Nenhuma ação territorial foi aplicada.')
-        }
-    }
+    const reasons =
+        turnResult.reasons.length > 0
+            ? turnResult.reasons.map(translateTurnReason)
+            : ['Nenhuma ação territorial foi aplicada.']
+    const shouldShowReasons = outcome === 'NO_EFFECT'
+
+    const shieldChange =
+        turnResult.shieldBefore != null && turnResult.shieldAfter != null
+            ? turnResult.shieldAfter - turnResult.shieldBefore
+            : null
+
+    const ownerChanged = turnResult.previousOwner?.id !== turnResult.newOwner?.id ||
+        turnResult.previousOwner?.type !== turnResult.newOwner?.type
 
     return (
         <div className={styles.resultCard}>
@@ -340,22 +337,24 @@ function RunResult({ result, onReset }: RunResultProps) {
                     {actionBadge.label}
                 </span>
 
-                {territoryResult?.success && (
+                {turnResult.actionType && (
                     <>
                         <div className={styles.shieldChange}>
-                            <span>Escudo: {territoryResult.shieldBefore} → {territoryResult.shieldAfter}</span>
-                            <span className={territoryResult.shieldChange > 0 ? styles.positive : styles.negative}>
-                                ({territoryResult.shieldChange > 0 ? '+' : ''}{territoryResult.shieldChange})
-                            </span>
+                            <span>Escudo: {turnResult.shieldBefore ?? '—'} → {turnResult.shieldAfter ?? '—'}</span>
+                            {shieldChange !== null && (
+                                <span className={shieldChange > 0 ? styles.positive : styles.negative}>
+                                    ({shieldChange > 0 ? '+' : ''}{shieldChange})
+                                </span>
+                            )}
                         </div>
 
-                        {territoryResult.tileId && (
+                        {turnResult.tileId && (
                             <div className={styles.shieldChange}>
-                                <span>Tile: {territoryResult.tileId}</span>
+                                <span>Tile: {turnResult.tileId}</span>
                             </div>
                         )}
 
-                        {territoryResult.ownerChanged && (
+                        {ownerChanged && (
                             <div className={styles.ownerChanged}>
                                 🎉 Tile conquistado!
                             </div>
@@ -385,7 +384,7 @@ function RunResult({ result, onReset }: RunResultProps) {
                 </div>
             </div>
 
-            {outcome === 'NO_EFFECT' && reasons.length > 0 && (
+            {shouldShowReasons && (
                 <div className={styles.failureReasons}>
                     <h4>Por que não gerou ação territorial:</h4>
                     <ul>
@@ -398,7 +397,7 @@ function RunResult({ result, onReset }: RunResultProps) {
 
             <div className={styles.actionsRemaining}>
                 <span>Ações restantes hoje:</span>
-                <strong>{result.dailyActionsRemaining}</strong>
+                <strong>{turnResult.capsRemaining.userActionsRemaining}</strong>
             </div>
 
             <button
@@ -438,20 +437,22 @@ function formatDuration(seconds: number): string {
     return `${mins}:${secs.toString().padStart(2, '0')}`
 }
 
-function translateReason(reason: string): string {
+function translateTurnReason(reason: string): string {
     const translations: Record<string, string> = {
+        // Loop validation
         distance_too_short: 'Distância muito curta (mínimo 1.2km)',
         duration_too_short: 'Duração muito curta (mínimo 7 minutos)',
         loop_not_closed: 'Loop não fechado (máximo 40m entre início e fim)',
         insufficient_tile_coverage: 'Cobertura insuficiente do tile (mínimo 60%)',
         fraud_detected: 'Padrão suspeito detectado',
         outside_game_area: 'Fora da área do jogo (Curitiba)',
-    }
-    return translations[reason] || reason
-}
 
-function translateTerritoryReason(reason: string): string {
-    const translations: Record<string, string> = {
+        // Turn / caps
+        no_primary_tile: 'Não foi possível determinar um tile principal para essa corrida.',
+        user_daily_cap_reached: 'Limite diário de ações atingido.',
+        bandeira_daily_cap_reached: 'Limite diário de ações da bandeira atingido.',
+
+        // Territory action validation
         cannot_determine_action: 'Não foi possível determinar a ação (conquista/ataque/defesa).',
         tile_already_owned: 'Tile já possui dono.',
         cannot_attack_neutral: 'Não é possível atacar um tile neutro.',

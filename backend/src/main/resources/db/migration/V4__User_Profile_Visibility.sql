@@ -1,4 +1,4 @@
--- V2__User_Profile_Visibility.sql
+-- V4__User_Profile_Visibility.sql
 -- Adds profile visibility, user name, and updated_at timestamp
 
 ALTER TABLE users
