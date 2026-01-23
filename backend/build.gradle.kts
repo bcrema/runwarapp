@@ -4,6 +4,7 @@ plugins {
     kotlin("jvm") version "2.2.0"
     kotlin("plugin.spring") version "2.2.0"
     kotlin("plugin.jpa") version "2.2.0"
+    jacoco
 }
 
 group = "com.runwar"
@@ -59,6 +60,7 @@ dependencies {
     // Testing
     testImplementation("org.springframework.boot:spring-boot-starter-test")
     testImplementation("org.springframework.security:spring-security-test")
+    testImplementation("io.mockk:mockk:1.13.13")
 }
 
 kotlin {
@@ -70,6 +72,23 @@ kotlin {
 
 tasks.withType<Test> {
     useJUnitPlatform()
+}
+
+jacoco {
+    toolVersion = "0.8.12"
+}
+
+tasks.jacocoTestReport {
+    dependsOn(tasks.test)
+    reports {
+        xml.required.set(true)
+        html.required.set(true)
+        csv.required.set(false)
+    }
+}
+
+tasks.test {
+    finalizedBy(tasks.jacocoTestReport)
 }
 
 
