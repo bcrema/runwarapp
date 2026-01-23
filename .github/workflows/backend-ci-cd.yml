@@ -14,7 +14,7 @@ env:
   REPO_NAME: runwar
   SERVICE_NAME: runwar-backend
   IMAGE_NAME: runwar-backend
-  DB_INSTANCE_NAME: runwar-db
+  DB_CONNECTION_NAME: ${{ secrets.GCP_PROJECT_ID }}:us-central1:runwar-db
   DB_NAME: runwar
   DB_USER: runwar-user
 
@@ -95,12 +95,6 @@ jobs:
       - name: Configure Docker for Artifact Registry
         run: gcloud auth configure-docker ${{ env.REGION }}-docker.pkg.dev --quiet
 
-      - name: Get Cloud SQL Connection Name
-        id: cloudsql
-        run: |
-          CONNECTION_NAME=$(gcloud sql instances describe ${{ env.DB_INSTANCE_NAME }} --format="value(connectionName)")
-          echo "connection_name=$CONNECTION_NAME" >> $GITHUB_OUTPUT
-
       - name: Build Docker image
         run: |
           docker build \
@@ -120,9 +114,9 @@ jobs:
             --platform managed \
             --region ${{ env.REGION }} \
             --allow-unauthenticated \
-            --add-cloudsql-instances ${{ steps.cloudsql.outputs.connection_name }} \
+            --add-cloudsql-instances ${{ env.DB_CONNECTION_NAME }} \
             --set-env-vars "SPRING_PROFILES_ACTIVE=prod" \
-            --set-env-vars "DATABASE_URL=jdbc:postgresql:///${{ env.DB_NAME }}?socketFactory=com.google.cloud.sql.postgres.SocketFactory&cloudSqlInstance=${{ steps.cloudsql.outputs.connection_name }}" \
+            --set-env-vars "DATABASE_URL=jdbc:postgresql:///${{ env.DB_NAME }}?socketFactory=com.google.cloud.sql.postgres.SocketFactory&cloudSqlInstance=${{ env.DB_CONNECTION_NAME }}" \
             --set-env-vars "DATABASE_USER=${{ env.DB_USER }}" \
             --set-env-vars "DATABASE_PASSWORD=${{ secrets.DB_PASSWORD }}" \
             --set-env-vars "JWT_SECRET=${{ secrets.JWT_SECRET }}" \
