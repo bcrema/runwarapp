@@ -41,7 +41,7 @@ describe('useAuth store', () => {
     })
 
     test('login sets token and user', async () => {
-        mockApi.login.mockResolvedValueOnce({ token: 't1', user })
+        mockApi.login.mockResolvedValueOnce({ accessToken: 't1', refreshToken: 'r1', user })
 
         await useAuth.getState().login('user@example.com', 'secret')
 

@@ -21,13 +21,13 @@ export const useAuth = create<AuthState>((set, get) => ({
 
     login: async (email: string, password: string) => {
         const response = await api.login(email, password)
-        api.setToken(response.token)
+        api.setToken(response.accessToken)
         set({ user: response.user, isAuthenticated: true })
     },
 
     register: async (email: string, username: string, password: string) => {
         const response = await api.register(email, username, password)
-        api.setToken(response.token)
+        api.setToken(response.accessToken)
         set({ user: response.user, isAuthenticated: true })
     },
 

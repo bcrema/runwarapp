@@ -36,12 +36,13 @@ describe('api client', () => {
     test('login posts JSON and returns parsed response', async () => {
         global.fetch = jest.fn().mockResolvedValueOnce({
             ok: true,
-            text: async () => JSON.stringify({ token: 't1', user }),
+            text: async () => JSON.stringify({ accessToken: 't1', refreshToken: 'r1', user }),
         })
 
         const response = await api.login('user@example.com', 'secret')
 
-        expect(response.token).toBe('t1')
+        expect(response.accessToken).toBe('t1')
+        expect(response.refreshToken).toBe('r1')
         expect(response.user).toEqual(user)
 
         const [url, options] = (global.fetch as unknown as jest.Mock).mock.calls[0]
@@ -84,4 +85,3 @@ describe('api client', () => {
         await expect(api.login('user@example.com', 'bad')).rejects.toThrow('Credenciais inválidas')
     })
 })
-

@@ -3,17 +3,12 @@ package com.runwar.domain.user
 import jakarta.validation.Valid
 import jakarta.validation.constraints.Email
 import jakarta.validation.constraints.NotBlank
-import jakarta.validation.constraints.Pattern
 import jakarta.validation.constraints.Size
 import jakarta.servlet.http.HttpServletRequest
 import org.springframework.http.ResponseEntity
 import org.springframework.security.core.annotation.AuthenticationPrincipal
 import org.springframework.web.bind.annotation.*
 import com.runwar.config.UserPrincipal
-import com.fasterxml.jackson.annotation.JsonAnySetter
-import com.fasterxml.jackson.annotation.JsonIgnore
-import com.fasterxml.jackson.annotation.JsonProperty
-import jakarta.validation.constraints.AssertTrue
 
 @RestController
 @RequestMapping("/api")
@@ -96,26 +91,11 @@ class UserController(
     }
     
     // ===== User Endpoints (Authenticated) =====
-    
-    data class MeResponse(
-        val id: java.util.UUID,
-        val username: String,
-        val email: String,
-        @field:JsonProperty("profile_visibility")
-        val profileVisibility: String
-    )
 
     @GetMapping("/me", "/users/me")
-    fun getMe(@AuthenticationPrincipal principal: UserPrincipal): ResponseEntity<MeResponse> {
-        val profile = userService.getMe(principal.user.id)
-        return ResponseEntity.ok(
-            MeResponse(
-                id = profile.id,
-                username = profile.username,
-                email = profile.email,
-                profileVisibility = profile.profileVisibility
-            )
-        )
+    fun getMe(@AuthenticationPrincipal principal: UserPrincipal): ResponseEntity<UserService.UserDto> {
+        val profile = userService.getProfile(principal.user.id)
+        return ResponseEntity.ok(profile)
     }
     
     data class UpdateProfileRequest(
