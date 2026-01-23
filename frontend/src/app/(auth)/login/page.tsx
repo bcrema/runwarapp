@@ -34,7 +34,7 @@ export default function LoginPage() {
             <div className={styles.container}>
                 <div className={styles.header}>
                     <Link href="/" className={styles.logo}>
-                        <span className={styles.logoAccent}>Run</span>War
+                        <span className={styles.logoAccent}>Liga</span>Run
                     </Link>
                     <h1>Entrar</h1>
                     <p>Bem-vindo de volta, corredor!</p>
