@@ -1,108 +1,158 @@
 import SwiftUI
 
+struct Tile: Identifiable {
+    let id: String
+    let ownerName: String?
+    let ownerColor: String? // Hex string
+    let shield: Int // 0-100
+    let isInDispute: Bool
+    let isInCooldown: Bool
+}
+
 struct TileDetailsView: View {
-    let tileId: String
-    let owner: String
-    let shieldIntegrity: Double // 0.0 to 1.0
-    let isDisputed: Bool
+    let tile: Tile
+    
+    // Design System Colors
+    private let tealColor = Color(red: 0/255, green: 200/255, blue: 150/255)
+    private let darkColor = Color(red: 30/255, green: 30/255, blue: 30/255)
     
     var body: some View {
-        VStack(spacing: 16) {
-            // Drag Indicator
-            Capsule()
-                .fill(Color.gray.opacity(0.3))
-                .frame(width: 40, height: 4)
-                .padding(.top, 8)
-            
+        VStack(spacing: 24) {
             // Header
-            HStack {
-                VStack(alignment: .leading) {
-                    Text("Tile #\(tileId)")
-                        .font(.title2)
-                        .fontWeight(.bold)
+            HStack(alignment: .top) {
+                VStack(alignment: .leading, spacing: 4) {
+                    Text("Territory #\(tile.id.prefix(6))")
+                        .font(.system(size: 24, weight: .bold, design: .rounded))
+                        .foregroundColor(darkColor)
                     
-                    HStack {
-                        Image(systemName: "flag.fill") // Placeholder for avatar
-                            .foregroundColor(.blue)
-                        Text("Owner: \(owner)")
-                            .font(.subheadline)
-                            .foregroundColor(.secondary)
+                    HStack(spacing: 6) {
+                        Circle()
+                            .fill(Color(hex: tile.ownerColor ?? "#CCCCCC"))
+                            .frame(width: 8, height: 8)
+                        
+                        Text(tile.ownerName ?? "Neutral Territory")
+                            .font(.system(size: 16, weight: .medium, design: .rounded))
+                            .foregroundColor(.gray)
                     }
                 }
+                
                 Spacer()
                 
-                if isDisputed {
-                    VStack {
+                if tile.isInDispute {
+                    HStack(spacing: 4) {
                         Image(systemName: "exclamationmark.triangle.fill")
-                            .foregroundColor(.orange)
                         Text("Disputed")
-                            .font(.caption)
-                            .foregroundColor(.orange)
+                            .font(.system(size: 12, weight: .bold, design: .rounded))
                     }
+                    .padding(.horizontal, 10)
+                    .padding(.vertical, 6)
+                    .background(Color.orange.opacity(0.15))
+                    .foregroundColor(.orange)
+                    .cornerRadius(12)
                 }
             }
             .padding(.horizontal)
+            .padding(.top, 24)
             
-            // Shield Bar
-            VStack(alignment: .leading, spacing: 5) {
+            // Shield Status
+            VStack(spacing: 8) {
                 HStack {
                     Text("Shield Integrity")
-                        .font(.caption)
-                        .fontWeight(.semibold)
+                        .font(.system(size: 14, weight: .semibold, design: .rounded))
+                        .foregroundColor(.gray)
                     Spacer()
-                    Text("\(Int(shieldIntegrity * 100))%")
-                        .font(.caption)
+                    Text("\(tile.shield)%")
+                        .font(.system(size: 14, weight: .bold, design: .rounded))
                         .foregroundColor(shieldColor)
                 }
                 
                 GeometryReader { geometry in
                     ZStack(alignment: .leading) {
-                        Rectangle()
-                            .frame(width: geometry.size.width, height: 8)
-                            .opacity(0.1)
-                            .foregroundColor(.gray)
-                            .cornerRadius(4)
+                        RoundedRectangle(cornerRadius: 6)
+                            .fill(Color.gray.opacity(0.1))
+                            .frame(height: 12)
                         
-                        Rectangle()
-                            .frame(width: geometry.size.width * CGFloat(shieldIntegrity), height: 8)
-                            .foregroundColor(shieldColor)
-                            .cornerRadius(4)
+                        RoundedRectangle(cornerRadius: 6)
+                            .fill(shieldColor)
+                            .frame(width: (CGFloat(tile.shield) / 100.0) * geometry.size.width, height: 12)
                     }
                 }
-                .frame(height: 8)
+                .frame(height: 12)
+                
+                if tile.isInCooldown {
+                    HStack {
+                        Image(systemName: "clock")
+                        Text("Shield regenerating...")
+                    }
+                    .font(.caption)
+                    .foregroundColor(.gray)
+                }
             }
+            .padding(.all, 16)
+            .background(Color.white)
+            .cornerRadius(16)
+            .shadow(color: .black.opacity(0.05), radius: 10, x: 0, y: 4)
             .padding(.horizontal)
             
-            // Actions
+            Spacer()
+            
+            // Action Button
             Button(action: {
-                // TODO: Set target action
+                // TODO: Start Run targeting this tile
             }) {
-                Text("Set as Target")
-                    .font(.headline)
+                Text("Start Mission Here")
+                    .font(.system(size: 18, weight: .bold, design: .rounded))
                     .foregroundColor(.white)
                     .frame(maxWidth: .infinity)
-                    .padding()
-                    .background(Color.blue)
-                    .cornerRadius(12)
+                    .frame(height: 56)
+                    .background(tealColor)
+                    .cornerRadius(16)
+                    .shadow(color: tealColor.opacity(0.4), radius: 10, x: 0, y: 6)
             }
             .padding(.horizontal)
-            .padding(.bottom, 20)
+            .padding(.bottom, 30)
         }
-        .background(Color.white)
-        .cornerRadius(20)
-        .shadow(radius: 5)
+        .background(Color(UIColor.systemBackground))
     }
     
     var shieldColor: Color {
-        if shieldIntegrity > 0.7 { return .green }
-        if shieldIntegrity > 0.3 { return .yellow }
+        if tile.shield > 70 { return tealColor }
+        if tile.shield > 30 { return .yellow }
         return .red
+    }
+}
+
+// Helper for Hex Color
+extension Color {
+    init(hex: String) {
+        let hex = hex.trimmingCharacters(in: CharacterSet.alphanumerics.inverted)
+        var int: UInt64 = 0
+        Scanner(string: hex).scanHexInt64(&int)
+        let a, r, g, b: UInt64
+        switch hex.count {
+        case 3: // RGB (12-bit)
+            (a, r, g, b) = (255, (int >> 8) * 17, (int >> 4 & 0xF) * 17, (int & 0xF) * 17)
+        case 6: // RGB (24-bit)
+            (a, r, g, b) = (255, int >> 16, int >> 8 & 0xFF, int & 0xFF)
+        case 8: // ARGB (32-bit)
+            (a, r, g, b) = (int >> 24, int >> 16 & 0xFF, int >> 8 & 0xFF, int & 0xFF)
+        default:
+            (a, r, g, b) = (1, 1, 1, 0)
+        }
+
+        self.init(
+            .sRGB,
+            red: Double(r) / 255,
+            green: Double(g) / 255,
+            blue:  Double(b) / 255,
+            opacity: Double(a) / 255
+        )
     }
 }
 
 struct TileDetailsView_Previews: PreviewProvider {
     static var previews: some View {
-        TileDetailsView(tileId: "8291", owner: "Team Iron", shieldIntegrity: 0.8, isDisputed: true)
+        TileDetailsView(tile: Tile(id: "8291-A", ownerName: "Team Iron", ownerColor: "#3498db", shield: 80, isInDispute: true, isInCooldown: false))
             .previewLayout(.sizeThatFits)
     }
 }
