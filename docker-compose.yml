@@ -32,6 +32,7 @@ services:
       JWT_SECRET: super-secret-key-for-development-only-256-bits-minimum
       CORS_ORIGINS: http://localhost:3000
       PORT: 8080
+      RUNWAR_SEED_ENABLED: ${RUNWAR_SEED_ENABLED:-false}
     ports:
       - "8080:8080"
     depends_on:

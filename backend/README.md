@@ -30,6 +30,7 @@ export JWT_SECRET=sua-chave-secreta-256-bits-minimo
 export JWT_REFRESH_EXPIRATION=2592000000
 export JWT_EXPIRATION=900000
 export CORS_ORIGINS=http://localhost:3000
+export RUNWAR_SEED_ENABLED=true # opcional: insere dados mock para testes
 ```
 
 ### 3. Build e Run
@@ -82,6 +83,14 @@ docker run -p 8080:8080 --env-file .env runwar-backend
 ## Swagger UI
 
 Acesse `http://localhost:8080/swagger-ui.html` para documentação interativa da API.
+
+## Dados mock (opcional)
+
+Se `RUNWAR_SEED_ENABLED=true`, o backend cria alguns usuários/bandeiras/tiles para testes na primeira execução:
+
+- `alpha.admin+seed@runwar.local` / `password123`
+- `beta.admin+seed@runwar.local` / `password123`
+- `alice+seed@runwar.local` / `password123`
 
 ## Arquitetura
 

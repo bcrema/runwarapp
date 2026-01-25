@@ -37,6 +37,8 @@ jwt:
 
 # RunWar Game Parameters
 runwar:
+  seed:
+    enabled: ${RUNWAR_SEED_ENABLED:false}
   game:
     # Loop validation
     min-loop-distance: 1200 # meters
