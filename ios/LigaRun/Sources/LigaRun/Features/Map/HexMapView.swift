@@ -163,9 +163,9 @@ struct HexMapView: UIViewRepresentable {
                 let coordinate = focusCoordinate
             else { return }
 
-            if let last = lastFocusedCoordinate,
-               abs(last.latitude - coordinate.latitude) < 0.00001,
-               abs(last.longitude - coordinate.longitude) < 0.00001 {
+            let currentCenter = mapView.cameraState.center
+            if abs(currentCenter.latitude - coordinate.latitude) < 0.00001,
+               abs(currentCenter.longitude - coordinate.longitude) < 0.00001 {
                 return
             }
 
