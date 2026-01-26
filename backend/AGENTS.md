@@ -15,6 +15,7 @@
 - Não renomeie variáveis/identificadores técnicos (tokens, DB names) sem aprovação.
 
 ## Testes
+- Sempre garanta cobertura de testes e resultados passando para mudanças.
 - Priorize `./gradlew test` para validar mudanças de código.
 
 ## Segurança/segredos

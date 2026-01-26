@@ -15,6 +15,7 @@
 - Evite introduzir dependências sem alinhamento.
 
 ## Testes
+- Sempre garanta cobertura de testes e resultados passando para mudanças.
 - Rodar `npm run lint`/`npm run test` se afetar lógica; mínimo: garantir build local (`npm run build`) se mexer em config.
 
 ## Segurança/segredos

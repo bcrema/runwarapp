@@ -16,6 +16,7 @@
 - Não exponha segredos; use xcconfig para valores.
 
 ## Testes
+- Sempre garanta cobertura de testes e resultados passando para mudanças.
 - Use simulador para smoke tests; se criar lógica, inclua testes Swift quando possível.
 
 ## Checklist rápida
