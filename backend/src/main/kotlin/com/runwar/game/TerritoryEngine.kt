@@ -65,6 +65,12 @@ class TerritoryEngine(
             }
         }
 
+        // Update activity timestamps for decay and tracking consistency
+        val now = Instant.now()
+        tile.lastActionAt = now
+        if (actionType == TerritoryActionType.DEFENSE) {
+            tile.lastDefenseAt = now
+        }
         shieldAfter = shieldAfter.coerceIn(0, MAX_SHIELD)
         tile.shield = shieldAfter
         tileRepository.save(tile)
