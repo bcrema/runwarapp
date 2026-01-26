@@ -67,6 +67,8 @@ runwar:
     max-speed-duration-seconds: 30
     
     # H3 Grid
+    # NOTE: The old `h3-resolution` configuration key has been replaced by `h3-target-radius-meters`.
+    # Any existing configuration using `h3-resolution` must be updated to this new key.
     h3-target-radius-meters: 250 # ~250m radius
     
     # Curitiba bounds
