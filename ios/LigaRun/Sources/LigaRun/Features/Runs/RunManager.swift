@@ -98,9 +98,7 @@ class RunManager: ObservableObject {
             _ = try? await sessionStore.append(session)
             do {
                 let result = try await uploadService.upload(session)
-                await MainActor.run {
-                    self.submissionResult = result
-                }
+                self.submissionResult = result
             } catch {
                 // Keep session persisted for retry
             }
