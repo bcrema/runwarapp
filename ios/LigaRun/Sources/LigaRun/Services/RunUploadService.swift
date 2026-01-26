@@ -64,8 +64,9 @@ final class RunUploadService {
         "<trk><name>Run</name><trkseg>\n"
         let footer = "</trkseg></trk>\n</gpx>"
 
+        let formatter = ISO8601DateFormatter()
         let entries = session.points.map { point in
-            let timeString = ISO8601DateFormatter().string(from: point.timestamp)
+            let timeString = formatter.string(from: point.timestamp)
             var segment = "<trkpt lat=\"\(point.latitude)\" lon=\"\(point.longitude)\">"
             if let altitude = point.altitude {
                 segment += "<ele>\(altitude)</ele>"
