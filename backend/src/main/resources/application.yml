@@ -67,7 +67,7 @@ runwar:
     max-speed-duration-seconds: 30
     
     # H3 Grid
-    h3-resolution: 8 # ~250m radius
+    h3-target-radius-meters: 250 # ~250m radius
     
     # Curitiba bounds
     curitiba:
