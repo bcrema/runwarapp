@@ -131,3 +131,49 @@ Todos configuráveis em `application.yml`:
 | Em disputa | <70 escudo |
 | Cap usuário | 3 ações/dia |
 | Cap bandeira | 60 ações/dia |
+
+## Flags de validação de loop (server-authoritative)
+
+Para pilotos sem deploy, é possível alterar os parâmetros do LoopValidator via arquivo local e
+recarregamento automático por modificação do arquivo.
+
+Configure o caminho do arquivo e a cidade padrão:
+
+```yaml
+runwar:
+  loop-validation-flags-path: /app/config/loop-validation-flags.json
+  loop-validation-default-city: curitiba
+```
+
+Observação: `loop-validation-default-city` é usado apenas para selecionar quais overrides de flags
+serão aplicados a partir da chave correspondente em `byCity` no arquivo JSON. Ele **não** altera a
+área do jogo nem os limites geográficos usados pelo validador, que atualmente permanecem fixos em
+Curitiba (via configuração `runwar.game.curitiba`).
+Formato do arquivo (`loop-validation-flags.json`):
+
+```json
+{
+  "defaults": {
+    "minLoopDistanceKm": 1.2,
+    "minLoopDurationMin": 7,
+    "maxClosureMeters": 40,
+    "minCoveragePct": 0.6
+  },
+  "byCity": {
+    "curitiba": {
+      "minLoopDistanceKm": 1.2,
+      "minLoopDurationMin": 7,
+      "maxClosureMeters": 40,
+      "minCoveragePct": 0.6
+    }
+  },
+  "byBandeira": {
+    "alpha": {
+      "minLoopDistanceKm": 1.5,
+      "minLoopDurationMin": 8,
+      "maxClosureMeters": 30,
+      "minCoveragePct": 0.7
+    }
+  }
+}
+```

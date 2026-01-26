@@ -4,6 +4,8 @@ import com.runwar.config.GameProperties
 import com.runwar.domain.tile.TileRepository
 import com.runwar.domain.user.User
 import com.runwar.game.LatLngPoint
+import com.runwar.game.LoopValidationFlagService
+import com.runwar.game.LoopValidationInput
 import com.runwar.game.LoopValidator
 import com.runwar.game.ShieldMechanics
 import com.runwar.geo.GpxParser
@@ -20,6 +22,7 @@ class RunService(
         private val runRepository: RunRepository,
         private val gpxParser: GpxParser,
         private val loopValidator: LoopValidator,
+        private val loopValidationFlagService: LoopValidationFlagService,
         private val shieldMechanics: ShieldMechanics,
         private val gameProperties: GameProperties,
         private val tileRepository: TileRepository,
@@ -93,9 +96,14 @@ class RunService(
                 val parsed = gpxParser.parse(gpxFile)
 
                 // Validate loop
-                val validation = loopValidator.validate(parsed.coordinates, parsed.timestamps)
+                val loopFlags = loopValidationFlagService.resolveFlags(user.bandeira?.slug)
+                val validation =
+                        loopValidator.validate(
+                                LoopValidationInput(parsed.coordinates, parsed.timestamps),
+                                loopFlags
+                        )
                 val boundingBox = calculateBoundingBox(parsed.coordinates)
-                val status = resolveStatus(validation.isValid)
+                val status = resolveStatus(validation.isLoopValid)
 
                 // Create run record
                 val run =
@@ -111,9 +119,11 @@ class RunService(
                                 minLng = boundingBox.minLng,
                                 maxLat = boundingBox.maxLat,
                                 maxLng = boundingBox.maxLng,
-                                isLoopValid = validation.isValid,
-                                loopDistance = validation.distance.let { BigDecimal.valueOf(it) },
-                                closingDistance = BigDecimal.valueOf(validation.closingDistance),
+                                isLoopValid = validation.isLoopValid,
+                                loopDistance =
+                                        BigDecimal.valueOf(validation.metrics.loopDistanceMeters),
+                                closingDistance =
+                                        BigDecimal.valueOf(validation.metrics.closureMeters),
                                 fraudFlags = validation.fraudFlags
                         )
 
@@ -124,7 +134,7 @@ class RunService(
                                 ?.let { OwnerSnapshot(id = it.ownerId, type = it.ownerType) }
 
                 // Process territory action if valid
-                if (validation.isValid && validation.primaryTile != null) {
+                if (validation.isLoopValid && validation.primaryTile != null) {
                         run.isValidForTerritory = true
 
                         if (!capsCheck.userCapReached && !capsCheck.bandeiraCapReached) {
@@ -174,9 +184,14 @@ class RunService(
                 val capsCheck = capsService.checkCaps(user)
 
                 // Validate loop
-                val validation = loopValidator.validate(coordinates, timestamps)
+                val loopFlags = loopValidationFlagService.resolveFlags(user.bandeira?.slug)
+                val validation =
+                        loopValidator.validate(
+                                LoopValidationInput(coordinates, timestamps),
+                                loopFlags
+                        )
                 val boundingBox = calculateBoundingBox(coordinates)
-                val status = resolveStatus(validation.isValid)
+                val status = resolveStatus(validation.isLoopValid)
 
                 val startTime = timestamps.firstOrNull() ?: Instant.now()
                 val endTime = timestamps.lastOrNull() ?: Instant.now()
@@ -188,7 +203,8 @@ class RunService(
                                 user = user,
                                 origin = origin,
                                 status = status,
-                                distance = BigDecimal.valueOf(validation.distance),
+                                distance =
+                                        BigDecimal.valueOf(validation.metrics.loopDistanceMeters),
                                 duration = duration,
                                 startTime = startTime,
                                 endTime = endTime,
@@ -196,9 +212,11 @@ class RunService(
                                 minLng = boundingBox.minLng,
                                 maxLat = boundingBox.maxLat,
                                 maxLng = boundingBox.maxLng,
-                                isLoopValid = validation.isValid,
-                                loopDistance = BigDecimal.valueOf(validation.distance),
-                                closingDistance = BigDecimal.valueOf(validation.closingDistance),
+                                isLoopValid = validation.isLoopValid,
+                                loopDistance =
+                                        BigDecimal.valueOf(validation.metrics.loopDistanceMeters),
+                                closingDistance =
+                                        BigDecimal.valueOf(validation.metrics.closureMeters),
                                 fraudFlags = validation.fraudFlags
                         )
 
@@ -208,7 +226,7 @@ class RunService(
                                 ?.let { tileRepository.findById(it).orElse(null) }
                                 ?.let { OwnerSnapshot(id = it.ownerId, type = it.ownerType) }
 
-                if (validation.isValid && validation.primaryTile != null) {
+                if (validation.isLoopValid && validation.primaryTile != null) {
                         run.isValidForTerritory = true
 
                         if (!capsCheck.userCapReached && !capsCheck.bandeiraCapReached) {
@@ -288,10 +306,10 @@ class RunService(
                         }
 
                 val reasons = mutableListOf<String>()
-                if (!validation.isValid) {
-                        reasons.addAll(validation.failureReasons)
+                if (!validation.isLoopValid) {
+                        reasons.addAll(validation.reasons)
                 }
-                if (validation.isValid && validation.primaryTile == null) {
+                if (validation.isLoopValid && validation.primaryTile == null) {
                         reasons.add("no_primary_tile")
                 }
 

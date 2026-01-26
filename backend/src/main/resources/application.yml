@@ -39,6 +39,8 @@ jwt:
 runwar:
   seed:
     enabled: ${RUNWAR_SEED_ENABLED:false}
+  loop-validation-flags-path: ${RUNWAR_LOOP_VALIDATION_FLAGS_PATH:}
+  loop-validation-default-city: ${RUNWAR_LOOP_VALIDATION_DEFAULT_CITY:curitiba}
   game:
     # Loop validation
     min-loop-distance: 1200 # meters
