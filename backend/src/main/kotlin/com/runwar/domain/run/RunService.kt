@@ -1,7 +1,6 @@
 package com.runwar.domain.run
 
 import com.runwar.config.GameProperties
-import com.runwar.domain.territory.TerritoryActionRepository
 import com.runwar.domain.tile.TileRepository
 import com.runwar.domain.user.User
 import com.runwar.game.LatLngPoint
@@ -10,8 +9,6 @@ import com.runwar.game.ShieldMechanics
 import com.runwar.geo.GpxParser
 import java.math.BigDecimal
 import java.time.Instant
-import java.time.LocalDate
-import java.time.ZoneId
 import java.util.*
 import org.springframework.data.domain.PageRequest
 import org.springframework.stereotype.Service
@@ -21,12 +18,12 @@ import org.springframework.web.multipart.MultipartFile
 @Service
 class RunService(
         private val runRepository: RunRepository,
-        private val territoryActionRepository: TerritoryActionRepository,
         private val gpxParser: GpxParser,
         private val loopValidator: LoopValidator,
         private val shieldMechanics: ShieldMechanics,
         private val gameProperties: GameProperties,
-        private val tileRepository: TileRepository
+        private val tileRepository: TileRepository,
+        private val capsService: CapsService
 ) {
 
         data class RunDto(
@@ -90,14 +87,7 @@ class RunService(
                 origin: RunOrigin = RunOrigin.IMPORT
         ): RunSubmissionResult {
                 // Check daily cap
-                val actionsToday = getDailyActionCount(user)
-                val userCapReached = actionsToday >= gameProperties.userDailyActionCap
-                val bandeiraActionsToday = user.bandeira?.let { getBandeiraDailyActionCount(it.id) }
-                val bandeiraCapReached =
-                        user.bandeira?.let { bandeira ->
-                                (bandeiraActionsToday ?: 0) >= bandeira.dailyActionCap
-                        }
-                                ?: false
+                val capsCheck = capsService.checkCaps(user)
 
                 // Parse GPX
                 val parsed = gpxParser.parse(gpxFile)
@@ -137,7 +127,7 @@ class RunService(
                 if (validation.isValid && validation.primaryTile != null) {
                         run.isValidForTerritory = true
 
-                        if (!userCapReached && !bandeiraCapReached) {
+                        if (!capsCheck.userCapReached && !capsCheck.bandeiraCapReached) {
                                 territoryResult =
                                         shieldMechanics.processAction(validation.primaryTile, user)
                         }
@@ -161,8 +151,8 @@ class RunService(
                                 territoryResult,
                                 previousOwner,
                                 user,
-                                actionsToday,
-                                bandeiraActionsToday
+                                capsCheck.actionsToday,
+                                capsCheck.bandeiraActionsToday
                         )
 
                 return RunSubmissionResult(
@@ -181,14 +171,7 @@ class RunService(
                 origin: RunOrigin = RunOrigin.WEB
         ): RunSubmissionResult {
                 // Check daily cap
-                val actionsToday = getDailyActionCount(user)
-                val userCapReached = actionsToday >= gameProperties.userDailyActionCap
-                val bandeiraActionsToday = user.bandeira?.let { getBandeiraDailyActionCount(it.id) }
-                val bandeiraCapReached =
-                        user.bandeira?.let { bandeira ->
-                                (bandeiraActionsToday ?: 0) >= bandeira.dailyActionCap
-                        }
-                                ?: false
+                val capsCheck = capsService.checkCaps(user)
 
                 // Validate loop
                 val validation = loopValidator.validate(coordinates, timestamps)
@@ -228,7 +211,7 @@ class RunService(
                 if (validation.isValid && validation.primaryTile != null) {
                         run.isValidForTerritory = true
 
-                        if (!userCapReached && !bandeiraCapReached) {
+                        if (!capsCheck.userCapReached && !capsCheck.bandeiraCapReached) {
                                 territoryResult =
                                         shieldMechanics.processAction(validation.primaryTile, user)
                         }
@@ -246,8 +229,8 @@ class RunService(
                                 territoryResult,
                                 previousOwner,
                                 user,
-                                actionsToday,
-                                bandeiraActionsToday
+                                capsCheck.actionsToday,
+                                capsCheck.bandeiraActionsToday
                         )
 
                 return RunSubmissionResult(
@@ -269,18 +252,6 @@ class RunService(
         /** Get a specific run by ID */
         fun getRunById(runId: UUID): RunDto? {
                 return runRepository.findById(runId).map { RunDto.from(it) }.orElse(null)
-        }
-
-        /** Get the count of territory actions today for a user */
-        fun getDailyActionCount(user: User): Int {
-                val startOfDay = LocalDate.now().atStartOfDay(ZoneId.systemDefault()).toInstant()
-                return territoryActionRepository.countUserActionsToday(user.id, startOfDay)
-        }
-
-        /** Get the count of territory actions today for a bandeira */
-        fun getBandeiraDailyActionCount(bandeiraId: UUID): Int {
-                val startOfDay = LocalDate.now().atStartOfDay(ZoneId.systemDefault()).toInstant()
-                return territoryActionRepository.countBandeiraActionsToday(bandeiraId, startOfDay)
         }
 
         private fun buildTurnResult(
@@ -332,8 +303,12 @@ class RunService(
                         }
                                 ?: false
 
-                if (userCapReached) reasons.add("user_daily_cap_reached")
-                if (bandeiraCapReached) reasons.add("bandeira_daily_cap_reached")
+                if (userCapReached) {
+                        reasons.add("user_daily_cap_reached")
+                }
+                if (bandeiraCapReached) {
+                        reasons.add("bandeira_daily_cap_reached")
+                }
 
                 if (territoryResult != null && !territoryResult.success) {
                         territoryResult.reason?.let { reasons.add(it) }
@@ -390,8 +365,9 @@ class RunService(
                 // merge it.
                 // A better approach is to fetch user again if we are unsure.
                 // But let's try just Transactional first.
-                val actionsUsed = getDailyActionCount(user)
-                val bandeiraActionsUsed = user.bandeira?.let { getBandeiraDailyActionCount(it.id) }
+                val actionsUsed = capsService.getDailyActionCount(user.id)
+                val bandeiraActionsUsed =
+                        user.bandeira?.let { capsService.getBandeiraDailyActionCount(it.id) }
 
                 return DailyStatusInfo(
                         userActionsUsed = actionsUsed,
