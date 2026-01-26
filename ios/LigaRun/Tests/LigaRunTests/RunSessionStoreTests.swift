@@ -77,6 +77,16 @@ final class RunSessionStoreTests: XCTestCase {
     private func makeTempFileURL() -> URL {
         let directory = FileManager.default.temporaryDirectory
             .appendingPathComponent(UUID().uuidString, isDirectory: true)
+
+        do {
+            try FileManager.default.createDirectory(at: directory, withIntermediateDirectories: true)
+        } catch {
+            XCTFail("Failed to create temporary directory: \(error)")
+        }
+
+        addTeardownBlock {
+            try? FileManager.default.removeItem(at: directory)
+        }
         return directory.appendingPathComponent("run-sessions.json")
     }
 }
