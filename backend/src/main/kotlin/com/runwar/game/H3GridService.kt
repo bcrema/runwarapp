@@ -125,7 +125,7 @@ class H3GridService(private val gameProperties: GameProperties) {
             val p1 = coordinates[i]
             val p2 = coordinates[i + 1]
             val segmentDistance = haversineDistance(p1, p2)
-            if (segmentDistance == 0.0) {
+            if (abs(segmentDistance) < 1e-9) {
                 continue
             }
             totalDistance += segmentDistance
