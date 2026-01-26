@@ -29,8 +29,10 @@ final class RunsViewModel: ObservableObject {
             async let statusTask = session.api.getDailyStatus()
             runs = try await runsTask
             dailyStatus = try await statusTask
-            if let latestResult = uploadResults.last {
-                submissionResult = latestResult
+            if uploadResults.count == 1 {
+                submissionResult = uploadResults[0]
+            } else {
+                submissionResult = nil
             }
         } catch let apiError as APIError {
             errorMessage = "API Error: \(apiError.message)"
