@@ -45,13 +45,17 @@ class TerritoryEngine(
             }
             TerritoryActionType.ATTACK -> {
                 val projectedShield = tile.shield - ATTACK_DAMAGE
-                if (projectedShield <= 0) {
+                val inCooldown = tile.isInCooldown()
+                if (!inCooldown && projectedShield <= 0) {
                     val (ownerId, ownerType) = resolveOwner(actor)
                     tile.ownerId = ownerId
                     tile.ownerType = ownerType
                     shieldAfter = TRANSFER_SHIELD
                     tile.cooldownUntil = Instant.now().plus(COOLDOWN_HOURS, ChronoUnit.HOURS)
                     ownerChanged = true
+                } else if (inCooldown && projectedShield <= 0) {
+                    // While in cooldown, prevent ownership transfer and cap shield at the transfer threshold
+                    shieldAfter = 1
                 } else {
                     shieldAfter = projectedShield
                 }
