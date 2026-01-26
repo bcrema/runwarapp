@@ -35,6 +35,7 @@ final class RunUploadService {
             _ = try await store.update(updatedSession)
         } catch {
             logger.error("Failed to mark session as uploading: \(error.localizedDescription)")
+            throw error
         }
 
         let coordinates = session.points.map { point in
