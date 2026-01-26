@@ -56,7 +56,11 @@ actor RunSessionStore {
             let data = try Data(contentsOf: fileURL)
             return try decoder.decode([RunSessionRecord].self, from: data)
         } catch {
-            if (error as NSError).code != NSFileReadNoSuchFileError {
+            if let nsError = error as NSError?,
+               nsError.domain == NSCocoaErrorDomain,
+               nsError.code == NSFileReadNoSuchFileError {
+                // File doesn't exist, which is fine
+            } else {
                 logger.error("Failed to load run sessions: \(error.localizedDescription)")
             }
             return []
