@@ -229,10 +229,11 @@ class H3GridService(private val gameProperties: GameProperties) {
 
     private fun getTilePolygon(tileId: String): Polygon {
         val boundary = h3.cellToBoundary(tileId)
-        val coordinates = boundary.map { Coordinate(it.lng, it.lat) }.toMutableList()
-        if (coordinates.isNotEmpty()) {
-            coordinates.add(coordinates.first())
+        require(boundary.isNotEmpty()) {
+            "Invalid H3 tile ID '$tileId': cellToBoundary returned an empty boundary."
         }
+        val coordinates = boundary.map { Coordinate(it.lng, it.lat) }.toMutableList()
+        coordinates.add(coordinates.first())
         return geometryFactory.createPolygon(coordinates.toTypedArray())
     }
 
