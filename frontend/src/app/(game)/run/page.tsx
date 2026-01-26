@@ -1,6 +1,7 @@
 'use client'
 
 import { useState, useRef, useCallback } from 'react'
+import { useRouter } from 'next/navigation'
 import { api, RunSubmissionResult } from '@/lib/api'
 import { requestTilesRefresh } from '@/lib/tilesRefresh'
 import styles from './page.module.css'
@@ -284,6 +285,7 @@ interface RunResultProps {
 
 function RunResult({ result, onReset }: RunResultProps) {
     const { loopValidation, turnResult } = result
+    const router = useRouter()
 
     type TurnOutcome = 'CONQUEST' | 'ATTACK' | 'DEFENSE' | 'NO_EFFECT'
 
@@ -299,16 +301,24 @@ function RunResult({ result, onReset }: RunResultProps) {
 
     const actionBadge = badges[outcome]
 
-    const reasons =
-        turnResult.reasons.length > 0
-            ? turnResult.reasons.map(translateTurnReason)
-            : ['Nenhuma ação territorial foi aplicada.']
-    const shouldShowReasons = outcome === 'NO_EFFECT'
+    const combinedReasons = [
+        ...turnResult.reasons,
+        ...loopValidation.failureReasons,
+        ...loopValidation.fraudFlags.map((flag) => `fraud_flag:${flag}`),
+    ]
+    const reasons = combinedReasons.map(translateTurnReason)
+    const shouldShowReasons = reasons.length > 0
 
     const shieldChange =
         turnResult.shieldBefore != null && turnResult.shieldAfter != null
             ? turnResult.shieldAfter - turnResult.shieldBefore
             : null
+
+    const tileFocusId = turnResult.tileId ?? loopValidation.primaryTile
+
+    const cooldownLabel = turnResult.cooldownUntil
+        ? formatCooldown(turnResult.cooldownUntil)
+        : '—'
 
     const ownerChanged = turnResult.previousOwner?.id !== turnResult.newOwner?.id ||
         turnResult.previousOwner?.type !== turnResult.newOwner?.type
@@ -337,30 +347,46 @@ function RunResult({ result, onReset }: RunResultProps) {
                     {actionBadge.label}
                 </span>
 
-                {turnResult.actionType && (
-                    <>
-                        <div className={styles.shieldChange}>
-                            <span>Escudo: {turnResult.shieldBefore ?? '—'} → {turnResult.shieldAfter ?? '—'}</span>
+                <div className={styles.actionDetails}>
+                    <div className={styles.actionDetailRow}>
+                        <span className={styles.actionDetailLabel}>Tipo de ação</span>
+                        <span className={styles.actionDetailValue}>{actionBadge.label}</span>
+                    </div>
+                    <div className={styles.actionDetailRow}>
+                        <span className={styles.actionDetailLabel}>Tile afetado</span>
+                        <span className={styles.actionDetailValue}>{tileFocusId ?? '—'}</span>
+                    </div>
+                    <div className={styles.actionDetailRow}>
+                        <span className={styles.actionDetailLabel}>Escudo antes/depois</span>
+                        <span className={styles.actionDetailValue}>
+                            {turnResult.shieldBefore ?? '—'} → {turnResult.shieldAfter ?? '—'}
                             {shieldChange !== null && (
                                 <span className={shieldChange > 0 ? styles.positive : styles.negative}>
                                     ({shieldChange > 0 ? '+' : ''}{shieldChange})
                                 </span>
                             )}
-                        </div>
+                        </span>
+                    </div>
+                    <div className={styles.actionDetailRow}>
+                        <span className={styles.actionDetailLabel}>Cooldown</span>
+                        <span className={styles.actionDetailValue}>{cooldownLabel}</span>
+                    </div>
+                </div>
 
-                        {turnResult.tileId && (
-                            <div className={styles.shieldChange}>
-                                <span>Tile: {turnResult.tileId}</span>
-                            </div>
-                        )}
-
-                        {ownerChanged && (
-                            <div className={styles.ownerChanged}>
-                                🎉 Tile conquistado!
-                            </div>
-                        )}
-                    </>
+                {ownerChanged && (
+                    <div className={styles.ownerChanged}>
+                        🎉 Tile conquistado!
+                    </div>
                 )}
+
+                <button
+                    className={`btn btn-primary btn-lg ${styles.viewOnMapButton}`}
+                    onClick={() => router.push(tileFocusId ? `/map?tile=${tileFocusId}` : '/map')}
+                    disabled={!tileFocusId}
+                    type="button"
+                >
+                    Ver no mapa
+                </button>
             </div>
 
             <div className={styles.resultStats}>
@@ -386,7 +412,7 @@ function RunResult({ result, onReset }: RunResultProps) {
 
             {shouldShowReasons && (
                 <div className={styles.failureReasons}>
-                    <h4>Por que não gerou ação territorial:</h4>
+                    <h4>Por que não contou:</h4>
                     <ul>
                         {reasons.map((reason, idx) => (
                             <li key={`${idx}-${reason}`}>{reason}</li>
@@ -437,7 +463,22 @@ function formatDuration(seconds: number): string {
     return `${mins}:${secs.toString().padStart(2, '0')}`
 }
 
+function formatCooldown(isoDate: string): string {
+    const date = new Date(isoDate)
+    if (Number.isNaN(date.getTime())) return '—'
+    return date.toLocaleString('pt-BR', {
+        day: '2-digit',
+        month: '2-digit',
+        hour: '2-digit',
+        minute: '2-digit',
+    })
+}
+
 function translateTurnReason(reason: string): string {
+    if (reason.startsWith('fraud_flag:')) {
+        return `Padrão suspeito detectado (${reason.replace('fraud_flag:', '')})`
+    }
+
     const translations: Record<string, string> = {
         // Loop validation
         distance_too_short: 'Distância muito curta (mínimo 1.2km)',

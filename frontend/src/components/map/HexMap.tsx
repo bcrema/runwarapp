@@ -2,7 +2,7 @@
 
 import { useEffect, useRef, useState, useCallback } from 'react'
 import mapboxgl from 'mapbox-gl'
-import { cellToBoundary } from 'h3-js'
+import { cellToBoundary, cellToLatLng } from 'h3-js'
 import { api, Tile } from '@/lib/api'
 import { onTilesRefresh } from '@/lib/tilesRefresh'
 import styles from './HexMap.module.css'
@@ -12,6 +12,7 @@ mapboxgl.accessToken = process.env.NEXT_PUBLIC_MAPBOX_TOKEN || ''
 
 interface HexMapProps {
     onTileClick?: (tile: Tile) => void
+    focusTileId?: string | null
     className?: string
 }
 
@@ -30,7 +31,7 @@ const TILE_OPACITY = {
     dispute: 0.18,
 } as const
 
-export default function HexMap({ onTileClick, className }: HexMapProps) {
+export default function HexMap({ onTileClick, focusTileId, className }: HexMapProps) {
     const mapContainer = useRef<HTMLDivElement>(null)
     const map = useRef<mapboxgl.Map | null>(null)
     const [tiles, setTiles] = useState<Tile[]>([])
@@ -214,6 +215,20 @@ export default function HexMap({ onTileClick, className }: HexMapProps) {
             map.current = null
         }
     }, [loadTiles, scheduleLoadTiles]) // Removed tiles and onTileClick dependencies
+
+    useEffect(() => {
+        if (!map.current || !focusTileId || isLoading) return
+        try {
+            const [lat, lng] = cellToLatLng(focusTileId)
+            map.current.flyTo({
+                center: [lng, lat],
+                zoom: 15,
+                essential: true,
+            })
+        } catch (error) {
+            console.warn('Failed to focus tile:', error)
+        }
+    }, [focusTileId, isLoading])
 
     // Refs to keep track of current state/props for event handlers
     const tilesRef = useRef(tiles)

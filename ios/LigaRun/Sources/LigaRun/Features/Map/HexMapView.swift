@@ -5,6 +5,7 @@ import Turf
 struct HexMapView: UIViewRepresentable {
     @Binding var selectedTile: Tile?
     var tiles: [Tile]
+    var focusCoordinate: CLLocationCoordinate2D?
     var onVisibleRegionChanged: ((CoordinateBounds) -> Void)?
     var onTileTapped: ((Tile) -> Void)?
 
@@ -29,6 +30,8 @@ struct HexMapView: UIViewRepresentable {
         context.coordinator.onTileTapped = onTileTapped
         context.coordinator.selectedTile = selectedTile
         context.coordinator.onVisibleRegionChanged = onVisibleRegionChanged
+        context.coordinator.focusCoordinate = focusCoordinate
+        context.coordinator.updateFocusIfNeeded()
     }
 
     func makeCoordinator() -> Coordinator {
@@ -41,8 +44,11 @@ struct HexMapView: UIViewRepresentable {
         var onTileTapped: ((Tile) -> Void)?
         var onVisibleRegionChanged: ((CoordinateBounds) -> Void)?
         var selectedTile: Tile?
+        var focusCoordinate: CLLocationCoordinate2D?
         private var addedTapHandler = false
         private var cancellables: [Cancelable] = []
+        private var isMapLoaded = false
+        private var lastFocusedCoordinate: CLLocationCoordinate2D?
 
         func bind(mapView: MapView) {
             self.mapView = mapView
@@ -136,6 +142,8 @@ struct HexMapView: UIViewRepresentable {
             cancellables.append(
                 mapView.mapboxMap.onMapLoaded.observeNext { [weak self] _ in
                     self?.configureStyle()
+                    self?.isMapLoaded = true
+                    self?.updateFocusIfNeeded()
                 }
             )
 
@@ -146,6 +154,24 @@ struct HexMapView: UIViewRepresentable {
                     self.onVisibleRegionChanged?(bounds)
                 }
             )
+        }
+
+        func updateFocusIfNeeded() {
+            guard
+                isMapLoaded,
+                let mapView,
+                let coordinate = focusCoordinate
+            else { return }
+
+            if let last = lastFocusedCoordinate,
+               abs(last.latitude - coordinate.latitude) < 0.00001,
+               abs(last.longitude - coordinate.longitude) < 0.00001 {
+                return
+            }
+
+            lastFocusedCoordinate = coordinate
+            let camera = CameraOptions(center: coordinate, zoom: 15)
+            mapView.camera.ease(to: camera, duration: 0.8, curve: .easeInOut)
         }
     }
 }

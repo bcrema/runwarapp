@@ -104,6 +104,23 @@ struct LoopValidation: Codable {
     let failureReasons: [String]
 }
 
+struct TurnResult: Codable {
+    let actionType: String?
+    let tileId: String?
+    let h3Index: String?
+    let shieldBefore: Int?
+    let shieldAfter: Int?
+    let cooldownUntil: String?
+    let disputeState: String?
+    let capsRemaining: TurnCapsRemaining?
+    let reasons: [String]?
+}
+
+struct TurnCapsRemaining: Codable {
+    let userActionsRemaining: Int
+    let bandeiraActionsRemaining: Int?
+}
+
 struct TerritoryResult: Codable {
     let success: Bool
     let actionType: String?
@@ -120,6 +137,7 @@ struct RunSubmissionResult: Codable {
     let run: Run
     let loopValidation: LoopValidation
     let territoryResult: TerritoryResult?
+    let turnResult: TurnResult?
     let dailyActionsRemaining: Int
 }
 

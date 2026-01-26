@@ -2,9 +2,11 @@ import SwiftUI
 import MapboxMaps
 
 struct MapScreen: View {
+    @ObservedObject private var session: SessionStore
     @StateObject private var viewModel: MapViewModel
 
     init(session: SessionStore) {
+        self.session = session
         _viewModel = StateObject(wrappedValue: MapViewModel(session: session))
     }
 
@@ -13,6 +15,7 @@ struct MapScreen: View {
             HexMapView(
                 selectedTile: $viewModel.selectedTile,
                 tiles: viewModel.tiles,
+                focusCoordinate: viewModel.focusCoordinate,
                 onVisibleRegionChanged: { bounds in
                     Task { await viewModel.loadTiles(bounds: bounds.toTuple) }
                 },
@@ -59,6 +62,13 @@ struct MapScreen: View {
             }
         } message: {
             Text(viewModel.errorMessage ?? "")
+        }
+        .onChange(of: session.mapFocusTileId) { newValue in
+            guard let tileId = newValue else { return }
+            Task {
+                await viewModel.focusOnTile(id: tileId)
+                session.mapFocusTileId = nil
+            }
         }
     }
 }
