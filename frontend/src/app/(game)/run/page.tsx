@@ -306,7 +306,10 @@ function RunResult({ result, onReset }: RunResultProps) {
         ...loopValidation.failureReasons,
         ...loopValidation.fraudFlags.map((flag) => `fraud_flag:${flag}`),
     ]
-    const reasons = combinedReasons.map(translateTurnReason)
+    const hasReasons = combinedReasons.length > 0
+    const reasons = hasReasons
+        ? combinedReasons.map(translateTurnReason)
+        : ['Nenhuma ação territorial foi aplicada.']
     const shouldShowReasons = reasons.length > 0
 
     const shieldChange =
