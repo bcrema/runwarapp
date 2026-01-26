@@ -269,7 +269,37 @@ class H3GridService(private val gameProperties: GameProperties) {
     }
     
     companion object {
-        private const val SEGMENT_SAMPLE_INTERVAL_METERS = 50.0
+        /**
+         * Reference H3 resolution for which the base sampling interval is defined.
+         * Resolution 8 corresponds roughly to ~250m radius tiles; the existing 50m
+         * interval was tuned for this resolution.
+         */
+        private const val BASE_H3_RESOLUTION = 8
+
+        /**
+         * Base segment sampling interval in meters for [BASE_H3_RESOLUTION].
+         *
+         * For backward compatibility, this preserves the original behavior of
+         * sampling every 50 meters at resolution 8.
+         */
+        private const val BASE_SEGMENT_SAMPLE_INTERVAL_METERS = 50.0
+
+        /**
+         * Compute an appropriate segment sampling interval (in meters) for a given
+         * H3 resolution.
+         *
+         * As resolution increases, H3 cell sizes shrink. We adjust the sampling
+         * interval exponentially so that higher resolutions use a finer sampling
+         * and lower resolutions use a coarser sampling, while keeping the interval
+         * at [BASE_SEGMENT_SAMPLE_INTERVAL_METERS] for [BASE_H3_RESOLUTION].
+         */
+        fun segmentSampleIntervalMetersForResolution(resolution: Int): Double {
+            val resolutionDelta = resolution - BASE_H3_RESOLUTION
+            val scaleFactor = 2.0.pow(resolutionDelta.toDouble())
+            // For resolution > BASE_H3_RESOLUTION, this yields a smaller interval;
+            // for resolution < BASE_H3_RESOLUTION, a larger interval.
+            return BASE_SEGMENT_SAMPLE_INTERVAL_METERS / scaleFactor
+        }
 
         /**
          * Calculate distance between two points using Haversine formula
