@@ -1,39 +1,35 @@
 package com.runwar.game
 
-import com.runwar.config.GameProperties
 import org.springframework.stereotype.Service
 import java.time.Duration
-import java.time.Instant
 
 @Service
 class LoopValidator(
-    private val gameProperties: GameProperties,
     private val h3GridService: H3GridService,
     private val antiFraudService: AntiFraudService
 ) {
     
     data class ValidationResult(
-        val isValid: Boolean,
-        val distance: Double, // total distance in meters
-        val duration: Int, // duration in seconds
-        val closingDistance: Double, // distance between start and end
+        val isLoopValid: Boolean,
+        val reasons: List<String>,
+        val metrics: LoopValidationMetrics,
         val tilesCovered: List<String>,
         val primaryTile: String?,
-        val primaryTileCoverage: Double,
-        val fraudFlags: List<String>,
-        val failureReasons: List<String>
+        val fraudFlags: List<String>
     ) {
         companion object {
             fun invalid(reason: String) = ValidationResult(
-                isValid = false,
-                distance = 0.0,
-                duration = 0,
-                closingDistance = 0.0,
+                isLoopValid = false,
+                reasons = listOf(reason),
+                metrics = LoopValidationMetrics(
+                    loopDistanceMeters = 0.0,
+                    loopDurationSeconds = 0,
+                    closureMeters = 0.0,
+                    coveragePct = 0.0
+                ),
                 tilesCovered = emptyList(),
                 primaryTile = null,
-                primaryTileCoverage = 0.0,
-                fraudFlags = emptyList(),
-                failureReasons = listOf(reason)
+                fraudFlags = emptyList()
             )
         }
     }
@@ -42,9 +38,12 @@ class LoopValidator(
      * Validate a run to determine if it forms a valid loop for territory action
      */
     fun validate(
-        coordinates: List<LatLngPoint>,
-        timestamps: List<Instant>
+        run: LoopValidationInput,
+        flags: LoopValidationFlags
     ): ValidationResult {
+        val coordinates = run.coordinates
+        val timestamps = run.timestamps
+
         if (coordinates.size < 2) {
             return ValidationResult.invalid("not_enough_points")
         }
@@ -80,19 +79,19 @@ class LoopValidator(
         val fraudFlags = antiFraudService.detectFraud(coordinates, timestamps)
         
         // Check all validation criteria
-        if (totalDistance < gameProperties.minLoopDistance) {
+        if (totalDistance < flags.minLoopDistanceKm * 1000) {
             failureReasons.add("distance_too_short")
         }
         
-        if (totalDuration < gameProperties.minLoopDuration) {
+        if (totalDuration < flags.minLoopDurationMin * 60) {
             failureReasons.add("duration_too_short")
         }
         
-        if (closingDistance > gameProperties.maxClosingDistance) {
+        if (closingDistance > flags.maxClosureMeters) {
             failureReasons.add("loop_not_closed")
         }
         
-        if (primaryCoverage < gameProperties.minTileCoverage) {
+        if (primaryCoverage < flags.minCoveragePct) {
             failureReasons.add("insufficient_tile_coverage")
         }
         
@@ -111,15 +110,17 @@ class LoopValidator(
         val isValid = failureReasons.isEmpty()
         
         return ValidationResult(
-            isValid = isValid,
-            distance = totalDistance,
-            duration = totalDuration,
-            closingDistance = closingDistance,
+            isLoopValid = isValid,
+            reasons = failureReasons,
+            metrics = LoopValidationMetrics(
+                loopDistanceMeters = totalDistance,
+                loopDurationSeconds = totalDuration,
+                closureMeters = closingDistance,
+                coveragePct = primaryCoverage
+            ),
             tilesCovered = tilesCovered,
             primaryTile = primaryTile,
-            primaryTileCoverage = primaryCoverage,
-            fraudFlags = fraudFlags,
-            failureReasons = failureReasons
+            fraudFlags = fraudFlags
         )
     }
     
