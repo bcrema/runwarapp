@@ -1,7 +1,6 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import { useSearchParams } from 'next/navigation'
 import dynamic from 'next/dynamic'
 import { api, Tile, TileStats, DailyStatus } from '@/lib/api'
 import { useAuth } from '@/lib/auth'
@@ -20,12 +19,9 @@ const HexMap = dynamic(() => import('@/components/map/HexMap'), {
 
 export default function MapPage() {
     const { user } = useAuth()
-    const searchParams = useSearchParams()
     const [stats, setStats] = useState<TileStats | null>(null)
     const [dailyStatus, setDailyStatus] = useState<DailyStatus | null>(null)
     const [selectedTile, setSelectedTile] = useState<Tile | null>(null)
-
-    const focusTileId = searchParams.get('tile')
 
     useEffect(() => {
         const loadData = async () => {
@@ -73,7 +69,7 @@ export default function MapPage() {
 
             {/* Map */}
             <div className={styles.mapContainer}>
-                <HexMap onTileClick={handleTileClick} focusTileId={focusTileId} />
+                <HexMap onTileClick={handleTileClick} />
             </div>
 
             {/* Legend */}
