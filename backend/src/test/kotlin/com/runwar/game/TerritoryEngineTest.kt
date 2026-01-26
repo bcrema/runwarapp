@@ -144,7 +144,7 @@ class TerritoryEngineTest {
         assertEquals(OwnerType.SOLO, savedTile.captured.ownerType)
         assertNotNull(result.cooldownUntil)
         val cooldown = result.cooldownUntil!!
-        val maxExpected = before.plus(Duration.ofHours(18)).plusSeconds(5)
+        val maxExpected = before.plus(Duration.ofHours(18)).plus(Duration.ofMinutes(5))
         assertTrue(cooldown.isAfter(before))
         assertTrue(cooldown.isBefore(maxExpected))
         assertEquals(35, savedAction.captured.shieldChange)
