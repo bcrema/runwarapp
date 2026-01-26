@@ -303,7 +303,12 @@ class RunService(
                         }
                                 ?: false
 
-                if (userCapReached || bandeiraCapReached) reasons.add("CAP_REACHED")
+                if (userCapReached) {
+                        reasons.add("user_daily_cap_reached")
+                }
+                if (bandeiraCapReached) {
+                        reasons.add("bandeira_daily_cap_reached")
+                }
 
                 if (territoryResult != null && !territoryResult.success) {
                         territoryResult.reason?.let { reasons.add(it) }
