@@ -10,7 +10,7 @@ class H3GridServiceTest {
 
     @Test
     fun `resolution defaults to ~250m radius`() {
-        val service = H3GridService(GameProperties(h3Resolution = null, h3TargetRadiusMeters = 250.0))
+        val service = H3GridService(GameProperties(h3TargetRadiusMeters = 250.0))
 
         assertEquals(8, service.resolution)
     }
