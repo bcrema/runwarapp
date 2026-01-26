@@ -116,10 +116,35 @@ struct TerritoryResult: Codable {
     let tileId: String?
 }
 
+struct TurnResult: Codable {
+    let actionType: String?
+    let tileId: String?
+    let h3Index: String?
+    let previousOwner: TurnOwnerSnapshot?
+    let newOwner: TurnOwnerSnapshot?
+    let shieldBefore: Int?
+    let shieldAfter: Int?
+    let cooldownUntil: String?
+    let disputeState: String?
+    let capsRemaining: TurnCapsRemaining
+    let reasons: [String]
+}
+
+struct TurnOwnerSnapshot: Codable {
+    let id: String?
+    let type: OwnerType?
+}
+
+struct TurnCapsRemaining: Codable {
+    let userActionsRemaining: Int
+    let bandeiraActionsRemaining: Int?
+}
+
 struct RunSubmissionResult: Codable {
     let run: Run
     let loopValidation: LoopValidation
     let territoryResult: TerritoryResult?
+    let turnResult: TurnResult?
     let dailyActionsRemaining: Int
 }
 
