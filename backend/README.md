@@ -145,6 +145,10 @@ runwar:
   loop-validation-default-city: curitiba
 ```
 
+Observação: `loop-validation-default-city` é usado apenas para selecionar quais overrides de flags
+serão aplicados a partir da chave correspondente em `byCity` no arquivo JSON. Ele **não** altera a
+área do jogo nem os limites geográficos usados pelo validador, que atualmente permanecem fixos em
+Curitiba (via configuração `runwar.game.curitiba`).
 Formato do arquivo (`loop-validation-flags.json`):
 
 ```json
