@@ -4,10 +4,19 @@ import com.runwar.config.GameProperties
 import com.uber.h3core.H3Core
 import com.uber.h3core.util.LatLng
 import org.locationtech.jts.geom.Coordinate
+import org.locationtech.jts.geom.Geometry
+import org.locationtech.jts.geom.GeometryCollection
 import org.locationtech.jts.geom.GeometryFactory
+import org.locationtech.jts.geom.LineString
+import org.locationtech.jts.geom.MultiLineString
 import org.locationtech.jts.geom.Point
+import org.locationtech.jts.geom.Polygon
 import org.locationtech.jts.geom.PrecisionModel
 import org.springframework.stereotype.Service
+import kotlin.math.abs
+import kotlin.math.ceil
+import kotlin.math.pow
+import kotlin.math.sqrt
 
 @Service
 class H3GridService(private val gameProperties: GameProperties) {
@@ -15,7 +24,8 @@ class H3GridService(private val gameProperties: GameProperties) {
     private val h3: H3Core = H3Core.newInstance()
     private val geometryFactory = GeometryFactory(PrecisionModel(), 4326)
     
-    val resolution: Int get() = gameProperties.h3Resolution
+    val resolution: Int = gameProperties.h3Resolution
+        ?: chooseResolutionForRadius(gameProperties.h3TargetRadiusMeters)
     
     /**
      * Get H3 cell ID for a coordinate
@@ -54,6 +64,14 @@ class H3GridService(private val gameProperties: GameProperties) {
      */
     fun getTileBoundary(tileId: String): List<LatLngPoint> {
         return h3.cellToBoundary(tileId).map { LatLngPoint(it.lat, it.lng) }
+    }
+
+    /**
+     * Resolve a tile index and polygon for a coordinate (map overlay).
+     */
+    fun getTileOverlay(lat: Double, lng: Double): TileOverlay {
+        val tileId = getTileId(lat, lng)
+        return TileOverlay(tileId = tileId, boundary = getTileBoundary(tileId))
     }
     
     /**
@@ -107,14 +125,26 @@ class H3GridService(private val gameProperties: GameProperties) {
             val p1 = coordinates[i]
             val p2 = coordinates[i + 1]
             val segmentDistance = haversineDistance(p1, p2)
+            if (abs(segmentDistance) < 1e-9) {
+                continue
+            }
             totalDistance += segmentDistance
-            
-            // Attribute segment to midpoint tile
-            val midLat = (p1.lat + p2.lat) / 2
-            val midLng = (p1.lng + p2.lng) / 2
-            val tileId = getTileId(midLat, midLng)
-            
-            segmentsByTile[tileId] = (segmentsByTile[tileId] ?: 0.0) + segmentDistance
+
+            val line = geometryFactory.createLineString(
+                arrayOf(
+                    Coordinate(p1.lng, p1.lat),
+                    Coordinate(p2.lng, p2.lat)
+                )
+            )
+
+            val candidateTiles = getCandidateTilesForSegment(p1, p2, segmentDistance)
+            candidateTiles.forEach { tileId ->
+                val polygon = getTilePolygon(tileId)
+                val distanceInTile = intersectionDistanceMeters(line, polygon)
+                if (distanceInTile > 0) {
+                    segmentsByTile[tileId] = (segmentsByTile[tileId] ?: 0.0) + distanceInTile
+                }
+            }
         }
         
         // Convert to percentages
@@ -123,6 +153,19 @@ class H3GridService(private val gameProperties: GameProperties) {
         } else {
             emptyMap()
         }
+    }
+
+    /**
+     * Determine the primary tile (highest coverage) and its overlay boundary for a track.
+     */
+    fun getPrimaryTileForTrack(coordinates: List<LatLngPoint>): TileCoverageResult? {
+        val coverage = calculateTileCoverage(coordinates)
+        val primary = coverage.maxByOrNull { it.value } ?: return null
+        return TileCoverageResult(
+            tileId = primary.key,
+            coverage = primary.value,
+            boundary = getTileBoundary(primary.key)
+        )
     }
     
     /**
@@ -157,8 +200,107 @@ class H3GridService(private val gameProperties: GameProperties) {
         
         return clusters
     }
+
+    private fun chooseResolutionForRadius(targetRadiusMeters: Double): Int {
+        val baseEdgeLengthMeters = 1_107_712.591
+        val edgeLengthRatio = sqrt(7.0)
+        val candidates = 0..15
+        return candidates.minByOrNull { resolution ->
+            val edgeLengthMeters = baseEdgeLengthMeters / edgeLengthRatio.pow(resolution.toDouble())
+            val approxRadiusMeters = edgeLengthMeters / 2.0
+            abs(approxRadiusMeters - targetRadiusMeters)
+        } ?: 8
+    }
+
+    private fun getCandidateTilesForSegment(
+        start: LatLngPoint,
+        end: LatLngPoint,
+        segmentDistanceMeters: Double
+    ): Set<String> {
+        val steps = maxOf(1, ceil(segmentDistanceMeters / SEGMENT_SAMPLE_INTERVAL_METERS).toInt())
+        return (0..steps)
+            .mapTo(mutableSetOf()) { step ->
+                val ratio = step.toDouble() / steps
+                val lat = start.lat + (end.lat - start.lat) * ratio
+                val lng = start.lng + (end.lng - start.lng) * ratio
+                getTileId(lat, lng)
+            }
+    }
+
+    private fun getTilePolygon(tileId: String): Polygon {
+        val boundary = h3.cellToBoundary(tileId)
+        require(boundary.isNotEmpty()) {
+            "Invalid H3 tile ID '$tileId': cellToBoundary returned an empty boundary."
+        }
+        val coordinates = boundary.map { Coordinate(it.lng, it.lat) }.toMutableList()
+        coordinates.add(coordinates.first())
+        return geometryFactory.createPolygon(coordinates.toTypedArray())
+    }
+
+    private fun intersectionDistanceMeters(line: LineString, polygon: Polygon): Double {
+        val intersection = line.intersection(polygon)
+        val lineStrings = mutableListOf<LineString>()
+        collectLineStrings(intersection, lineStrings)
+        return lineStrings.sumOf { lineStringDistanceMeters(it) }
+    }
+
+    private fun collectLineStrings(geometry: Geometry, collector: MutableList<LineString>) {
+        when (geometry) {
+            is LineString -> collector.add(geometry)
+            is MultiLineString,
+            is GeometryCollection -> {
+                for (index in 0 until geometry.numGeometries) {
+                    collectLineStrings(geometry.getGeometryN(index), collector)
+                }
+            }
+        }
+    }
+
+    private fun lineStringDistanceMeters(line: LineString): Double {
+        val coords = line.coordinates
+        if (coords.size < 2) return 0.0
+        var total = 0.0
+        for (i in 0 until coords.size - 1) {
+            val p1 = LatLngPoint(coords[i].y, coords[i].x)
+            val p2 = LatLngPoint(coords[i + 1].y, coords[i + 1].x)
+            total += haversineDistance(p1, p2)
+        }
+        return total
+    }
     
     companion object {
+        /**
+         * Reference H3 resolution for which the base sampling interval is defined.
+         * Resolution 8 corresponds roughly to ~250m radius tiles; the existing 50m
+         * interval was tuned for this resolution.
+         */
+        private const val BASE_H3_RESOLUTION = 8
+
+        /**
+         * Base segment sampling interval in meters for [BASE_H3_RESOLUTION].
+         *
+         * For backward compatibility, this preserves the original behavior of
+         * sampling every 50 meters at resolution 8.
+         */
+        private const val BASE_SEGMENT_SAMPLE_INTERVAL_METERS = 50.0
+
+        /**
+         * Compute an appropriate segment sampling interval (in meters) for a given
+         * H3 resolution.
+         *
+         * As resolution increases, H3 cell sizes shrink. We adjust the sampling
+         * interval exponentially so that higher resolutions use a finer sampling
+         * and lower resolutions use a coarser sampling, while keeping the interval
+         * at [BASE_SEGMENT_SAMPLE_INTERVAL_METERS] for [BASE_H3_RESOLUTION].
+         */
+        fun segmentSampleIntervalMetersForResolution(resolution: Int): Double {
+            val resolutionDelta = resolution - BASE_H3_RESOLUTION
+            val scaleFactor = 2.0.pow(resolutionDelta.toDouble())
+            // For resolution > BASE_H3_RESOLUTION, this yields a smaller interval;
+            // for resolution < BASE_H3_RESOLUTION, a larger interval.
+            return BASE_SEGMENT_SAMPLE_INTERVAL_METERS / scaleFactor
+        }
+
         /**
          * Calculate distance between two points using Haversine formula
          */
@@ -184,4 +326,15 @@ class H3GridService(private val gameProperties: GameProperties) {
 data class LatLngPoint(
     val lat: Double,
     val lng: Double
+)
+
+data class TileOverlay(
+    val tileId: String,
+    val boundary: List<LatLngPoint>
+)
+
+data class TileCoverageResult(
+    val tileId: String,
+    val coverage: Double,
+    val boundary: List<LatLngPoint>
 )

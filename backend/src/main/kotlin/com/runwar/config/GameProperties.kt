@@ -31,7 +31,8 @@ data class GameProperties(
     val maxSpeedDurationSeconds: Int = 30,
     
     // H3 Grid
-    val h3Resolution: Int = 8,
+    val h3Resolution: Int? = null,
+    val h3TargetRadiusMeters: Double = 250.0,
     
     // Curitiba bounds
     val curitiba: CuritibaBounds = CuritibaBounds()
