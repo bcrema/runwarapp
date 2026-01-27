@@ -217,7 +217,7 @@ class H3GridService(private val gameProperties: GameProperties) {
         end: LatLngPoint,
         segmentDistanceMeters: Double
     ): Set<String> {
-        val steps = maxOf(1, ceil(segmentDistanceMeters / SEGMENT_SAMPLE_INTERVAL_METERS).toInt())
+        val steps = maxOf(1, ceil(segmentDistanceMeters / segmentSampleIntervalMetersForResolution(resolution)).toInt())
         return (0..steps)
             .mapTo(mutableSetOf()) { step ->
                 val ratio = step.toDouble() / steps
