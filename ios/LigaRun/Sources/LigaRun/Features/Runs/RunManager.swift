@@ -110,7 +110,6 @@ class RunManager: ObservableObject {
             } catch {
                 // Keep session persisted for retry
             }
-            self.uploadTask = nil
         }
     }
 
