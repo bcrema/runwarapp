@@ -9,6 +9,7 @@ import com.runwar.game.LoopValidationInput
 import com.runwar.game.LoopValidator
 import com.runwar.game.ShieldMechanics
 import com.runwar.geo.GpxParser
+import com.runwar.telemetry.RunTelemetryService
 import java.math.BigDecimal
 import java.time.Instant
 import java.util.*
@@ -26,7 +27,8 @@ class RunService(
         private val shieldMechanics: ShieldMechanics,
         private val gameProperties: GameProperties,
         private val tileRepository: TileRepository,
-        private val capsService: CapsService
+        private val capsService: CapsService,
+        private val runTelemetryService: RunTelemetryService
 ) {
 
         data class RunDto(
@@ -165,6 +167,14 @@ class RunService(
                                 capsCheck.bandeiraActionsToday
                         )
 
+                runTelemetryService.recordRunTelemetry(
+                        run = savedRun,
+                        validation = validation,
+                        territoryResult = territoryResult,
+                        capsCheck = capsCheck,
+                        turnResult = turnResult
+                )
+
                 return RunSubmissionResult(
                         run = RunDto.from(savedRun),
                         loopValidation = validation,
@@ -250,6 +260,14 @@ class RunService(
                                 capsCheck.actionsToday,
                                 capsCheck.bandeiraActionsToday
                         )
+
+                runTelemetryService.recordRunTelemetry(
+                        run = savedRun,
+                        validation = validation,
+                        territoryResult = territoryResult,
+                        capsCheck = capsCheck,
+                        turnResult = turnResult
+                )
 
                 return RunSubmissionResult(
                         run = RunDto.from(savedRun),
