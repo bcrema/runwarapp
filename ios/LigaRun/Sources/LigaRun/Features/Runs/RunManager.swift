@@ -102,8 +102,13 @@ class RunManager: ObservableObject {
             lastError: nil
         )
 
-        uploadTask = Task {
+        uploadTask = Task { [weak self] in
+            guard let self else { return }
             _ = try? await sessionStore.append(session)
+            
+            // Check if task was cancelled before uploading
+            if Task.isCancelled { return }
+            
             do {
                 let result = try await uploadService.upload(session)
                 self.submissionResult = result
