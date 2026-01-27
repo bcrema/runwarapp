@@ -103,6 +103,7 @@ class RunManager: ObservableObject {
         )
 
         uploadTask = Task {
+            defer { self.uploadTask = nil }
             _ = try? await sessionStore.append(session)
             do {
                 let result = try await uploadService.upload(session)
