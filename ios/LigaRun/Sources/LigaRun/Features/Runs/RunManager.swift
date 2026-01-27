@@ -24,6 +24,7 @@ class RunManager: ObservableObject {
     private var timer: AnyCancellable?
     private var cancellables = Set<AnyCancellable>()
     private var startTime: Date?
+    private var uploadTask: Task<Void, Never>?
 
     let loopGoal: Double = 1200 // 1.2km
 
@@ -41,6 +42,10 @@ class RunManager: ObservableObject {
                 self?.handleNewLocation(location)
             }
             .store(in: &cancellables)
+    }
+    
+    deinit {
+        uploadTask?.cancel()
     }
 
     func startRun() {
@@ -79,6 +84,9 @@ class RunManager: ObservableObject {
         timer?.cancel()
         locationManager.stopTracking()
         guard let startTime else { return }
+        
+        // Cancel any existing upload task
+        uploadTask?.cancel()
 
         let endTime = Date()
         let points = locations.map { RunTrackPoint(location: $0) }
@@ -94,8 +102,14 @@ class RunManager: ObservableObject {
             lastError: nil
         )
 
-        Task {
+        uploadTask = Task { [weak self] in
+            guard let self else { return }
+            // Always persist session locally for retry, even if cancelled
             _ = try? await sessionStore.append(session)
+            
+            // Check if task was cancelled before uploading
+            if Task.isCancelled { return }
+            
             do {
                 let result = try await uploadService.upload(session)
                 self.submissionResult = result
