@@ -104,6 +104,7 @@ class RunManager: ObservableObject {
 
         uploadTask = Task { [weak self] in
             guard let self else { return }
+            // Always persist session locally for retry, even if cancelled
             _ = try? await sessionStore.append(session)
             
             // Check if task was cancelled before uploading
