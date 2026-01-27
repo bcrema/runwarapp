@@ -37,3 +37,13 @@ targets:
       Release: Config/Release.xcconfig
     dependencies:
       - package: MapboxMaps
+  LigaRunTests:
+    type: bundle.unit-test
+    platform: iOS
+    deploymentTarget: "16.0"
+    sources:
+      - path: Tests/LigaRunTests
+    info:
+      path: Tests/Info.plist
+    dependencies:
+      - target: LigaRun

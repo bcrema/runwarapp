@@ -9,9 +9,13 @@ final class RunsViewModel: ObservableObject {
     @Published var submissionResult: RunSubmissionResult?
 
     private let session: SessionStore
+    private let runSessionStore: RunSessionStore
+    private let uploadService: RunUploadService
 
-    init(session: SessionStore) {
+    init(session: SessionStore, runSessionStore: RunSessionStore = RunSessionStore()) {
         self.session = session
+        self.runSessionStore = runSessionStore
+        self.uploadService = RunUploadService(api: session.api, store: runSessionStore)
     }
 
     func load() async {
@@ -20,10 +24,16 @@ final class RunsViewModel: ObservableObject {
         defer { isLoading = false }
 
         do {
+            let uploadResults = await uploadService.uploadPendingSessions()
             async let runsTask = session.api.getMyRuns(limit: 20)
             async let statusTask = session.api.getDailyStatus()
             runs = try await runsTask
             dailyStatus = try await statusTask
+            if uploadResults.count == 1 {
+                submissionResult = uploadResults[0]
+            } else {
+                submissionResult = nil
+            }
         } catch let apiError as APIError {
             errorMessage = "API Error: \(apiError.message)"
         } catch {
