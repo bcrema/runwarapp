@@ -107,7 +107,7 @@ struct ActiveRunHUD: View {
         if tile.isInDispute {
             parts.append("Em disputa")
         }
-        return "Tile #\(tile.id.prefix(6)) • " + parts.joined(separator: " • ")
+        return "Tile #\(String(tile.id.prefix(6))) • " + parts.joined(separator: " • ")
     }
 
     private var statsCard: some View {
@@ -205,6 +205,11 @@ struct ActiveRunHUD: View {
 
     private func updateFocusCoordinate() {
         guard let location = runManager.currentLocation else { return }
+        if lastFocusLocation == nil {
+            lastFocusLocation = location
+            focusCoordinate = location.coordinate
+            return
+        }
         if let lastFocusLocation, location.distance(from: lastFocusLocation) < 20 {
             return
         }

@@ -23,7 +23,7 @@ struct RunTrackPoint: Codable, Equatable {
               lhs.altitude == rhs.altitude,
               lhs.horizontalAccuracy == rhs.horizontalAccuracy
         else { return false }
-        return abs(lhs.timestamp.timeIntervalSince1970 - rhs.timestamp.timeIntervalSince1970) <= 0.001
+        return abs(lhs.timestamp.timeIntervalSince1970 - rhs.timestamp.timeIntervalSince1970) <= 0.01
     }
 }
 
@@ -60,7 +60,7 @@ struct RunSessionRecord: Codable, Identifiable, Equatable {
     }
 
     private static func datesEqual(_ lhs: Date, _ rhs: Date) -> Bool {
-        abs(lhs.timeIntervalSince1970 - rhs.timeIntervalSince1970) <= 0.001
+        abs(lhs.timeIntervalSince1970 - rhs.timeIntervalSince1970) <= 0.01
     }
 
     private static func datesEqual(_ lhs: Date?, _ rhs: Date?) -> Bool {
@@ -85,7 +85,22 @@ actor RunSessionStore {
         encoder = JSONEncoder()
         encoder.dateEncodingStrategy = .iso8601
         decoder = JSONDecoder()
-        decoder.dateDecodingStrategy = .iso8601
+        decoder.dateDecodingStrategy = .custom { decoder in
+            let container = try decoder.singleValueContainer()
+            let string = try container.decode(String.self)
+            let fractionalFormatter = ISO8601DateFormatter()
+            fractionalFormatter.formatOptions = [.withInternetDateTime, .withFractionalSeconds]
+            let internetDateTimeFormatter = ISO8601DateFormatter()
+            internetDateTimeFormatter.formatOptions = [.withInternetDateTime]
+            if let date = fractionalFormatter.date(from: string)
+                ?? internetDateTimeFormatter.date(from: string) {
+                return date
+            }
+            throw DecodingError.dataCorruptedError(
+                in: container,
+                debugDescription: "Invalid ISO8601 date string: \(string)"
+            )
+        }
         self.fileURL = fileURL ?? RunSessionStore.defaultFileURL()
     }
 
