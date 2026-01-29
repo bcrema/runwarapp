@@ -1,10 +1,13 @@
 import SwiftUI
 import UniformTypeIdentifiers
+import UIKit
 
 struct RunsView: View {
     @StateObject private var viewModel: RunsViewModel
+    @StateObject private var healthKitStore = HealthKitAuthorizationStore()
     @State private var showingImporter = false
     @EnvironmentObject private var session: SessionStore
+    @Environment(\.openURL) private var openURL
 
     init(session: SessionStore) {
         _viewModel = StateObject(wrappedValue: RunsViewModel(session: session))
@@ -19,6 +22,20 @@ struct RunsView: View {
     @ViewBuilder
     private var content: some View {
         List {
+            Section("Saúde") {
+                HealthKitPermissionCard(
+                    availability: healthKitStore.availability,
+                    status: healthKitStore.status,
+                    onRequest: {
+                        healthKitStore.requestAuthorization()
+                    },
+                    onOpenSettings: {
+                        guard let url = URL(string: UIApplication.openSettingsURLString) else { return }
+                        openURL(url)
+                    }
+                )
+            }
+
             if let status = viewModel.dailyStatus {
                 Section("Ações diárias") {
                     HStack {
@@ -82,6 +99,9 @@ struct RunsView: View {
         .task {
             await viewModel.load()
         }
+        .onAppear {
+            healthKitStore.refreshStatus()
+        }
         .alert("Erro", isPresented: Binding(get: {
             viewModel.errorMessage != nil
         }, set: { newValue in
@@ -128,6 +148,106 @@ struct RunsView: View {
             NavigationView { content() }
                 .navigationViewStyle(StackNavigationViewStyle())
         }
+    }
+}
+
+private struct HealthKitPermissionCard: View {
+    let availability: HealthKitAvailability
+    let status: HealthKitAuthorizationState
+    let onRequest: () -> Void
+    let onOpenSettings: () -> Void
+
+    private var statusLabel: String {
+        switch availability {
+        case .notAvailable:
+            return "Indisponível"
+        case .checking:
+            return "Verificando"
+        case .available:
+            switch status {
+            case .authorized:
+                return "Concedido"
+            case .denied:
+                return "Negado"
+            case .restricted:
+                return "Restrito"
+            case .notDetermined:
+                return "Pendente"
+            }
+        }
+    }
+
+    private var statusColor: Color {
+        switch availability {
+        case .notAvailable:
+            return .secondary
+        case .checking:
+            return .secondary
+        case .available:
+            switch status {
+            case .authorized:
+                return .green
+            case .denied:
+                return .red
+            case .restricted:
+                return .orange
+            case .notDetermined:
+                return .secondary
+            }
+        }
+    }
+
+    private var descriptionText: String {
+        switch availability {
+        case .notAvailable:
+            return "O HealthKit não está disponível neste dispositivo."
+        case .checking:
+            return "Verificando disponibilidade do Saúde..."
+        case .available:
+            return "Permita que o LigaRun leia suas corridas para importar automaticamente."
+        }
+    }
+
+    private var showsRequestButton: Bool {
+        availability == .available && status == .notDetermined
+    }
+
+    private var showsSettingsButton: Bool {
+        availability == .available && (status == .denied || status == .restricted)
+    }
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 12) {
+            HStack {
+                Text("Permitir acesso ao Saúde")
+                    .font(.headline)
+                Spacer()
+                Text(statusLabel)
+                    .font(.subheadline.bold())
+                    .foregroundColor(statusColor)
+            }
+
+            Text(descriptionText)
+                .font(.subheadline)
+                .foregroundColor(.secondary)
+
+            if showsRequestButton {
+                Button(action: onRequest) {
+                    Text("Permitir acesso ao Saúde")
+                        .frame(maxWidth: .infinity)
+                }
+                .buttonStyle(.borderedProminent)
+            }
+
+            if showsSettingsButton {
+                Button(action: onOpenSettings) {
+                    Text("Abrir Ajustes")
+                        .frame(maxWidth: .infinity)
+                }
+                .buttonStyle(.bordered)
+            }
+        }
+        .padding(.vertical, 4)
     }
 }
 

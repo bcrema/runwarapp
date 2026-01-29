@@ -32,6 +32,8 @@ targets:
       base:
         PRODUCT_BUNDLE_IDENTIFIER: com.runwar.ligarun
         SWIFT_VERSION: 6.0
+    capabilities:
+      healthKit: true
     configFiles:
       Debug: Config/Debug.xcconfig
       Release: Config/Release.xcconfig
