@@ -1,4 +1,5 @@
 import Foundation
+import CoreLocation
 
 protocol RunServiceProtocol {
     func submitRunCoordinates(coordinates: [CLLocationCoordinate2D], timestamps: [Int]) async throws -> RunSubmissionResult

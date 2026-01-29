@@ -47,3 +47,12 @@ targets:
       path: Tests/Info.plist
     dependencies:
       - target: LigaRun
+
+schemes:
+  LigaRun:
+    build:
+      targets:
+        LigaRun: all
+    test:
+      targets:
+        - LigaRunTests

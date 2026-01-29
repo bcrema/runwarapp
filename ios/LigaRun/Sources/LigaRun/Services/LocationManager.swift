@@ -12,15 +12,19 @@ class LocationManager: NSObject, ObservableObject, CLLocationManagerDelegate {
         locationManager.delegate = self
         locationManager.desiredAccuracy = kCLLocationAccuracyBest
         locationManager.distanceFilter = 5 // Update every 5 meters
-        locationManager.allowsBackgroundLocationUpdates = true
         locationManager.pausesLocationUpdatesAutomatically = false
+        authorizationStatus = locationManager.authorizationStatus
+        updateBackgroundLocationSetting(for: authorizationStatus)
     }
     
     func requestPermission() {
-        locationManager.requestWhenInUseAuthorization()
+        if locationManager.authorizationStatus == .notDetermined {
+            locationManager.requestWhenInUseAuthorization()
+        }
     }
     
     func startTracking() {
+        updateBackgroundLocationSetting(for: locationManager.authorizationStatus)
         locationManager.startUpdatingLocation()
     }
     
@@ -32,6 +36,7 @@ class LocationManager: NSObject, ObservableObject, CLLocationManagerDelegate {
     
     func locationManagerDidChangeAuthorization(_ manager: CLLocationManager) {
         authorizationStatus = manager.authorizationStatus
+        updateBackgroundLocationSetting(for: manager.authorizationStatus)
     }
     
     func locationManager(_ manager: CLLocationManager, didUpdateLocations locations: [CLLocation]) {
@@ -41,5 +46,19 @@ class LocationManager: NSObject, ObservableObject, CLLocationManagerDelegate {
     
     func locationManager(_ manager: CLLocationManager, didFailWithError error: Error) {
         print("Location Manager Error: \(error.localizedDescription)")
+    }
+
+    private var supportsBackgroundLocationUpdates: Bool {
+        guard let modes = Bundle.main.object(forInfoDictionaryKey: "UIBackgroundModes") as? [String] else {
+            return false
+        }
+        return modes.contains("location")
+    }
+
+    private func updateBackgroundLocationSetting(for status: CLAuthorizationStatus) {
+        let shouldAllowBackground = supportsBackgroundLocationUpdates && status == .authorizedAlways
+        if locationManager.allowsBackgroundLocationUpdates != shouldAllowBackground {
+            locationManager.allowsBackgroundLocationUpdates = shouldAllowBackground
+        }
     }
 }
