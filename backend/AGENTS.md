@@ -13,6 +13,7 @@
 - Seguir estilos existentes (Kotlin + Spring idiomático).
 - Use `rg` para busca; evite mexer em pacotes/namespaces (`com.runwar`) sem pedido explícito.
 - Não renomeie variáveis/identificadores técnicos (tokens, DB names) sem aprovação.
+- Sempre trabalhe em uma branch de feature separada da `main` e abra PR para revisão, evitando merges diretos.
 
 ## Testes
 - Sempre garanta cobertura de testes e resultados passando para mudanças.

@@ -27,6 +27,7 @@
 - Manter SwiftUI/Combine simples; evitar mudar bundle id ou targets sem pedido.
 - Atualize `configFiles` em `project.yml` se adicionar novas configs.
 - Não exponha segredos; use xcconfig para valores.
+- Sempre trabalhe em uma branch de feature separada da `main` e abra PR para revisão, evitando merges diretos.
 
 ## Testes
 - Sempre garanta cobertura de testes e resultados passando para mudanças.

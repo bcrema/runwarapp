@@ -13,6 +13,7 @@
 - Seguir componentes e CSS modules existentes; evitar mudar rotas/app dir sem alinhamento.
 - Prefira `rg` para buscas e manter nomes/prefixos atuais (tokens, storage keys).
 - Evite introduzir dependências sem alinhamento.
+- Sempre trabalhe em uma branch de feature separada da `main` e abra PR para revisão, evitando merges diretos.
 
 ## Testes
 - Sempre garanta cobertura de testes e resultados passando para mudanças.
