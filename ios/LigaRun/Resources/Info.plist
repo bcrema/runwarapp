@@ -24,6 +24,8 @@
 	<string>1</string>
 	<key>MAPBOX_ACCESS_TOKEN</key>
 	<string>$(MAPBOX_ACCESS_TOKEN)</string>
+	<key>NSLocationWhenInUseUsageDescription</key>
+	<string>Precisamos da sua localizacao para acompanhar suas corridas e mostrar o mapa.</string>
 	<key>UILaunchScreen</key>
 	<dict>
 		<key>UIColorName</key>

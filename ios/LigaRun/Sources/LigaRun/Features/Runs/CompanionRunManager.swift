@@ -95,9 +95,11 @@ final class CompanionRunManager: ObservableObject {
     }
 
     private func updatePace() {
-        if distanceMeters > 0 {
-            currentPace = duration / (distanceMeters / 1000)
+        guard distanceMeters > 0 else {
+            currentPace = 0
+            return
         }
+        currentPace = duration / (distanceMeters / 1000)
     }
 
     private func updateLoopProgress() {

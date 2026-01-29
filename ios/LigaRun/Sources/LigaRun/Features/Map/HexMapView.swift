@@ -125,32 +125,7 @@ struct HexMapView: UIViewRepresentable {
             else { return }
 
             let features: [Feature] = tiles.compactMap { tile in
-                var coords = tile.boundaryCoordinates
-
-                // Ensure we have a valid closed ring for fill polygons.
-                guard coords.count >= 3, let first = coords.first else {
-                    return nil
-                }
-                if coords.last != first {
-                    coords.append(first)
-                }
-
-                let ring = Ring(coordinates: coords.map { LocationCoordinate2D(latitude: $0.latitude, longitude: $0.longitude) })
-                let polygon = Polygon([ring.coordinates])
-                var feature = Feature(geometry: polygon)
-                feature.identifier = .string(tile.id)
-
-                let fillColor = tile.ownerColor ?? "#6b7280"
-                let strokeColor = tile.isInDispute ? "#f59e0b" : (tile.ownerColor ?? "#ffffff")
-                let fillOpacity: Double = tile.ownerType == nil ? 0.1 : 0.4
-
-                feature.properties = [
-                    "fillColor": .string(fillColor),
-                    "strokeColor": .string(strokeColor),
-                    "fillOpacity": .number(fillOpacity)
-                ]
-
-                return feature
+                makePolygonFeature(for: tile)
             }
 
             let collection = FeatureCollection(features: features)
@@ -178,11 +153,14 @@ struct HexMapView: UIViewRepresentable {
 
         func updateUserLocationDisplay() {
             guard let mapView else { return }
-            if showsUserLocation {
+            let status = CLLocationManager.authorizationStatus()
+            let isAuthorized = status == .authorizedWhenInUse || status == .authorizedAlways
+            if showsUserLocation && isAuthorized {
                 mapView.location.options.puckType = .puck2D()
                 mapView.location.options.puckBearingEnabled = true
             } else {
                 mapView.location.options.puckType = nil
+                mapView.location.options.puckBearingEnabled = false
             }
         }
 
@@ -223,6 +201,49 @@ struct HexMapView: UIViewRepresentable {
             lastFocusedCoordinate = coordinate
             let camera = CameraOptions(center: coordinate, zoom: 15)
             mapView.camera.ease(to: camera, duration: 0.8, curve: .easeInOut)
+        }
+
+        private func makePolygonFeature(for tile: Tile) -> Feature? {
+            let coords = tile.boundaryCoordinates.map {
+                LocationCoordinate2D(latitude: $0.latitude, longitude: $0.longitude)
+            }
+
+            guard coords.count >= 3, let first = coords.first else { return nil }
+
+            var ring = coords
+            if let last = ring.last,
+               first.latitude != last.latitude || first.longitude != last.longitude {
+                ring.append(first)
+            }
+
+            guard ring.count >= 4, abs(polygonArea(ring)) > 0.0000001 else { return nil }
+
+            let polygon = Polygon([ring])
+            var feature = Feature(geometry: .polygon(polygon))
+            feature.identifier = .string(tile.id)
+
+            let fillColor = tile.ownerColor ?? "#6b7280"
+            let strokeColor = tile.isInDispute ? "#f59e0b" : (tile.ownerColor ?? "#ffffff")
+            let fillOpacity: Double = tile.ownerType == nil ? 0.1 : 0.4
+
+            feature.properties = [
+                "fillColor": .string(fillColor),
+                "strokeColor": .string(strokeColor),
+                "fillOpacity": .number(fillOpacity)
+            ]
+
+            return feature
+        }
+
+        private func polygonArea(_ ring: [LocationCoordinate2D]) -> Double {
+            guard ring.count >= 3 else { return 0 }
+            var area = 0.0
+            for index in 0..<(ring.count - 1) {
+                let current = ring[index]
+                let next = ring[index + 1]
+                area += (current.longitude * next.latitude) - (next.longitude * current.latitude)
+            }
+            return area * 0.5
         }
     }
 }
