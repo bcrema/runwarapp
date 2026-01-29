@@ -1,6 +1,7 @@
 import Foundation
 import OSLog
 
+@MainActor
 final class RunUploadService {
     private let api: APIClient
     private let store: RunSessionStore

@@ -4,6 +4,7 @@ import UniformTypeIdentifiers
 struct RunsView: View {
     @StateObject private var viewModel: RunsViewModel
     @State private var showingImporter = false
+    @State private var showingActiveRun = false
     @EnvironmentObject private var session: SessionStore
 
     init(session: SessionStore) {
@@ -19,6 +20,28 @@ struct RunsView: View {
     @ViewBuilder
     private var content: some View {
         List {
+            Section("Corrida") {
+                Button {
+                    showingActiveRun = true
+                } label: {
+                    HStack(spacing: 12) {
+                        Image(systemName: "figure.run")
+                            .foregroundColor(.green)
+                        VStack(alignment: .leading, spacing: 4) {
+                            Text("Acompanhar corrida")
+                                .font(.headline)
+                            Text("Abra o Fitness/Workout para iniciar. O LigaRun mostra o território em tempo real.")
+                                .font(.caption)
+                                .foregroundColor(.secondary)
+                        }
+                        Spacer()
+                        Image(systemName: "chevron.right")
+                            .foregroundColor(.secondary)
+                    }
+                    .padding(.vertical, 4)
+                }
+            }
+
             if let status = viewModel.dailyStatus {
                 Section("Ações diárias") {
                     HStack {
@@ -117,6 +140,9 @@ struct RunsView: View {
             case .failure(let error):
                 viewModel.errorMessage = error.localizedDescription
             }
+        }
+        .fullScreenCover(isPresented: $showingActiveRun) {
+            ActiveRunHUD(session: session)
         }
     }
 

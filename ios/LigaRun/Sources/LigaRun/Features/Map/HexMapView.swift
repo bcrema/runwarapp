@@ -6,6 +6,9 @@ struct HexMapView: UIViewRepresentable {
     @Binding var selectedTile: Tile?
     var tiles: [Tile]
     var focusCoordinate: CLLocationCoordinate2D?
+    var routeCoordinates: [CLLocationCoordinate2D] = []
+    var showsUserLocation: Bool = false
+    var styleURI: StyleURI = .dark
     var onVisibleRegionChanged: ((CoordinateBounds) -> Void)?
     var onTileTapped: ((Tile) -> Void)?
 
@@ -16,7 +19,7 @@ struct HexMapView: UIViewRepresentable {
                 center: CLLocationCoordinate2D(latitude: -25.43, longitude: -49.27),
                 zoom: 13
             ),
-            styleURI: .dark
+            styleURI: styleURI
         )
         let mapView = MapView(frame: .zero, mapInitOptions: initOptions)
 
@@ -31,6 +34,9 @@ struct HexMapView: UIViewRepresentable {
         context.coordinator.selectedTile = selectedTile
         context.coordinator.onVisibleRegionChanged = onVisibleRegionChanged
         context.coordinator.focusCoordinate = focusCoordinate
+        context.coordinator.showsUserLocation = showsUserLocation
+        context.coordinator.updateUserLocationDisplay()
+        context.coordinator.updateRoute(routeCoordinates)
         context.coordinator.updateFocusIfNeeded()
     }
 
@@ -45,10 +51,12 @@ struct HexMapView: UIViewRepresentable {
         var onVisibleRegionChanged: ((CoordinateBounds) -> Void)?
         var selectedTile: Tile?
         var focusCoordinate: CLLocationCoordinate2D?
+        var showsUserLocation: Bool = false
         private var addedTapHandler = false
         private var cancellables: [Cancelable] = []
         private var isMapLoaded = false
         private var lastFocusedCoordinate: CLLocationCoordinate2D?
+        private var pendingRouteCoordinates: [CLLocationCoordinate2D] = []
 
         func bind(mapView: MapView) {
             self.mapView = mapView
@@ -72,6 +80,19 @@ struct HexMapView: UIViewRepresentable {
             outline.lineOpacity = .constant(0.6)
             try? mapView.mapboxMap.addLayer(outline)
 
+            var routeSource = GeoJSONSource(id: "route-source")
+            routeSource.data = .featureCollection(.init(features: []))
+            try? mapView.mapboxMap.addSource(routeSource)
+
+            var routeLayer = LineLayer(id: "route-line", source: "route-source")
+            routeLayer.lineColor = .constant(StyleColor("#34d399"))
+            routeLayer.lineWidth = .constant(4.0)
+            routeLayer.lineOpacity = .constant(0.9)
+            routeLayer.lineCap = .constant(.round)
+            routeLayer.lineJoin = .constant(.round)
+            try? mapView.mapboxMap.addLayer(routeLayer)
+
+            updateUserLocationDisplay()
             addTapHandlerIfNeeded()
         }
 
@@ -133,7 +154,36 @@ struct HexMapView: UIViewRepresentable {
             }
 
             let collection = FeatureCollection(features: features)
-            mapView.mapboxMap.updateGeoJSONSource(withId: "hex-source", geoJSON: .featureCollection(collection))
+            let data = GeoJSONSourceData.featureCollection(collection)
+            mapView.mapboxMap.updateGeoJSONSource(withId: "hex-source", data: data)
+        }
+
+        func updateRoute(_ coordinates: [CLLocationCoordinate2D]) {
+            pendingRouteCoordinates = coordinates
+            guard let mapView, isMapLoaded,
+                  mapView.mapboxMap.sourceExists(withId: "route-source")
+            else { return }
+
+            let geoJSON: GeoJSONSourceData
+            if coordinates.count >= 2 {
+                let lineCoords = coordinates.map { LocationCoordinate2D(latitude: $0.latitude, longitude: $0.longitude) }
+                let line = LineString(lineCoords)
+                geoJSON = .feature(Feature(geometry: .lineString(line)))
+            } else {
+                geoJSON = .featureCollection(FeatureCollection(features: []))
+            }
+
+            mapView.mapboxMap.updateGeoJSONSource(withId: "route-source", data: geoJSON)
+        }
+
+        func updateUserLocationDisplay() {
+            guard let mapView else { return }
+            if showsUserLocation {
+                mapView.location.options.puckType = .puck2D()
+                mapView.location.options.puckBearingEnabled = true
+            } else {
+                mapView.location.options.puckType = nil
+            }
         }
 
         private func setupObservers() {
@@ -143,6 +193,7 @@ struct HexMapView: UIViewRepresentable {
                 mapView.mapboxMap.onMapLoaded.observeNext { [weak self] _ in
                     self?.configureStyle()
                     self?.isMapLoaded = true
+                    self?.updateRoute(self?.pendingRouteCoordinates ?? [])
                     self?.updateFocusIfNeeded()
                 }
             )

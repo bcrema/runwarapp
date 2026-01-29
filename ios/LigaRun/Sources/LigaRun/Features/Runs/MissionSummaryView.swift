@@ -8,13 +8,19 @@ struct MissionSummaryView: View {
     let loopValid: Bool
     let actionsUsed: Int
     let actionCap: Int
+    @State private var viewport = Viewport.camera(
+        center: CLLocationCoordinate2D(latitude: -25.43, longitude: -49.27),
+        zoom: 13,
+        bearing: 0,
+        pitch: 0
+    )
     
     var body: some View {
         ScrollView {
             VStack(spacing: 24) {
                 // Map Snapshot Area
                 ZStack(alignment: .bottomLeading) {
-                    Map(key: "static-map")
+                    Map(viewport: $viewport)
                          .mapStyle(.standard) // Light style
                          .ignoresSafeArea()
                          .frame(height: 300)

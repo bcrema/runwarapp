@@ -1,6 +1,6 @@
 import SwiftUI
 
-struct Tile: Identifiable {
+struct TileDetailsModel: Identifiable {
     let id: String
     let ownerName: String?
     let ownerColor: String? // Hex string
@@ -10,7 +10,7 @@ struct Tile: Identifiable {
 }
 
 struct TileDetailsView: View {
-    let tile: Tile
+    let tile: TileDetailsModel
     
     // Design System Colors
     private let tealColor = Color(red: 0/255, green: 200/255, blue: 150/255)
@@ -122,37 +122,18 @@ struct TileDetailsView: View {
     }
 }
 
-// Helper for Hex Color
-extension Color {
-    init(hex: String) {
-        let hex = hex.trimmingCharacters(in: CharacterSet.alphanumerics.inverted)
-        var int: UInt64 = 0
-        Scanner(string: hex).scanHexInt64(&int)
-        let a, r, g, b: UInt64
-        switch hex.count {
-        case 3: // RGB (12-bit)
-            (a, r, g, b) = (255, (int >> 8) * 17, (int >> 4 & 0xF) * 17, (int & 0xF) * 17)
-        case 6: // RGB (24-bit)
-            (a, r, g, b) = (255, int >> 16, int >> 8 & 0xFF, int & 0xFF)
-        case 8: // ARGB (32-bit)
-            (a, r, g, b) = (int >> 24, int >> 16 & 0xFF, int >> 8 & 0xFF, int & 0xFF)
-        default:
-            (a, r, g, b) = (1, 1, 1, 0)
-        }
-
-        self.init(
-            .sRGB,
-            red: Double(r) / 255,
-            green: Double(g) / 255,
-            blue:  Double(b) / 255,
-            opacity: Double(a) / 255
-        )
-    }
-}
-
 struct TileDetailsView_Previews: PreviewProvider {
     static var previews: some View {
-        TileDetailsView(tile: Tile(id: "8291-A", ownerName: "Team Iron", ownerColor: "#3498db", shield: 80, isInDispute: true, isInCooldown: false))
+        TileDetailsView(
+            tile: TileDetailsModel(
+                id: "8291-A",
+                ownerName: "Team Iron",
+                ownerColor: "#3498db",
+                shield: 80,
+                isInDispute: true,
+                isInCooldown: false
+            )
+        )
             .previewLayout(.sizeThatFits)
     }
 }
