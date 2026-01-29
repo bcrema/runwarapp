@@ -1,8 +1,7 @@
 import Foundation
 import OSLog
 
-@MainActor
-final class RunUploadService {
+final class RunUploadService: Sendable {
     private let api: APIClient
     private let store: RunSessionStore
     private let logger = Logger(subsystem: AppEnvironment.keychainService, category: "RunUploadService")

@@ -60,7 +60,7 @@ struct RunSessionRecord: Codable, Identifiable, Equatable {
     }
 
     private static func datesEqual(_ lhs: Date, _ rhs: Date) -> Bool {
-        abs(lhs.timeIntervalSince1970 - rhs.timeIntervalSince1970) <= 0.01
+        abs(lhs.timeIntervalSince1970 - rhs.timeIntervalSince1970) <= 0.001
     }
 
     private static func datesEqual(_ lhs: Date?, _ rhs: Date?) -> Bool {
@@ -83,7 +83,12 @@ actor RunSessionStore {
 
     init(fileURL: URL? = nil) {
         encoder = JSONEncoder()
-        encoder.dateEncodingStrategy = .iso8601
+        encoder.dateEncodingStrategy = .custom { date, encoder in
+            var container = encoder.singleValueContainer()
+            let formatter = ISO8601DateFormatter()
+            formatter.formatOptions = [.withInternetDateTime, .withFractionalSeconds]
+            try container.encode(formatter.string(from: date))
+        }
         decoder = JSONDecoder()
         decoder.dateDecodingStrategy = .custom { decoder in
             let container = try decoder.singleValueContainer()
