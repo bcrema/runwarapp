@@ -83,30 +83,9 @@ actor RunSessionStore {
 
     init(fileURL: URL? = nil) {
         encoder = JSONEncoder()
-        encoder.dateEncodingStrategy = .custom { date, encoder in
-            let formatter = ISO8601DateFormatter()
-            formatter.formatOptions = [.withInternetDateTime, .withFractionalSeconds]
-            let string = formatter.string(from: date)
-            var container = encoder.singleValueContainer()
-            try container.encode(string)
-        }
+        encoder.dateEncodingStrategy = .iso8601
         decoder = JSONDecoder()
-        decoder.dateDecodingStrategy = .custom { decoder in
-            let container = try decoder.singleValueContainer()
-            let string = try container.decode(String.self)
-            let fractionalFormatter = ISO8601DateFormatter()
-            fractionalFormatter.formatOptions = [.withInternetDateTime, .withFractionalSeconds]
-            let internetDateTimeFormatter = ISO8601DateFormatter()
-            internetDateTimeFormatter.formatOptions = [.withInternetDateTime]
-            if let date = fractionalFormatter.date(from: string)
-                ?? internetDateTimeFormatter.date(from: string) {
-                return date
-            }
-            throw DecodingError.dataCorruptedError(
-                in: container,
-                debugDescription: "Invalid ISO8601 date string: \(string)"
-            )
-        }
+        decoder.dateDecodingStrategy = .iso8601
         self.fileURL = fileURL ?? RunSessionStore.defaultFileURL()
     }
 
