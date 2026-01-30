@@ -1,14 +1,14 @@
 import Foundation
 import CoreLocation
 
-protocol RunServiceProtocol {
+protocol RunServiceProtocol: Sendable {
     func submitRunGpx(fileURL: URL) async throws -> RunSubmissionResult
     func submitRunCoordinates(coordinates: [CLLocationCoordinate2D], timestamps: [Int]) async throws -> RunSubmissionResult
     func getMyRuns() async throws -> [Run]
     func getDailyStatus() async throws -> DailyStatus
 }
 
-class RunService: RunServiceProtocol {
+final class RunService: RunServiceProtocol {
     private let apiClient: APIClient
     
     init(apiClient: APIClient) {
