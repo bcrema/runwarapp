@@ -8,14 +8,17 @@ final class RunsViewModel: ObservableObject {
     @Published var errorMessage: String?
     @Published var submissionResult: RunSubmissionResult?
 
-    private let session: SessionStore
-    private let runSessionStore: RunSessionStore
-    private let uploadService: RunUploadService
+    private let runService: RunServiceProtocol
+    private let uploadService: RunUploadServiceProtocol
 
-    init(session: SessionStore, runSessionStore: RunSessionStore = RunSessionStore()) {
-        self.session = session
-        self.runSessionStore = runSessionStore
-        self.uploadService = RunUploadService(api: session.api, store: runSessionStore)
+    init(
+        session: SessionStore,
+        runService: RunServiceProtocol? = nil,
+        runSessionStore: RunSessionStore = RunSessionStore(),
+        uploadService: RunUploadServiceProtocol? = nil
+    ) {
+        self.runService = runService ?? RunService(apiClient: session.api)
+        self.uploadService = uploadService ?? RunUploadService(api: session.api, store: runSessionStore)
     }
 
     func load() async {
@@ -23,21 +26,33 @@ final class RunsViewModel: ObservableObject {
         errorMessage = nil
         defer { isLoading = false }
 
+        let uploadResults = await uploadService.uploadPendingSessions()
+        var runsError: Error?
+
         do {
-            let uploadResults = await uploadService.uploadPendingSessions()
-            async let runsTask = session.api.getMyRuns(limit: 20)
-            async let statusTask = session.api.getDailyStatus()
-            runs = try await runsTask
-            dailyStatus = try await statusTask
-            if uploadResults.count == 1 {
-                submissionResult = uploadResults[0]
-            } else {
-                submissionResult = nil
-            }
-        } catch let apiError as APIError {
-            errorMessage = "API Error: \(apiError.message)"
+            runs = try await runService.getMyRuns()
         } catch {
-            errorMessage = "System Error: \(error.localizedDescription)"
+            runsError = error
+        }
+
+        do {
+            dailyStatus = try await runService.getDailyStatus()
+        } catch {
+            dailyStatus = nil
+        }
+
+        if uploadResults.count == 1 {
+            submissionResult = uploadResults[0]
+        } else {
+            submissionResult = nil
+        }
+
+        if let runsError {
+            if let apiError = runsError as? APIError {
+                errorMessage = "API Error: \(apiError.message)"
+            } else {
+                errorMessage = "System Error: \(runsError.localizedDescription)"
+            }
         }
     }
 
@@ -47,9 +62,9 @@ final class RunsViewModel: ObservableObject {
         defer { isLoading = false }
 
         do {
-            submissionResult = try await session.api.submitRunGpx(fileURL: url)
+            submissionResult = try await runService.submitRunGpx(fileURL: url)
             runs.insert(submissionResult!.run, at: 0)
-            dailyStatus = try? await session.api.getDailyStatus()
+            dailyStatus = try? await runService.getDailyStatus()
         } catch {
             errorMessage = error.localizedDescription
         }

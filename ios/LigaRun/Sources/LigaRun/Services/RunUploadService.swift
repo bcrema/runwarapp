@@ -1,7 +1,11 @@
 import Foundation
 import OSLog
 
-final class RunUploadService: Sendable {
+protocol RunUploadServiceProtocol: Sendable {
+    func uploadPendingSessions() async -> [RunSubmissionResult]
+}
+
+final class RunUploadService: RunUploadServiceProtocol {
     private let api: APIClient
     private let store: RunSessionStore
     private let logger = Logger(subsystem: AppEnvironment.keychainService, category: "RunUploadService")
