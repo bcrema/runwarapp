@@ -45,7 +45,7 @@ enum GeoUtils {
     private static func isPoint(_ point: CLLocationCoordinate2D,
                                 onSegmentBetween start: CLLocationCoordinate2D,
                                 and end: CLLocationCoordinate2D) -> Bool {
-        let epsilon = 1e-9
+        let epsilon = 1e-7
         let cross = (point.latitude - start.latitude) * (end.longitude - start.longitude)
             - (point.longitude - start.longitude) * (end.latitude - start.latitude)
         if abs(cross) > epsilon {
