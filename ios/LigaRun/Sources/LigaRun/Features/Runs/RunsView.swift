@@ -6,6 +6,7 @@ struct RunsView: View {
     @StateObject private var viewModel: RunsViewModel
     @StateObject private var healthKitStore = HealthKitAuthorizationStore()
     @State private var showingImporter = false
+    @State private var showingActiveRun = false
     @EnvironmentObject private var session: SessionStore
     @Environment(\.openURL) private var openURL
 
@@ -22,18 +23,26 @@ struct RunsView: View {
     @ViewBuilder
     private var content: some View {
         List {
-            Section("Saúde") {
-                HealthKitPermissionCard(
-                    availability: healthKitStore.availability,
-                    status: healthKitStore.status,
-                    onRequest: {
-                        healthKitStore.requestAuthorization()
-                    },
-                    onOpenSettings: {
-                        guard let url = URL(string: UIApplication.openSettingsURLString) else { return }
-                        openURL(url)
+            Section("Corrida") {
+                Button {
+                    showingActiveRun = true
+                } label: {
+                    HStack(spacing: 12) {
+                        Image(systemName: "figure.run")
+                            .foregroundColor(.green)
+                        VStack(alignment: .leading, spacing: 4) {
+                            Text("Acompanhar corrida")
+                                .font(.headline)
+                            Text("Abra o Fitness/Workout para iniciar. O LigaRun mostra o território em tempo real.")
+                                .font(.caption)
+                                .foregroundColor(.secondary)
+                        }
+                        Spacer()
+                        Image(systemName: "chevron.right")
+                            .foregroundColor(.secondary)
                     }
-                )
+                    .padding(.vertical, 4)
+                }
             }
 
             if let status = viewModel.dailyStatus {
@@ -93,10 +102,10 @@ struct RunsView: View {
                 }
             }
         }
-        .refreshable {
+        .refreshable { @MainActor in
             await viewModel.load()
         }
-        .task {
+        .task { @MainActor in
             await viewModel.load()
         }
         .onAppear {
@@ -132,11 +141,16 @@ struct RunsView: View {
             switch result {
             case .success(let urls):
                 if let url = urls.first {
-                    Task { await viewModel.submitGPX(at: url) }
+                    Task { @MainActor in
+                        await viewModel.submitGPX(at: url)
+                    }
                 }
             case .failure(let error):
                 viewModel.errorMessage = error.localizedDescription
             }
+        }
+        .fullScreenCover(isPresented: $showingActiveRun) {
+            ActiveRunHUD(session: session)
         }
     }
 

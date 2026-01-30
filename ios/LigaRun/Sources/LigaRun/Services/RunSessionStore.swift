@@ -16,6 +16,15 @@ struct RunTrackPoint: Codable, Equatable {
         horizontalAccuracy = location.horizontalAccuracy >= 0 ? location.horizontalAccuracy : nil
         timestamp = location.timestamp
     }
+
+    static func == (lhs: RunTrackPoint, rhs: RunTrackPoint) -> Bool {
+        guard lhs.latitude == rhs.latitude,
+              lhs.longitude == rhs.longitude,
+              lhs.altitude == rhs.altitude,
+              lhs.horizontalAccuracy == rhs.horizontalAccuracy
+        else { return false }
+        return abs(lhs.timestamp.timeIntervalSince1970 - rhs.timestamp.timeIntervalSince1970) <= 0.01
+    }
 }
 
 enum RunSessionStatus: String, Codable {
@@ -35,6 +44,35 @@ struct RunSessionRecord: Codable, Identifiable, Equatable {
     var status: RunSessionStatus
     var lastUploadAttempt: Date?
     var lastError: String?
+
+    static func == (lhs: RunSessionRecord, rhs: RunSessionRecord) -> Bool {
+        guard lhs.id == rhs.id,
+              datesEqual(lhs.startedAt, rhs.startedAt),
+              datesEqual(lhs.endedAt, rhs.endedAt),
+              lhs.duration == rhs.duration,
+              lhs.distanceMeters == rhs.distanceMeters,
+              lhs.points == rhs.points,
+              lhs.status == rhs.status,
+              datesEqual(lhs.lastUploadAttempt, rhs.lastUploadAttempt),
+              lhs.lastError == rhs.lastError
+        else { return false }
+        return true
+    }
+
+    private static func datesEqual(_ lhs: Date, _ rhs: Date) -> Bool {
+        abs(lhs.timeIntervalSince1970 - rhs.timeIntervalSince1970) <= 0.001
+    }
+
+    private static func datesEqual(_ lhs: Date?, _ rhs: Date?) -> Bool {
+        switch (lhs, rhs) {
+        case (nil, nil):
+            return true
+        case let (lhs?, rhs?):
+            return datesEqual(lhs, rhs)
+        default:
+            return false
+        }
+    }
 }
 
 actor RunSessionStore {
@@ -45,9 +83,29 @@ actor RunSessionStore {
 
     init(fileURL: URL? = nil) {
         encoder = JSONEncoder()
-        encoder.dateEncodingStrategy = .iso8601
+        encoder.dateEncodingStrategy = .custom { date, encoder in
+            var container = encoder.singleValueContainer()
+            let formatter = ISO8601DateFormatter()
+            formatter.formatOptions = [.withInternetDateTime, .withFractionalSeconds]
+            try container.encode(formatter.string(from: date))
+        }
         decoder = JSONDecoder()
-        decoder.dateDecodingStrategy = .iso8601
+        decoder.dateDecodingStrategy = .custom { decoder in
+            let container = try decoder.singleValueContainer()
+            let string = try container.decode(String.self)
+            let fractionalFormatter = ISO8601DateFormatter()
+            fractionalFormatter.formatOptions = [.withInternetDateTime, .withFractionalSeconds]
+            let internetDateTimeFormatter = ISO8601DateFormatter()
+            internetDateTimeFormatter.formatOptions = [.withInternetDateTime]
+            if let date = fractionalFormatter.date(from: string)
+                ?? internetDateTimeFormatter.date(from: string) {
+                return date
+            }
+            throw DecodingError.dataCorruptedError(
+                in: container,
+                debugDescription: "Invalid ISO8601 date string: \(string)"
+            )
+        }
         self.fileURL = fileURL ?? RunSessionStore.defaultFileURL()
     }
 

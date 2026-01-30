@@ -13,44 +13,89 @@
 		13527BF2007EB0353EBF61AC /* ApiModels.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA805D4688712C6DD4DF6106 /* ApiModels.swift */; };
 		137EBF945C61CE847D80E400 /* RunsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = CF920B486730172950D145DF /* RunsView.swift */; };
 		16B9AECA3F588774B244EA64 /* MapViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = EA97388AAB84B14E4418C4D4 /* MapViewModel.swift */; };
+		1E0867982BE45F2A1751601D /* RunService.swift in Sources */ = {isa = PBXBuildFile; fileRef = C44CA3A3941B2BF370DDF251 /* RunService.swift */; };
 		210E6ED8B5579F9EF51A5D67 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = ADC6DE4A3E41CF8EC48B60DD /* Assets.xcassets */; };
 		36794CBA91B90E076BB5D4DC /* SessionStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = 36317B4036D4EC17DAAE3D05 /* SessionStore.swift */; };
 		462F351EBDE24FBBE380D238 /* LigaRunApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = DDBD0074A1CD40E238FEDDDB /* LigaRunApp.swift */; };
+		4BD2C417BBA74CA787C77817 /* HealthKitAuthorizationStoreTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = DF28D4B9293A3AE9EF358F7F /* HealthKitAuthorizationStoreTests.swift */; };
+		5D6E46DABDB85C4724F6B1FD /* StrategicMapView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5D8DEFA61C26D1DBF72C2F17 /* StrategicMapView.swift */; };
+		687D08AA35AF49AFE7AA1F40 /* TileService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 868F9127D460C6187D54C342 /* TileService.swift */; };
+		7DEDDC97CA4E3E6EA8C88603 /* HealthKitAuthorizationStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = 130949A44776191A527B5206 /* HealthKitAuthorizationStore.swift */; };
+		82736BAE69FA31A1E71B330E /* ActiveRunHUD.swift in Sources */ = {isa = PBXBuildFile; fileRef = D067E56BD2C745F2C0F36694 /* ActiveRunHUD.swift */; };
 		846C354283ACB2A55AD30F97 /* BandeirasView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 77D7169C2E064CB5E6F569DB /* BandeirasView.swift */; };
+		957CC1FF1FFABB049E975C5E /* RunSessionStoreTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 32507D4DD9EC6B847C11129C /* RunSessionStoreTests.swift */; };
 		98623452FBBF4D575A289094 /* APIClient.swift in Sources */ = {isa = PBXBuildFile; fileRef = 99C81E6498BAC1CA9DCB927C /* APIClient.swift */; };
 		9A3A0DBEBECDF1B0DFD7FCC0 /* ProfileView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3458657E74B93B192484D16C /* ProfileView.swift */; };
+		9CA95BB60E2D6623522DCA36 /* RunSessionStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5F5D2B441C2DC5B52A3BAC8D /* RunSessionStore.swift */; };
+		9F271213BC043C21421A9873 /* TileDetailsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6755542C76AB597836FCEA9E /* TileDetailsView.swift */; };
+		AFC9F94528C7FB52CD2CA02B /* GeoUtils.swift in Sources */ = {isa = PBXBuildFile; fileRef = DF1030E3CEB927D3E9B219EC /* GeoUtils.swift */; };
 		B899FB4A41BFE5793DC1F91B /* AuthView.swift in Sources */ = {isa = PBXBuildFile; fileRef = C055D58127E516529511A460 /* AuthView.swift */; };
+		B90E06E75CDE1E679B921284 /* RunUploadService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 15A2F38261691C62DC800076 /* RunUploadService.swift */; };
+		BD7535AF5995F861EDF49320 /* MissionSummaryView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8A8F4D495F9291551EE47D15 /* MissionSummaryView.swift */; };
+		C222BAC1FB80EA71B5184770 /* StrategicMapViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4F97C7EC05598F2091E1DA28 /* StrategicMapViewModel.swift */; };
 		CE4BE5CEDC2D309246DD9912 /* HexMapView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A7BD8E9AA1F055D350735CEB /* HexMapView.swift */; };
+		DDCACD33EDBE6317E060075E /* CompanionRunManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5120777A2B8A3D3C793D3036 /* CompanionRunManager.swift */; };
 		E2B62592434C82BDFC1811F1 /* AuthViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 68A46DA068E959FFAEE24347 /* AuthViewModel.swift */; };
 		E54A9529436E283603107766 /* RunsViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2AA19CFFF99B6C539A0ED851 /* RunsViewModel.swift */; };
 		E7B3F7DAEADA8FC6C814C02A /* MapboxMaps in Frameworks */ = {isa = PBXBuildFile; productRef = 2733DBDCCC4D3B62BD43AEE5 /* MapboxMaps */; };
 		EC9FB34D4FB8949878972F08 /* MainTabView.swift in Sources */ = {isa = PBXBuildFile; fileRef = F319063A28F6BCE60735016B /* MainTabView.swift */; };
+		ECD8E5771692B85108E4F00B /* RunManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1D6F8821C77AEC6DD6E6A09 /* RunManager.swift */; };
+		ED0C637E0C9439D0354ECD76 /* GeoUtilsTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 161FC3E3EB5EE89C8D12E9F0 /* GeoUtilsTests.swift */; };
+		EE4F5DC811D634C13E339735 /* LocationManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = B3E368A6F9923688C82AA9CD /* LocationManager.swift */; };
 		EF6C5942D98A6DED50ADAB26 /* AppEnvironment.swift in Sources */ = {isa = PBXBuildFile; fileRef = A561AC531A941CF1DC17B391 /* AppEnvironment.swift */; };
 		FBD50FC0BE2B5D6EA55F29E5 /* BandeirasViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 687A5818C9839BD446B9CCBA /* BandeirasViewModel.swift */; };
 /* End PBXBuildFile section */
 
+/* Begin PBXContainerItemProxy section */
+		988FD592D5D980BDBB69B569 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 9C5221A3E08488A2656858C4 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 3AED20CA5E74B34626A2CD28;
+			remoteInfo = LigaRun;
+		};
+/* End PBXContainerItemProxy section */
+
 /* Begin PBXFileReference section */
 		087F355BCB198162B648130C /* Debug.xcconfig */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; path = Debug.xcconfig; sourceTree = "<group>"; };
+		130949A44776191A527B5206 /* HealthKitAuthorizationStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HealthKitAuthorizationStore.swift; sourceTree = "<group>"; };
+		15A2F38261691C62DC800076 /* RunUploadService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RunUploadService.swift; sourceTree = "<group>"; };
+		161FC3E3EB5EE89C8D12E9F0 /* GeoUtilsTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GeoUtilsTests.swift; sourceTree = "<group>"; };
 		2AA19CFFF99B6C539A0ED851 /* RunsViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RunsViewModel.swift; sourceTree = "<group>"; };
 		2FFB5B222050191F72D40018 /* Release.xcconfig */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; path = Release.xcconfig; sourceTree = "<group>"; };
+		32507D4DD9EC6B847C11129C /* RunSessionStoreTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RunSessionStoreTests.swift; sourceTree = "<group>"; };
 		3458657E74B93B192484D16C /* ProfileView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProfileView.swift; sourceTree = "<group>"; };
 		36317B4036D4EC17DAAE3D05 /* SessionStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SessionStore.swift; sourceTree = "<group>"; };
 		4460EDCA5A8392F6B0412BD1 /* LigaRun.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = LigaRun.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		4F97C7EC05598F2091E1DA28 /* StrategicMapViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StrategicMapViewModel.swift; sourceTree = "<group>"; };
+		5120777A2B8A3D3C793D3036 /* CompanionRunManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CompanionRunManager.swift; sourceTree = "<group>"; };
+		5D8DEFA61C26D1DBF72C2F17 /* StrategicMapView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StrategicMapView.swift; sourceTree = "<group>"; };
+		5F5D2B441C2DC5B52A3BAC8D /* RunSessionStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RunSessionStore.swift; sourceTree = "<group>"; };
+		6755542C76AB597836FCEA9E /* TileDetailsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TileDetailsView.swift; sourceTree = "<group>"; };
 		687A5818C9839BD446B9CCBA /* BandeirasViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BandeirasViewModel.swift; sourceTree = "<group>"; };
 		68A46DA068E959FFAEE24347 /* AuthViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AuthViewModel.swift; sourceTree = "<group>"; };
 		6A2084EF36D9101EA1AAC5A0 /* KeychainStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = KeychainStore.swift; sourceTree = "<group>"; };
+		6D90C1473BE29FA146C52610 /* LigaRunTests.xctest */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = wrapper.cfbundle; path = LigaRunTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		77D7169C2E064CB5E6F569DB /* BandeirasView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BandeirasView.swift; sourceTree = "<group>"; };
+		868F9127D460C6187D54C342 /* TileService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TileService.swift; sourceTree = "<group>"; };
 		8A476164F6DEFB40D8EB759C /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; path = Info.plist; sourceTree = "<group>"; };
+		8A8F4D495F9291551EE47D15 /* MissionSummaryView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MissionSummaryView.swift; sourceTree = "<group>"; };
 		99C81E6498BAC1CA9DCB927C /* APIClient.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = APIClient.swift; sourceTree = "<group>"; };
+		A1D6F8821C77AEC6DD6E6A09 /* RunManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RunManager.swift; sourceTree = "<group>"; };
 		A561AC531A941CF1DC17B391 /* AppEnvironment.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppEnvironment.swift; sourceTree = "<group>"; };
 		A7BD8E9AA1F055D350735CEB /* HexMapView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HexMapView.swift; sourceTree = "<group>"; };
 		AA805D4688712C6DD4DF6106 /* ApiModels.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ApiModels.swift; sourceTree = "<group>"; };
 		ADC6DE4A3E41CF8EC48B60DD /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		B0B6D926AD4018BFEE0F808E /* Color+Hex.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Color+Hex.swift"; sourceTree = "<group>"; };
+		B3E368A6F9923688C82AA9CD /* LocationManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LocationManager.swift; sourceTree = "<group>"; };
 		C055D58127E516529511A460 /* AuthView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AuthView.swift; sourceTree = "<group>"; };
+		C44CA3A3941B2BF370DDF251 /* RunService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RunService.swift; sourceTree = "<group>"; };
 		C7F05BBC671A8D948634E040 /* MapScreen.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MapScreen.swift; sourceTree = "<group>"; };
 		CF920B486730172950D145DF /* RunsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RunsView.swift; sourceTree = "<group>"; };
+		D067E56BD2C745F2C0F36694 /* ActiveRunHUD.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ActiveRunHUD.swift; sourceTree = "<group>"; };
 		DDBD0074A1CD40E238FEDDDB /* LigaRunApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LigaRunApp.swift; sourceTree = "<group>"; };
+		DF1030E3CEB927D3E9B219EC /* GeoUtils.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GeoUtils.swift; sourceTree = "<group>"; };
+		DF28D4B9293A3AE9EF358F7F /* HealthKitAuthorizationStoreTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HealthKitAuthorizationStoreTests.swift; sourceTree = "<group>"; };
 		EA97388AAB84B14E4418C4D4 /* MapViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MapViewModel.swift; sourceTree = "<group>"; };
 		F319063A28F6BCE60735016B /* MainTabView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MainTabView.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
@@ -70,6 +115,10 @@
 		0FC41C7A1AFC0EC6B21BA80F /* Runs */ = {
 			isa = PBXGroup;
 			children = (
+				D067E56BD2C745F2C0F36694 /* ActiveRunHUD.swift */,
+				5120777A2B8A3D3C793D3036 /* CompanionRunManager.swift */,
+				8A8F4D495F9291551EE47D15 /* MissionSummaryView.swift */,
+				A1D6F8821C77AEC6DD6E6A09 /* RunManager.swift */,
 				CF920B486730172950D145DF /* RunsView.swift */,
 				2AA19CFFF99B6C539A0ED851 /* RunsViewModel.swift */,
 			);
@@ -131,7 +180,13 @@
 		9AD9363F157A3FDF07713314 /* Services */ = {
 			isa = PBXGroup;
 			children = (
+				130949A44776191A527B5206 /* HealthKitAuthorizationStore.swift */,
 				6A2084EF36D9101EA1AAC5A0 /* KeychainStore.swift */,
+				B3E368A6F9923688C82AA9CD /* LocationManager.swift */,
+				C44CA3A3941B2BF370DDF251 /* RunService.swift */,
+				5F5D2B441C2DC5B52A3BAC8D /* RunSessionStore.swift */,
+				15A2F38261691C62DC800076 /* RunUploadService.swift */,
+				868F9127D460C6187D54C342 /* TileService.swift */,
 			);
 			path = Services;
 			sourceTree = "<group>";
@@ -150,6 +205,8 @@
 				A7BD8E9AA1F055D350735CEB /* HexMapView.swift */,
 				C7F05BBC671A8D948634E040 /* MapScreen.swift */,
 				EA97388AAB84B14E4418C4D4 /* MapViewModel.swift */,
+				4F97C7EC05598F2091E1DA28 /* StrategicMapViewModel.swift */,
+				6755542C76AB597836FCEA9E /* TileDetailsView.swift */,
 			);
 			path = Map;
 			sourceTree = "<group>";
@@ -163,6 +220,7 @@
 				D2D328A5894B5905ED3EC422 /* Models */,
 				5A133C7B66CA9057124256AA /* Networking */,
 				9AD9363F157A3FDF07713314 /* Services */,
+				E44512B62B9FD09EB7A37E2C /* Utilities */,
 			);
 			name = LigaRun;
 			path = Sources/LigaRun;
@@ -187,17 +245,38 @@
 			path = App;
 			sourceTree = "<group>";
 		};
+		E44512B62B9FD09EB7A37E2C /* Utilities */ = {
+			isa = PBXGroup;
+			children = (
+				DF1030E3CEB927D3E9B219EC /* GeoUtils.swift */,
+			);
+			path = Utilities;
+			sourceTree = "<group>";
+		};
 		F0E9BAA0CF2FD98D3BCBECBC /* Products */ = {
 			isa = PBXGroup;
 			children = (
 				4460EDCA5A8392F6B0412BD1 /* LigaRun.app */,
+				6D90C1473BE29FA146C52610 /* LigaRunTests.xctest */,
 			);
 			name = Products;
+			sourceTree = "<group>";
+		};
+		FAA8B621927C5CBD2D1916A7 /* LigaRunTests */ = {
+			isa = PBXGroup;
+			children = (
+				161FC3E3EB5EE89C8D12E9F0 /* GeoUtilsTests.swift */,
+				DF28D4B9293A3AE9EF358F7F /* HealthKitAuthorizationStoreTests.swift */,
+				32507D4DD9EC6B847C11129C /* RunSessionStoreTests.swift */,
+			);
+			name = LigaRunTests;
+			path = Tests/LigaRunTests;
 			sourceTree = "<group>";
 		};
 		FE14795C6000252E127B61D1 /* Features */ = {
 			isa = PBXGroup;
 			children = (
+				5D8DEFA61C26D1DBF72C2F17 /* StrategicMapView.swift */,
 				2B5383E75516A822D3B5512F /* Auth */,
 				1743E9B7210037FFBB82760A /* Bandeiras */,
 				B5752918D4EA56FBF891B2C9 /* Map */,
@@ -212,6 +291,7 @@
 			children = (
 				8DE7C0BCFCB3893D15E36CEF /* Config */,
 				BAE162E4DEB3858512C84C94 /* LigaRun */,
+				FAA8B621927C5CBD2D1916A7 /* LigaRunTests */,
 				32E29FA1EEDD4A68241D0E95 /* Resources */,
 				F0E9BAA0CF2FD98D3BCBECBC /* Products */,
 			);
@@ -240,6 +320,24 @@
 			productReference = 4460EDCA5A8392F6B0412BD1 /* LigaRun.app */;
 			productType = "com.apple.product-type.application";
 		};
+		B30208C36FB3AC049187EB84 /* LigaRunTests */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = BAF8B97F961E80B77D0D97B6 /* Build configuration list for PBXNativeTarget "LigaRunTests" */;
+			buildPhases = (
+				5A14A41F33377BC707E17A6E /* Sources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				A8CD52A8D01649119583FF17 /* PBXTargetDependency */,
+			);
+			name = LigaRunTests;
+			packageProductDependencies = (
+			);
+			productName = LigaRunTests;
+			productReference = 6D90C1473BE29FA146C52610 /* LigaRunTests.xctest */;
+			productType = "com.apple.product-type.bundle.unit-test";
+		};
 /* End PBXNativeTarget section */
 
 /* Begin PBXProject section */
@@ -266,6 +364,7 @@
 			projectRoot = "";
 			targets = (
 				3AED20CA5E74B34626A2CD28 /* LigaRun */,
+				B30208C36FB3AC049187EB84 /* LigaRunTests */,
 			);
 		};
 /* End PBXProject section */
@@ -282,11 +381,22 @@
 /* End PBXResourcesBuildPhase section */
 
 /* Begin PBXSourcesBuildPhase section */
+		5A14A41F33377BC707E17A6E /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				ED0C637E0C9439D0354ECD76 /* GeoUtilsTests.swift in Sources */,
+				4BD2C417BBA74CA787C77817 /* HealthKitAuthorizationStoreTests.swift in Sources */,
+				957CC1FF1FFABB049E975C5E /* RunSessionStoreTests.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 		FD65E5939DB9B8340BC11AEA /* Sources */ = {
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
 				98623452FBBF4D575A289094 /* APIClient.swift in Sources */,
+				82736BAE69FA31A1E71B330E /* ActiveRunHUD.swift in Sources */,
 				13527BF2007EB0353EBF61AC /* ApiModels.swift in Sources */,
 				EF6C5942D98A6DED50ADAB26 /* AppEnvironment.swift in Sources */,
 				B899FB4A41BFE5793DC1F91B /* AuthView.swift in Sources */,
@@ -294,20 +404,41 @@
 				846C354283ACB2A55AD30F97 /* BandeirasView.swift in Sources */,
 				FBD50FC0BE2B5D6EA55F29E5 /* BandeirasViewModel.swift in Sources */,
 				0D379152F2FFF0205B92DA23 /* Color+Hex.swift in Sources */,
+				DDCACD33EDBE6317E060075E /* CompanionRunManager.swift in Sources */,
+				AFC9F94528C7FB52CD2CA02B /* GeoUtils.swift in Sources */,
+				7DEDDC97CA4E3E6EA8C88603 /* HealthKitAuthorizationStore.swift in Sources */,
 				CE4BE5CEDC2D309246DD9912 /* HexMapView.swift in Sources */,
 				059E37FEC2AEFF5B21783FA7 /* KeychainStore.swift in Sources */,
 				462F351EBDE24FBBE380D238 /* LigaRunApp.swift in Sources */,
+				EE4F5DC811D634C13E339735 /* LocationManager.swift in Sources */,
 				EC9FB34D4FB8949878972F08 /* MainTabView.swift in Sources */,
 				08F43D6CA4F98926EF425891 /* MapScreen.swift in Sources */,
 				16B9AECA3F588774B244EA64 /* MapViewModel.swift in Sources */,
+				BD7535AF5995F861EDF49320 /* MissionSummaryView.swift in Sources */,
 				9A3A0DBEBECDF1B0DFD7FCC0 /* ProfileView.swift in Sources */,
+				ECD8E5771692B85108E4F00B /* RunManager.swift in Sources */,
+				1E0867982BE45F2A1751601D /* RunService.swift in Sources */,
+				9CA95BB60E2D6623522DCA36 /* RunSessionStore.swift in Sources */,
+				B90E06E75CDE1E679B921284 /* RunUploadService.swift in Sources */,
 				137EBF945C61CE847D80E400 /* RunsView.swift in Sources */,
 				E54A9529436E283603107766 /* RunsViewModel.swift in Sources */,
 				36794CBA91B90E076BB5D4DC /* SessionStore.swift in Sources */,
+				5D6E46DABDB85C4724F6B1FD /* StrategicMapView.swift in Sources */,
+				C222BAC1FB80EA71B5184770 /* StrategicMapViewModel.swift in Sources */,
+				9F271213BC043C21421A9873 /* TileDetailsView.swift in Sources */,
+				687D08AA35AF49AFE7AA1F40 /* TileService.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 /* End PBXSourcesBuildPhase section */
+
+/* Begin PBXTargetDependency section */
+		A8CD52A8D01649119583FF17 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 3AED20CA5E74B34626A2CD28 /* LigaRun */;
+			targetProxy = 988FD592D5D980BDBB69B569 /* PBXContainerItemProxy */;
+		};
+/* End PBXTargetDependency section */
 
 /* Begin XCBuildConfiguration section */
 		11D68563724B7F08F1300EC4 /* Debug */ = {
@@ -315,6 +446,7 @@
 			baseConfigurationReference = 087F355BCB198162B648130C /* Debug.xcconfig */;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				CODE_SIGN_ENTITLEMENTS = Config/LigaRun.entitlements;
 				CODE_SIGN_IDENTITY = "iPhone Developer";
 				DEVELOPMENT_TEAM = D3TUSJSBC5;
 				INFOPLIST_FILE = Resources/Info.plist;
@@ -391,6 +523,7 @@
 			baseConfigurationReference = 2FFB5B222050191F72D40018 /* Release.xcconfig */;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				CODE_SIGN_ENTITLEMENTS = Config/LigaRun.entitlements;
 				CODE_SIGN_IDENTITY = "iPhone Developer";
 				DEVELOPMENT_TEAM = D3TUSJSBC5;
 				INFOPLIST_FILE = Resources/Info.plist;
@@ -405,6 +538,42 @@
 				TARGETED_DEVICE_FAMILY = "1,2";
 			};
 			name = Release;
+		};
+		48C3E11FA10F1A23E5D56FA7 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				INFOPLIST_FILE = Tests/Info.plist;
+				IPHONEOS_DEPLOYMENT_TARGET = 16.0;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@loader_path/Frameworks",
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = com.runwar.LigaRunTests;
+				SDKROOT = iphoneos;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/LigaRun.app/LigaRun";
+			};
+			name = Release;
+		};
+		76BE77638EE32F3EB6100E48 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				INFOPLIST_FILE = Tests/Info.plist;
+				IPHONEOS_DEPLOYMENT_TARGET = 16.0;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@loader_path/Frameworks",
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = com.runwar.LigaRunTests;
+				SDKROOT = iphoneos;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/LigaRun.app/LigaRun";
+			};
+			name = Debug;
 		};
 		79CEF64CE7C5B2F4C1680A01 /* Debug */ = {
 			isa = XCBuildConfiguration;
@@ -477,6 +646,15 @@
 			buildConfigurations = (
 				11D68563724B7F08F1300EC4 /* Debug */,
 				26C5DD1B7F708ABD14F7BFFE /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Debug;
+		};
+		BAF8B97F961E80B77D0D97B6 /* Build configuration list for PBXNativeTarget "LigaRunTests" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				76BE77638EE32F3EB6100E48 /* Debug */,
+				48C3E11FA10F1A23E5D56FA7 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Debug;

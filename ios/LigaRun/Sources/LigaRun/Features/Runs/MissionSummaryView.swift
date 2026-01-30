@@ -8,17 +8,30 @@ struct MissionSummaryView: View {
     let loopValid: Bool
     let actionsUsed: Int
     let actionCap: Int
+    let routeCoordinates: [CLLocationCoordinate2D]
+    @State private var viewport = Viewport.camera(
+        center: CLLocationCoordinate2D(latitude: -25.43, longitude: -49.27),
+        zoom: 13,
+        bearing: 0,
+        pitch: 0
+    )
     
     var body: some View {
         ScrollView {
             VStack(spacing: 24) {
                 // Map Snapshot Area
                 ZStack(alignment: .bottomLeading) {
-                    Map(key: "static-map")
+                    Map(viewport: $viewport)
                          .mapStyle(.standard) // Light style
                          .ignoresSafeArea()
                          .frame(height: 300)
                          .disabled(true) // Static interaction
+                         .onAppear {
+                             updateViewport(using: routeCoordinates)
+                         }
+                         .onChange(of: routeCoordinates) { newCoordinates in
+                             updateViewport(using: newCoordinates)
+                         }
                     
                     // Date Overlay
                     HStack {
@@ -105,6 +118,48 @@ struct MissionSummaryView: View {
     func formatDuration(_ duration: TimeInterval) -> String {
         let minutes = Int(duration / 60)
         return "\(minutes)"
+    }
+
+    private func updateViewport(using coordinates: [CLLocationCoordinate2D]) {
+        guard let bounds = coordinateBounds(for: coordinates) else { return }
+        let center = CLLocationCoordinate2D(
+            latitude: (bounds.min.latitude + bounds.max.latitude) / 2,
+            longitude: (bounds.min.longitude + bounds.max.longitude) / 2
+        )
+        let zoom = zoomLevel(for: bounds)
+        viewport = Viewport.camera(center: center, zoom: zoom, bearing: 0, pitch: 0)
+    }
+
+    private func coordinateBounds(for coordinates: [CLLocationCoordinate2D]) -> (min: CLLocationCoordinate2D, max: CLLocationCoordinate2D)? {
+        guard let first = coordinates.first else { return nil }
+        var minLat = first.latitude
+        var maxLat = first.latitude
+        var minLon = first.longitude
+        var maxLon = first.longitude
+
+        for coordinate in coordinates.dropFirst() {
+            minLat = min(minLat, coordinate.latitude)
+            maxLat = max(maxLat, coordinate.latitude)
+            minLon = min(minLon, coordinate.longitude)
+            maxLon = max(maxLon, coordinate.longitude)
+        }
+
+        return (
+            min: CLLocationCoordinate2D(latitude: minLat, longitude: minLon),
+            max: CLLocationCoordinate2D(latitude: maxLat, longitude: maxLon)
+        )
+    }
+
+    private func zoomLevel(for bounds: (min: CLLocationCoordinate2D, max: CLLocationCoordinate2D)) -> CGFloat {
+        let latitudeSpan = abs(bounds.max.latitude - bounds.min.latitude)
+        let longitudeSpan = abs(bounds.max.longitude - bounds.min.longitude)
+        let minZoom: Double = 10
+        let maxZoom: Double = 16
+        let minSpanForMaxZoom = 360 / pow(2, maxZoom)
+        let maxSpan = max(latitudeSpan, longitudeSpan, minSpanForMaxZoom)
+        let zoom = log2(360 / maxSpan)
+        let clampedZoom = min(max(zoom, minZoom), maxZoom)
+        return CGFloat(clampedZoom)
     }
 }
 

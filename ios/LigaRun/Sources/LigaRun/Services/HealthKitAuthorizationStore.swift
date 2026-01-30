@@ -14,13 +14,12 @@ enum HealthKitAuthorizationState: Equatable {
     case restricted
 }
 
-protocol HealthStoreProviding {
+protocol HealthStoreProviding: Sendable {
     func authorizationStatus(for type: HKObjectType) -> HKAuthorizationStatus
     func requestAuthorization(
-        toShare typesToShare: Set<HKSampleType>?,
-        read typesToRead: Set<HKObjectType>,
-        completion: @escaping (Bool, Error?) -> Void
-    )
+        toShare typesToShare: Set<HKSampleType>,
+        read typesToRead: Set<HKObjectType>
+    ) async throws
 }
 
 extension HKHealthStore: HealthStoreProviding {}
@@ -66,10 +65,13 @@ final class HealthKitAuthorizationStore: ObservableObject {
 
     func requestAuthorization() {
         guard availability == .available else { return }
-        healthStore.requestAuthorization(toShare: nil, read: readTypes) { [weak self] _, _ in
-            Task { @MainActor in
-                self?.refreshStatus()
+        Task { @MainActor in
+            do {
+                try await healthStore.requestAuthorization(toShare: [], read: readTypes)
+            } catch {
+                // Ignore authorization errors; status refresh handles current state.
             }
+            refreshStatus()
         }
     }
 
