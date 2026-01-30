@@ -112,9 +112,8 @@ final class GeoUtilsTests: XCTestCase {
         ]
         let pointOnVertex = CLLocationCoordinate2D(latitude: 0, longitude: 0)
 
-        // Ray-casting algorithm behavior on vertices is implementation-dependent
-        // This test documents the current behavior
-        _ = GeoUtils.isPoint(pointOnVertex, inside: polygon)
+        // Points on vertices are considered inside via boundary check
+        XCTAssertTrue(GeoUtils.isPoint(pointOnVertex, inside: polygon))
     }
 
     func testPointOnEdgeBehavior() {
@@ -126,9 +125,8 @@ final class GeoUtilsTests: XCTestCase {
         ]
         let pointOnEdge = CLLocationCoordinate2D(latitude: 0, longitude: 0.5)
 
-        // Ray-casting algorithm behavior on edges is implementation-dependent
-        // This test documents the current behavior
-        _ = GeoUtils.isPoint(pointOnEdge, inside: polygon)
+        // Points on edges are considered inside via boundary check
+        XCTAssertTrue(GeoUtils.isPoint(pointOnEdge, inside: polygon))
     }
 
     // MARK: - Self-Intersecting Polygon Tests
