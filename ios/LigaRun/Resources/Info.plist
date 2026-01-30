@@ -30,30 +30,21 @@
 		<true/>
 	</dict>
 	<key>NSLocationWhenInUseUsageDescription</key>
-	<string>This app uses your location to track your runs and display them on the map.</string>
-	<key>NSLocationWhenInUseUsageDescription</key>
-	<string>Precisamos da sua localizacao para acompanhar suas corridas e mostrar o mapa.</string>
-	<key>UILaunchScreen</key>
-	<dict>
-		<key>UIColorName</key>
-		<string>LaunchBackground</string>
-	</dict>
-	<key>NSLocationWhenInUseUsageDescription</key>
 	<string>LigaRun needs your location to track your runs and conquer territories.</string>
 	<key>NSLocationAlwaysAndWhenInUseUsageDescription</key>
 	<string>LigaRun needs access to your location even when the app is in the background to accurately track your runs.</string>
 	<key>NSHealthShareUsageDescription</key>
 	<string>LigaRun precisa acessar suas corridas para importar atividades automaticamente.</string>
-    <key>UIBackgroundModes</key>
-    <array>
-        <string>location</string>
-    </array>
-    <key>UIUserInterfaceStyle</key>
+	<key>UILaunchScreen</key>
+	<dict>
+		<key>UIColorName</key>
+		<string>LaunchBackground</string>
+	</dict>
+	<key>UIBackgroundModes</key>
+	<array>
+		<string>location</string>
+	</array>
+	<key>UIUserInterfaceStyle</key>
 	<string>Light</string>
-    <key>NSAppTransportSecurity</key>
-    <dict>
-        <key>NSAllowsArbitraryLoads</key>
-        <true/>
-    </dict>
 </dict>
 </plist>
