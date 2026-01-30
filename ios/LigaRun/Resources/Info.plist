@@ -40,11 +40,15 @@
 		<key>UIColorName</key>
 		<string>LaunchBackground</string>
 	</dict>
-	<key>UIBackgroundModes</key>
-	<array>
-		<string>location</string>
-	</array>
-	<key>UIUserInterfaceStyle</key>
+	<key>NSLocationWhenInUseUsageDescription</key>
+	<string>LigaRun needs your location to track your runs and conquer territories.</string>
+	<key>NSHealthShareUsageDescription</key>
+	<string>LigaRun precisa acessar suas corridas para importar atividades automaticamente.</string>
+    <key>UIBackgroundModes</key>
+    <array>
+        <string>location</string>
+	<string>Automatic</string>
+    <key>UIUserInterfaceStyle</key>
 	<string>Light</string>
 </dict>
 </plist>

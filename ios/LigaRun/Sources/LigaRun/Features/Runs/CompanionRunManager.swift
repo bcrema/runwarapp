@@ -23,6 +23,7 @@ final class CompanionRunManager: ObservableObject {
         self.locationManager = locationManager
 
         locationManager.$location
+            .receive(on: DispatchQueue.main)
             .sink { [weak self] location in
                 self?.handleNewLocation(location)
             }
@@ -95,7 +96,8 @@ final class CompanionRunManager: ObservableObject {
     }
 
     private func updatePace() {
-        guard distanceMeters > 0 else {
+        // Require at least 10 meters to calculate a meaningful pace
+        guard distanceMeters >= 10 else {
             currentPace = 0
             return
         }
