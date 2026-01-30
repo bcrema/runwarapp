@@ -17,6 +17,7 @@ env:
   DB_CONNECTION_NAME: ${{ secrets.GCP_PROJECT_ID }}:us-central1:runwar-db
   DB_NAME: runwar
   DB_USER: runwar-user
+  RUNWAR_SEED_ENABLED: true
 
 jobs:
   # ============================================
