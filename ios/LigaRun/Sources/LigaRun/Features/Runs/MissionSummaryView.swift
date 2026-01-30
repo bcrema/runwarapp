@@ -153,9 +153,13 @@ struct MissionSummaryView: View {
     private func zoomLevel(for bounds: (min: CLLocationCoordinate2D, max: CLLocationCoordinate2D)) -> CGFloat {
         let latitudeSpan = abs(bounds.max.latitude - bounds.min.latitude)
         let longitudeSpan = abs(bounds.max.longitude - bounds.min.longitude)
-        let maxSpan = max(latitudeSpan, longitudeSpan, 0.001)
+        let minZoom: Double = 10
+        let maxZoom: Double = 16
+        let minSpanForMaxZoom = 360 / pow(2, maxZoom)
+        let maxSpan = max(latitudeSpan, longitudeSpan, minSpanForMaxZoom)
         let zoom = log2(360 / maxSpan)
-        return CGFloat(min(max(zoom, 10), 16))
+        let clampedZoom = min(max(zoom, minZoom), maxZoom)
+        return CGFloat(clampedZoom)
     }
 }
 

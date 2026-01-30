@@ -28,8 +28,11 @@ final class HealthKitAuthorizationStoreTests: XCTestCase {
     }
 
     @MainActor
-    func testRequestAuthorizationTriggersHealthStore() {
-        let store = FakeHealthStore(authorizationStatus: .notDetermined)
+    func testRequestAuthorizationTriggersHealthStore() async {
+        let expectation = expectation(description: "requestAuthorization")
+        let store = FakeHealthStore(authorizationStatus: .notDetermined) {
+            expectation.fulfill()
+        }
         let authorizationStore = HealthKitAuthorizationStore(
             healthStore: store,
             isHealthDataAvailable: { true }
@@ -37,18 +40,21 @@ final class HealthKitAuthorizationStoreTests: XCTestCase {
 
         authorizationStore.requestAuthorization()
 
+        await fulfillment(of: [expectation], timeout: 1.0)
         XCTAssertEqual(store.requestedAuthorizationCalls, 1)
         XCTAssertFalse(store.lastRequestedReadTypes.isEmpty)
     }
 }
 
-private final class FakeHealthStore: HealthStoreProviding {
+private final class FakeHealthStore: HealthStoreProviding, @unchecked Sendable {
     private let authorization: HKAuthorizationStatus
+    private let onRequest: (() -> Void)?
     private(set) var requestedAuthorizationCalls = 0
     private(set) var lastRequestedReadTypes: Set<HKObjectType> = []
 
-    init(authorizationStatus: HKAuthorizationStatus) {
+    init(authorizationStatus: HKAuthorizationStatus, onRequest: (() -> Void)? = nil) {
         authorization = authorizationStatus
+        self.onRequest = onRequest
     }
 
     func authorizationStatus(for type: HKObjectType) -> HKAuthorizationStatus {
@@ -56,12 +62,11 @@ private final class FakeHealthStore: HealthStoreProviding {
     }
 
     func requestAuthorization(
-        toShare typesToShare: Set<HKSampleType>?,
-        read typesToRead: Set<HKObjectType>,
-        completion: @escaping (Bool, Error?) -> Void
-    ) {
+        toShare typesToShare: Set<HKSampleType>,
+        read typesToRead: Set<HKObjectType>
+    ) async throws {
         requestedAuthorizationCalls += 1
         lastRequestedReadTypes = typesToRead
-        completion(true, nil)
+        onRequest?()
     }
 }

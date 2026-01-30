@@ -17,8 +17,10 @@
 		210E6ED8B5579F9EF51A5D67 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = ADC6DE4A3E41CF8EC48B60DD /* Assets.xcassets */; };
 		36794CBA91B90E076BB5D4DC /* SessionStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = 36317B4036D4EC17DAAE3D05 /* SessionStore.swift */; };
 		462F351EBDE24FBBE380D238 /* LigaRunApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = DDBD0074A1CD40E238FEDDDB /* LigaRunApp.swift */; };
+		4BD2C417BBA74CA787C77817 /* HealthKitAuthorizationStoreTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = DF28D4B9293A3AE9EF358F7F /* HealthKitAuthorizationStoreTests.swift */; };
 		5D6E46DABDB85C4724F6B1FD /* StrategicMapView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5D8DEFA61C26D1DBF72C2F17 /* StrategicMapView.swift */; };
 		687D08AA35AF49AFE7AA1F40 /* TileService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 868F9127D460C6187D54C342 /* TileService.swift */; };
+		7DEDDC97CA4E3E6EA8C88603 /* HealthKitAuthorizationStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = 130949A44776191A527B5206 /* HealthKitAuthorizationStore.swift */; };
 		82736BAE69FA31A1E71B330E /* ActiveRunHUD.swift in Sources */ = {isa = PBXBuildFile; fileRef = D067E56BD2C745F2C0F36694 /* ActiveRunHUD.swift */; };
 		846C354283ACB2A55AD30F97 /* BandeirasView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 77D7169C2E064CB5E6F569DB /* BandeirasView.swift */; };
 		957CC1FF1FFABB049E975C5E /* RunSessionStoreTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 32507D4DD9EC6B847C11129C /* RunSessionStoreTests.swift */; };
@@ -56,6 +58,7 @@
 
 /* Begin PBXFileReference section */
 		087F355BCB198162B648130C /* Debug.xcconfig */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; path = Debug.xcconfig; sourceTree = "<group>"; };
+		130949A44776191A527B5206 /* HealthKitAuthorizationStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HealthKitAuthorizationStore.swift; sourceTree = "<group>"; };
 		15A2F38261691C62DC800076 /* RunUploadService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RunUploadService.swift; sourceTree = "<group>"; };
 		161FC3E3EB5EE89C8D12E9F0 /* GeoUtilsTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GeoUtilsTests.swift; sourceTree = "<group>"; };
 		2AA19CFFF99B6C539A0ED851 /* RunsViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RunsViewModel.swift; sourceTree = "<group>"; };
@@ -92,6 +95,7 @@
 		D067E56BD2C745F2C0F36694 /* ActiveRunHUD.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ActiveRunHUD.swift; sourceTree = "<group>"; };
 		DDBD0074A1CD40E238FEDDDB /* LigaRunApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LigaRunApp.swift; sourceTree = "<group>"; };
 		DF1030E3CEB927D3E9B219EC /* GeoUtils.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GeoUtils.swift; sourceTree = "<group>"; };
+		DF28D4B9293A3AE9EF358F7F /* HealthKitAuthorizationStoreTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HealthKitAuthorizationStoreTests.swift; sourceTree = "<group>"; };
 		EA97388AAB84B14E4418C4D4 /* MapViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MapViewModel.swift; sourceTree = "<group>"; };
 		F319063A28F6BCE60735016B /* MainTabView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MainTabView.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
@@ -176,6 +180,7 @@
 		9AD9363F157A3FDF07713314 /* Services */ = {
 			isa = PBXGroup;
 			children = (
+				130949A44776191A527B5206 /* HealthKitAuthorizationStore.swift */,
 				6A2084EF36D9101EA1AAC5A0 /* KeychainStore.swift */,
 				B3E368A6F9923688C82AA9CD /* LocationManager.swift */,
 				C44CA3A3941B2BF370DDF251 /* RunService.swift */,
@@ -261,6 +266,7 @@
 			isa = PBXGroup;
 			children = (
 				161FC3E3EB5EE89C8D12E9F0 /* GeoUtilsTests.swift */,
+				DF28D4B9293A3AE9EF358F7F /* HealthKitAuthorizationStoreTests.swift */,
 				32507D4DD9EC6B847C11129C /* RunSessionStoreTests.swift */,
 			);
 			name = LigaRunTests;
@@ -380,6 +386,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				ED0C637E0C9439D0354ECD76 /* GeoUtilsTests.swift in Sources */,
+				4BD2C417BBA74CA787C77817 /* HealthKitAuthorizationStoreTests.swift in Sources */,
 				957CC1FF1FFABB049E975C5E /* RunSessionStoreTests.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -399,6 +406,7 @@
 				0D379152F2FFF0205B92DA23 /* Color+Hex.swift in Sources */,
 				DDCACD33EDBE6317E060075E /* CompanionRunManager.swift in Sources */,
 				AFC9F94528C7FB52CD2CA02B /* GeoUtils.swift in Sources */,
+				7DEDDC97CA4E3E6EA8C88603 /* HealthKitAuthorizationStore.swift in Sources */,
 				CE4BE5CEDC2D309246DD9912 /* HexMapView.swift in Sources */,
 				059E37FEC2AEFF5B21783FA7 /* KeychainStore.swift in Sources */,
 				462F351EBDE24FBBE380D238 /* LigaRunApp.swift in Sources */,
@@ -438,6 +446,7 @@
 			baseConfigurationReference = 087F355BCB198162B648130C /* Debug.xcconfig */;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				CODE_SIGN_ENTITLEMENTS = Config/LigaRun.entitlements;
 				CODE_SIGN_IDENTITY = "iPhone Developer";
 				DEVELOPMENT_TEAM = D3TUSJSBC5;
 				INFOPLIST_FILE = Resources/Info.plist;
@@ -514,6 +523,7 @@
 			baseConfigurationReference = 2FFB5B222050191F72D40018 /* Release.xcconfig */;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				CODE_SIGN_ENTITLEMENTS = Config/LigaRun.entitlements;
 				CODE_SIGN_IDENTITY = "iPhone Developer";
 				DEVELOPMENT_TEAM = D3TUSJSBC5;
 				INFOPLIST_FILE = Resources/Info.plist;

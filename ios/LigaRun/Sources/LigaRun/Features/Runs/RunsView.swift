@@ -102,10 +102,10 @@ struct RunsView: View {
                 }
             }
         }
-        .refreshable {
+        .refreshable { @MainActor in
             await viewModel.load()
         }
-        .task {
+        .task { @MainActor in
             await viewModel.load()
         }
         .onAppear {
@@ -141,7 +141,9 @@ struct RunsView: View {
             switch result {
             case .success(let urls):
                 if let url = urls.first {
-                    Task { await viewModel.submitGPX(at: url) }
+                    Task { @MainActor in
+                        await viewModel.submitGPX(at: url)
+                    }
                 }
             case .failure(let error):
                 viewModel.errorMessage = error.localizedDescription

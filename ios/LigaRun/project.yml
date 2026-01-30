@@ -32,6 +32,7 @@ targets:
       base:
         PRODUCT_BUNDLE_IDENTIFIER: com.runwar.ligarun
         SWIFT_VERSION: 6.0
+        CODE_SIGN_ENTITLEMENTS: Config/LigaRun.entitlements
     capabilities:
       healthKit: true
     configFiles:
