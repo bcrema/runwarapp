@@ -30,8 +30,6 @@
 		<true/>
 	</dict>
 	<key>NSLocationWhenInUseUsageDescription</key>
-	<string>This app uses your location to track your runs and display them on the map.</string>
-	<key>NSLocationWhenInUseUsageDescription</key>
 	<string>Precisamos da sua localizacao para acompanhar suas corridas e mostrar o mapa.</string>
 	<key>UILaunchScreen</key>
 	<dict>
@@ -45,7 +43,7 @@
     <key>UIBackgroundModes</key>
     <array>
         <string>location</string>
-    </array>
+	<string>Automatic</string>
     <key>UIUserInterfaceStyle</key>
 	<string>Light</string>
     <key>NSAppTransportSecurity</key>
