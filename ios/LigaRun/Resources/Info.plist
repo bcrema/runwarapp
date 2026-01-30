@@ -40,6 +40,8 @@
 	</dict>
 	<key>NSLocationWhenInUseUsageDescription</key>
 	<string>LigaRun needs your location to track your runs and conquer territories.</string>
+	<key>NSLocationAlwaysAndWhenInUseUsageDescription</key>
+	<string>LigaRun needs access to your location even when the app is in the background to accurately track your runs.</string>
 	<key>NSHealthShareUsageDescription</key>
 	<string>LigaRun precisa acessar suas corridas para importar atividades automaticamente.</string>
     <key>UIBackgroundModes</key>
