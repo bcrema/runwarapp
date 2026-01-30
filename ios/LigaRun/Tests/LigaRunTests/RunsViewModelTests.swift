@@ -37,20 +37,25 @@ final class RunsViewModelTests: XCTestCase {
     }
 
     private func makeRun() -> Run {
+        let formatter = ISO8601DateFormatter()
+        let startDate = Date()
+        let endDate = startDate.addingTimeInterval(1800)
+        let startTime = formatter.string(from: startDate)
+        let endTime = formatter.string(from: endDate)
         Run(
             id: UUID().uuidString,
             userId: UUID().uuidString,
             distance: 5.0,
             duration: 1800,
-            startTime: "2024-01-01T10:00:00Z",
-            endTime: "2024-01-01T10:30:00Z",
+            startTime: startTime,
+            endTime: endTime,
             isLoopValid: true,
             loopDistance: 5000,
             territoryAction: nil,
             targetTileId: nil,
             isValidForTerritory: true,
             fraudFlags: [],
-            createdAt: "2024-01-01T10:30:00Z"
+            createdAt: endTime
         )
     }
 }
@@ -58,50 +63,18 @@ final class RunsViewModelTests: XCTestCase {
 private final class RunServiceStub: RunServiceProtocol {
     let runsResult: Result<[Run], Error>
     let dailyStatusResult: Result<DailyStatus, Error>
-    var submitResult: Result<RunSubmissionResult, Error>
 
     init(runsResult: Result<[Run], Error>, dailyStatusResult: Result<DailyStatus, Error>) {
         self.runsResult = runsResult
         self.dailyStatusResult = dailyStatusResult
-        self.submitResult = .success(RunSubmissionResult(
-            run: Run(
-                id: UUID().uuidString,
-                userId: UUID().uuidString,
-                distance: 1,
-                duration: 60,
-                startTime: "2024-01-01T00:00:00Z",
-                endTime: "2024-01-01T00:01:00Z",
-                isLoopValid: true,
-                loopDistance: 1,
-                territoryAction: nil,
-                targetTileId: nil,
-                isValidForTerritory: true,
-                fraudFlags: [],
-                createdAt: "2024-01-01T00:01:00Z"
-            ),
-            loopValidation: LoopValidation(
-                isValid: true,
-                distance: 1,
-                duration: 60,
-                closingDistance: 0,
-                tilesCovered: [],
-                primaryTile: nil,
-                primaryTileCoverage: 0,
-                fraudFlags: [],
-                failureReasons: []
-            ),
-            territoryResult: nil,
-            turnResult: nil,
-            dailyActionsRemaining: 0
-        ))
     }
 
     func submitRunGpx(fileURL: URL) async throws -> RunSubmissionResult {
-        try submitResult.get()
+        fatalError("submitRunGpx is not implemented for RunServiceStub in RunsViewModelTests")
     }
 
     func submitRunCoordinates(coordinates: [CLLocationCoordinate2D], timestamps: [Int]) async throws -> RunSubmissionResult {
-        try submitResult.get()
+        fatalError("submitRunCoordinates is not implemented for RunServiceStub in RunsViewModelTests")
     }
 
     func getMyRuns() async throws -> [Run] {

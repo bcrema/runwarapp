@@ -26,21 +26,24 @@ final class RunsViewModel: ObservableObject {
         errorMessage = nil
         defer { isLoading = false }
 
-        let uploadResults = await uploadService.uploadPendingSessions()
+        async let uploadResultsTask = uploadService.uploadPendingSessions()
+        async let runsTask = runService.getMyRuns()
+        async let dailyStatusTask = runService.getDailyStatus()
         var runsError: Error?
 
         do {
-            runs = try await runService.getMyRuns()
+            runs = try await runsTask
         } catch {
             runsError = error
         }
 
         do {
-            dailyStatus = try await runService.getDailyStatus()
+            dailyStatus = try await dailyStatusTask
         } catch {
             dailyStatus = nil
         }
 
+        let uploadResults = await uploadResultsTask
         if uploadResults.count == 1 {
             submissionResult = uploadResults[0]
         } else {
@@ -62,8 +65,9 @@ final class RunsViewModel: ObservableObject {
         defer { isLoading = false }
 
         do {
-            submissionResult = try await runService.submitRunGpx(fileURL: url)
-            runs.insert(submissionResult!.run, at: 0)
+            let result = try await runService.submitRunGpx(fileURL: url)
+            submissionResult = result
+            runs.insert(result.run, at: 0)
             dailyStatus = try? await runService.getDailyStatus()
         } catch {
             errorMessage = error.localizedDescription
