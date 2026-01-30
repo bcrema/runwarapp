@@ -17,6 +17,13 @@ App nativo iOS que consome o backend atual do LigaRun. Usa SwiftUI, Mapbox Maps 
    ```
 4) Abra `LigaRun.xcodeproj` no Xcode, selecione um simulador ou dispositivo e rode.
 
+## Testes
+Para rodar os testes via CLI (macOS com Xcode instalado):
+```bash
+cd ios/LigaRun
+./scripts/run-tests.sh
+```
+
 ## Estrutura
 - `project.yml`: definição do projeto (XcodeGen) com dependência Mapbox via SPM.
 - `Config/*.xcconfig`: configuração de ambiente (API base e token Mapbox).
