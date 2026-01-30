@@ -24,7 +24,7 @@ import java.time.Instant
 import java.util.UUID
 
 class RunTelemetryServiceTest {
-    private val objectMapper = jacksonObjectMapper()
+    private val objectMapper = jacksonObjectMapper().findAndRegisterModules()
 
     @Test
     fun `recordRunTelemetry persists structured event`() {

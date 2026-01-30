@@ -10,19 +10,20 @@ import com.runwar.domain.user.UserRole
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.slot
+import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.springframework.http.MediaType
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken
-import org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.authentication
-import org.springframework.security.test.web.servlet.setup.SecurityMockMvcConfigurers.springSecurity
+import org.springframework.security.core.context.SecurityContextHolder
+import org.springframework.security.web.method.annotation.AuthenticationPrincipalArgumentResolver
 import org.springframework.test.web.servlet.MockMvc
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get
+import org.springframework.test.web.servlet.request.RequestPostProcessor
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers.content
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers.status
 import org.springframework.test.web.servlet.setup.MockMvcBuilders
-import org.springframework.test.web.servlet.setup.StandaloneMockMvcBuilder
 import java.time.Duration
 import java.time.Instant
 import java.util.UUID
@@ -35,8 +36,13 @@ class RunTelemetryControllerTest {
     fun setUp() {
         mockMvc = MockMvcBuilders.standaloneSetup(RunTelemetryController(runTelemetryService))
             .setControllerAdvice(GlobalExceptionHandler())
-            .apply<StandaloneMockMvcBuilder>(springSecurity())
+            .setCustomArgumentResolvers(AuthenticationPrincipalArgumentResolver())
             .build()
+    }
+
+    @AfterEach
+    fun tearDown() {
+        SecurityContextHolder.clearContext()
     }
 
     @Test
@@ -114,17 +120,19 @@ class RunTelemetryControllerTest {
             .andExpect(content().string("createdAt,runId\n"))
     }
 
-    private fun authFor(role: UserRole) = authentication(
-        UserPrincipal(
-            User(
-                id = UUID.randomUUID(),
-                email = "${role.name.lowercase()}@example.com",
-                username = role.name.lowercase(),
-                passwordHash = "hash",
-                role = role
+    private fun authFor(role: UserRole) = RequestPostProcessor { request ->
+        val principal =
+            UserPrincipal(
+                User(
+                    id = UUID.randomUUID(),
+                    email = "${role.name.lowercase()}@example.com",
+                    username = role.name.lowercase(),
+                    passwordHash = "hash",
+                    role = role
+                )
             )
-        ).let { principal ->
-            UsernamePasswordAuthenticationToken(principal, null, principal.authorities)
-        }
-    )
+        val auth = UsernamePasswordAuthenticationToken(principal, null, principal.authorities)
+        SecurityContextHolder.getContext().authentication = auth
+        request
+    }
 }

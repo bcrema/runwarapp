@@ -9,6 +9,7 @@ import org.springframework.validation.FieldError
 import org.springframework.web.bind.MethodArgumentNotValidException
 import org.springframework.web.bind.annotation.ExceptionHandler
 import org.springframework.web.bind.annotation.RestControllerAdvice
+import org.springframework.web.server.ResponseStatusException
 
 @RestControllerAdvice
 class GlobalExceptionHandler {
@@ -73,6 +74,14 @@ class GlobalExceptionHandler {
         return ResponseEntity.status(HttpStatus.FORBIDDEN).body(
             ApiErrorResponse("FORBIDDEN", "Access denied")
         )
+    }
+
+    @ExceptionHandler(ResponseStatusException::class)
+    fun handleResponseStatus(e: ResponseStatusException): ResponseEntity<ApiErrorResponse> {
+        val status = e.statusCode
+        val error = (status as? HttpStatus)?.name ?: status.toString()
+        val message = e.reason ?: "Request failed"
+        return ResponseEntity.status(status).body(ApiErrorResponse(error, message))
     }
     
     @ExceptionHandler(Exception::class)
