@@ -18,8 +18,11 @@ class LocationManager: NSObject, ObservableObject, CLLocationManagerDelegate {
     }
     
     func requestPermission() {
+        // Request Always authorization to enable background location updates during runs.
+        // This allows the app to continue tracking location when in the background or when
+        // the device is locked, which is essential for accurate run tracking.
         if locationManager.authorizationStatus == .notDetermined {
-            locationManager.requestWhenInUseAuthorization()
+            locationManager.requestAlwaysAuthorization()
         }
     }
     
