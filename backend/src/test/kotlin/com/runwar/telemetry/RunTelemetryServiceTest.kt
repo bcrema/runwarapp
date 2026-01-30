@@ -13,7 +13,6 @@ import com.runwar.domain.user.User
 import com.runwar.game.LoopValidationMetrics
 import com.runwar.game.LoopValidator
 import com.runwar.game.ShieldMechanics
-import io.mockk.capture
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.slot

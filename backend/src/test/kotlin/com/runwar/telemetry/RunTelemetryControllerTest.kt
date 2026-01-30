@@ -22,6 +22,7 @@ import org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers.content
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers.status
 import org.springframework.test.web.servlet.setup.MockMvcBuilders
+import org.springframework.test.web.servlet.setup.StandaloneMockMvcBuilder
 import java.time.Duration
 import java.time.Instant
 import java.util.UUID
@@ -34,7 +35,7 @@ class RunTelemetryControllerTest {
     fun setUp() {
         mockMvc = MockMvcBuilders.standaloneSetup(RunTelemetryController(runTelemetryService))
             .setControllerAdvice(GlobalExceptionHandler())
-            .apply(springSecurity())
+            .apply<StandaloneMockMvcBuilder>(springSecurity())
             .build()
     }
 
