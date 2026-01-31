@@ -33,6 +33,7 @@ dependencies {
     
     // Database
     runtimeOnly("org.postgresql:postgresql")
+    runtimeOnly("com.h2database:h2")
     implementation("org.hibernate.orm:hibernate-spatial:6.6.4.Final")
     implementation("com.google.cloud.sql:postgres-socket-factory:1.23.0")
     

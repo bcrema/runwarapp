@@ -1,0 +1,803 @@
+{
+  "openapi": "3.0.3",
+  "info": {
+    "title": "LigaRun Backend API",
+    "version": "0.0.1-SNAPSHOT",
+    "description": "Especificação OpenAPI gerada para apoiar o desenvolvimento do app. Atualize com backend/scripts/export-openapi.sh quando possível."
+  },
+  "servers": [
+    {
+      "url": "http://localhost:8080"
+    }
+  ],
+  "tags": [
+    { "name": "auth" },
+    { "name": "users" },
+    { "name": "bandeiras" },
+    { "name": "tiles" },
+    { "name": "runs" },
+    { "name": "telemetry" }
+  ],
+  "paths": {
+    "/api/auth/signup": {
+      "post": {
+        "tags": ["auth"],
+        "summary": "Registrar novo usuário",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": { "$ref": "#/components/schemas/RegisterRequest" }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Auth tokens e dados do usuário",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/AuthResponse" }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/auth/register": {
+      "post": {
+        "tags": ["auth"],
+        "summary": "Registrar novo usuário (alias)",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": { "$ref": "#/components/schemas/RegisterRequest" }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Auth tokens e dados do usuário",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/AuthResponse" }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/auth/login": {
+      "post": {
+        "tags": ["auth"],
+        "summary": "Login",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": { "$ref": "#/components/schemas/LoginRequest" }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Auth tokens e dados do usuário",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/AuthResponse" }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/auth/refresh": {
+      "post": {
+        "tags": ["auth"],
+        "summary": "Renovar access token",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": { "$ref": "#/components/schemas/RefreshRequest" }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Auth tokens e dados do usuário",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/AuthResponse" }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/auth/logout": {
+      "post": {
+        "tags": ["auth"],
+        "summary": "Logout",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": { "$ref": "#/components/schemas/LogoutRequest" }
+            }
+          }
+        },
+        "responses": {
+          "204": {
+            "description": "Logout concluído"
+          }
+        }
+      }
+    },
+    "/api/me": {
+      "get": {
+        "tags": ["users"],
+        "summary": "Perfil do usuário atual",
+        "responses": {
+          "200": {
+            "description": "Perfil do usuário",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/UserDto" }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/users/me": {
+      "get": {
+        "tags": ["users"],
+        "summary": "Perfil do usuário atual (alias)",
+        "responses": {
+          "200": {
+            "description": "Perfil do usuário",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/UserDto" }
+              }
+            }
+          }
+        }
+      },
+      "put": {
+        "tags": ["users"],
+        "summary": "Atualizar perfil",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": { "$ref": "#/components/schemas/UpdateProfileRequest" }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Perfil atualizado",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/UserDto" }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/bandeiras": {
+      "get": {
+        "tags": ["bandeiras"],
+        "summary": "Listar bandeiras",
+        "responses": {
+          "200": {
+            "description": "Lista de bandeiras",
+            "content": {
+              "application/json": {
+                "schema": { "type": "array", "items": { "$ref": "#/components/schemas/BandeiraDto" } }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": ["bandeiras"],
+        "summary": "Criar bandeira",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": { "$ref": "#/components/schemas/CreateBandeiraRequest" }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Bandeira criada",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/BandeiraDto" }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/bandeiras/rankings": {
+      "get": {
+        "tags": ["bandeiras"],
+        "summary": "Ranking de bandeiras",
+        "responses": {
+          "200": {
+            "description": "Ranking",
+            "content": {
+              "application/json": {
+                "schema": { "type": "array", "items": { "$ref": "#/components/schemas/BandeiraDto" } }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/bandeiras/search": {
+      "get": {
+        "tags": ["bandeiras"],
+        "summary": "Buscar bandeiras",
+        "parameters": [
+          {
+            "name": "q",
+            "in": "query",
+            "required": true,
+            "schema": { "type": "string" }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Resultados",
+            "content": {
+              "application/json": {
+                "schema": { "type": "array", "items": { "$ref": "#/components/schemas/BandeiraDto" } }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/bandeiras/{id}": {
+      "get": {
+        "tags": ["bandeiras"],
+        "summary": "Detalhe de bandeira",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": { "type": "string", "format": "uuid" }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Bandeira",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/BandeiraDto" }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/bandeiras/{id}/members": {
+      "get": {
+        "tags": ["bandeiras"],
+        "summary": "Listar membros da bandeira",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": { "type": "string", "format": "uuid" }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Membros",
+            "content": {
+              "application/json": {
+                "schema": { "type": "array", "items": { "$ref": "#/components/schemas/BandeiraMemberDto" } }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/bandeiras/{id}/join": {
+      "post": {
+        "tags": ["bandeiras"],
+        "summary": "Entrar em uma bandeira",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": { "type": "string", "format": "uuid" }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Bandeira",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/BandeiraDto" }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/bandeiras/leave": {
+      "post": {
+        "tags": ["bandeiras"],
+        "summary": "Sair da bandeira",
+        "responses": {
+          "200": {
+            "description": "Sucesso",
+            "content": {
+              "application/json": {
+                "schema": { "type": "object", "additionalProperties": true }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/bandeiras/{id}/members/role": {
+      "put": {
+        "tags": ["bandeiras"],
+        "summary": "Atualizar papel de membro",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": { "type": "string", "format": "uuid" }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": { "$ref": "#/components/schemas/UpdateRoleRequest" }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Sucesso",
+            "content": {
+              "application/json": {
+                "schema": { "type": "object", "additionalProperties": true }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/tiles": {
+      "get": {
+        "tags": ["tiles"],
+        "summary": "Listar tiles por filtros",
+        "parameters": [
+          { "name": "minLat", "in": "query", "required": false, "schema": { "type": "number" } },
+          { "name": "minLng", "in": "query", "required": false, "schema": { "type": "number" } },
+          { "name": "maxLat", "in": "query", "required": false, "schema": { "type": "number" } },
+          { "name": "maxLng", "in": "query", "required": false, "schema": { "type": "number" } },
+          { "name": "bbox", "in": "query", "required": false, "schema": { "type": "string", "description": "minLng,minLat,maxLng,maxLat" } },
+          { "name": "centerLat", "in": "query", "required": false, "schema": { "type": "number" } },
+          { "name": "centerLng", "in": "query", "required": false, "schema": { "type": "number" } },
+          { "name": "radiusMeters", "in": "query", "required": false, "schema": { "type": "number" } }
+        ],
+        "responses": {
+          "200": {
+            "description": "Tiles",
+            "content": {
+              "application/json": {
+                "schema": { "type": "array", "items": { "$ref": "#/components/schemas/TileDto" } }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/tiles/{id}": {
+      "get": {
+        "tags": ["tiles"],
+        "summary": "Detalhe do tile",
+        "parameters": [
+          { "name": "id", "in": "path", "required": true, "schema": { "type": "string" } }
+        ],
+        "responses": {
+          "200": {
+            "description": "Tile",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/TileDto" }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/tiles/at": {
+      "get": {
+        "tags": ["tiles"],
+        "summary": "Tile para coordenada",
+        "parameters": [
+          { "name": "lat", "in": "query", "required": true, "schema": { "type": "number" } },
+          { "name": "lng", "in": "query", "required": true, "schema": { "type": "number" } }
+        ],
+        "responses": {
+          "200": {
+            "description": "Tile",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/TileDto" }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/tiles/user/{userId}": {
+      "get": {
+        "tags": ["tiles"],
+        "summary": "Tiles por usuário",
+        "parameters": [
+          { "name": "userId", "in": "path", "required": true, "schema": { "type": "string", "format": "uuid" } }
+        ],
+        "responses": {
+          "200": {
+            "description": "Tiles",
+            "content": {
+              "application/json": {
+                "schema": { "type": "array", "items": { "$ref": "#/components/schemas/TileDto" } }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/tiles/bandeira/{bandeiraId}": {
+      "get": {
+        "tags": ["tiles"],
+        "summary": "Tiles por bandeira",
+        "parameters": [
+          { "name": "bandeiraId", "in": "path", "required": true, "schema": { "type": "string", "format": "uuid" } }
+        ],
+        "responses": {
+          "200": {
+            "description": "Tiles",
+            "content": {
+              "application/json": {
+                "schema": { "type": "array", "items": { "$ref": "#/components/schemas/TileDto" } }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/tiles/disputed": {
+      "get": {
+        "tags": ["tiles"],
+        "summary": "Tiles em disputa",
+        "responses": {
+          "200": {
+            "description": "Tiles",
+            "content": {
+              "application/json": {
+                "schema": { "type": "array", "items": { "$ref": "#/components/schemas/TileDto" } }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/tiles/stats": {
+      "get": {
+        "tags": ["tiles"],
+        "summary": "Estatísticas do jogo",
+        "responses": {
+          "200": {
+            "description": "Stats",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/GameStats" }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/runs": {
+      "post": {
+        "tags": ["runs"],
+        "summary": "Submeter corrida (GPX)",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "multipart/form-data": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "file": { "type": "string", "format": "binary" }
+                },
+                "required": ["file"]
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": { "description": "Resultado da corrida" }
+        }
+      },
+      "get": {
+        "tags": ["runs"],
+        "summary": "Histórico de corridas",
+        "parameters": [
+          { "name": "limit", "in": "query", "required": false, "schema": { "type": "integer", "default": 20 } }
+        ],
+        "responses": {
+          "200": {
+            "description": "Corridas",
+            "content": {
+              "application/json": {
+                "schema": { "type": "array", "items": { "$ref": "#/components/schemas/RunDto" } }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/runs/coordinates": {
+      "post": {
+        "tags": ["runs"],
+        "summary": "Submeter corrida por coordenadas",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": { "$ref": "#/components/schemas/SubmitCoordinatesRequest" }
+            }
+          }
+        },
+        "responses": {
+          "200": { "description": "Resultado da corrida" }
+        }
+      }
+    },
+    "/api/runs/{id}": {
+      "get": {
+        "tags": ["runs"],
+        "summary": "Detalhe da corrida",
+        "parameters": [
+          { "name": "id", "in": "path", "required": true, "schema": { "type": "string", "format": "uuid" } }
+        ],
+        "responses": {
+          "200": {
+            "description": "Corrida",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/RunDto" }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/runs/daily-status": {
+      "get": {
+        "tags": ["runs"],
+        "summary": "Status diário",
+        "responses": {
+          "200": {
+            "description": "Status",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/DailyStatusResponse" }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/runs": {
+      "post": {
+        "tags": ["runs"],
+        "summary": "Ingestão de corrida (GPX ou coordenadas)",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "multipart/form-data": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "file": { "type": "string", "format": "binary" },
+                  "origin": { "type": "string" }
+                }
+              }
+            },
+            "application/json": {
+              "schema": { "$ref": "#/components/schemas/SubmitRunRequest" }
+            }
+          }
+        },
+        "responses": {
+          "200": { "description": "Resultado da ingestão" }
+        }
+      }
+    },
+    "/api/admin/telemetry/runs": {
+      "get": {
+        "tags": ["telemetry"],
+        "summary": "Exportar telemetry de corridas (admin)",
+        "parameters": [
+          { "name": "format", "in": "query", "required": false, "schema": { "type": "string", "default": "json" } },
+          { "name": "from", "in": "query", "required": false, "schema": { "type": "string", "format": "date-time" } },
+          { "name": "to", "in": "query", "required": false, "schema": { "type": "string", "format": "date-time" } }
+        ],
+        "responses": {
+          "200": { "description": "Exportação" }
+        }
+      }
+    }
+  },
+  "components": {
+    "securitySchemes": {
+      "bearerAuth": {
+        "type": "http",
+        "scheme": "bearer",
+        "bearerFormat": "JWT"
+      }
+    },
+    "schemas": {
+      "RegisterRequest": {
+        "type": "object",
+        "properties": {
+          "email": { "type": "string", "format": "email" },
+          "username": { "type": "string" },
+          "password": { "type": "string" }
+        },
+        "required": ["email", "username", "password"]
+      },
+      "LoginRequest": {
+        "type": "object",
+        "properties": {
+          "email": { "type": "string", "format": "email" },
+          "password": { "type": "string" }
+        },
+        "required": ["email", "password"]
+      },
+      "RefreshRequest": {
+        "type": "object",
+        "properties": {
+          "refreshToken": { "type": "string" }
+        },
+        "required": ["refreshToken"]
+      },
+      "LogoutRequest": {
+        "type": "object",
+        "properties": {
+          "refreshToken": { "type": "string" }
+        },
+        "required": ["refreshToken"]
+      },
+      "AuthResponse": {
+        "type": "object",
+        "properties": {
+          "user": { "$ref": "#/components/schemas/UserDto" },
+          "accessToken": { "type": "string" },
+          "refreshToken": { "type": "string" }
+        }
+      },
+      "UserDto": {
+        "type": "object",
+        "additionalProperties": true
+      },
+      "UpdateProfileRequest": {
+        "type": "object",
+        "properties": {
+          "username": { "type": "string" },
+          "avatarUrl": { "type": "string" },
+          "isPublic": { "type": "boolean" }
+        }
+      },
+      "BandeiraDto": {
+        "type": "object",
+        "additionalProperties": true
+      },
+      "BandeiraMemberDto": {
+        "type": "object",
+        "additionalProperties": true
+      },
+      "CreateBandeiraRequest": {
+        "type": "object",
+        "properties": {
+          "name": { "type": "string" },
+          "category": { "type": "string" },
+          "color": { "type": "string" },
+          "description": { "type": "string" }
+        },
+        "required": ["name", "category", "color"]
+      },
+      "UpdateRoleRequest": {
+        "type": "object",
+        "properties": {
+          "userId": { "type": "string", "format": "uuid" },
+          "role": { "type": "string" }
+        },
+        "required": ["userId", "role"]
+      },
+      "TileDto": {
+        "type": "object",
+        "additionalProperties": true
+      },
+      "GameStats": {
+        "type": "object",
+        "additionalProperties": true
+      },
+      "RunDto": {
+        "type": "object",
+        "additionalProperties": true
+      },
+      "SubmitCoordinatesRequest": {
+        "type": "object",
+        "properties": {
+          "coordinates": {
+            "type": "array",
+            "items": { "$ref": "#/components/schemas/CoordinatePoint" }
+          },
+          "timestamps": {
+            "type": "array",
+            "items": { "type": "integer", "format": "int64" }
+          }
+        },
+        "required": ["coordinates", "timestamps"]
+      },
+      "SubmitRunRequest": {
+        "type": "object",
+        "properties": {
+          "coordinates": {
+            "type": "array",
+            "items": { "$ref": "#/components/schemas/CoordinatePoint" }
+          },
+          "timestamps": {
+            "type": "array",
+            "items": { "type": "integer", "format": "int64" }
+          },
+          "origin": { "type": "string" }
+        },
+        "required": ["coordinates", "timestamps"]
+      },
+      "CoordinatePoint": {
+        "type": "object",
+        "properties": {
+          "lat": { "type": "number" },
+          "lng": { "type": "number" }
+        },
+        "required": ["lat", "lng"]
+      },
+      "DailyStatusResponse": {
+        "type": "object",
+        "properties": {
+          "userActionsUsed": { "type": "integer" },
+          "userActionsRemaining": { "type": "integer" },
+          "bandeiraActionsUsed": { "type": "integer" },
+          "bandeiraActionCap": { "type": "integer" }
+        }
+      }
+    }
+  }
+}
