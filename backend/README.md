@@ -84,6 +84,16 @@ docker run -p 8080:8080 --env-file .env runwar-backend
 
 Acesse `http://localhost:8080/swagger-ui.html` para documentação interativa da API.
 
+## OpenAPI exportado
+
+O OpenAPI exportado fica versionado em `backend/openapi/openapi.json` para uso no app.
+
+Para atualizar o arquivo, execute:
+
+```bash
+./backend/scripts/export-openapi.sh
+```
+
 ## Dados mock (opcional)
 
 Se `RUNWAR_SEED_ENABLED=true`, o backend cria alguns usuários/bandeiras/tiles para testes na primeira execução:
