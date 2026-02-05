@@ -1,5 +1,7 @@
 # GDS v1.0 — Aplicativo de Corrida Gamificado: Corrida & Conquista de Territórios (Piloto Curitiba)
 
+> **Escopo V1 iOS:** veja o documento enxuto em `GDS v1.0 - iOS.md` com foco em “correr → validar → conquistar/defender”.
+
 ## 1) Objetivo do produto
 Criar um “War” no mundo real para corredores, onde **corridas (GPS) conquistam e defendem territórios**, gerando:
 - Engajamento individual (progressão, coleção, ranking)
