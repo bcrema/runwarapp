@@ -4,9 +4,9 @@ Backend em Kotlin/Spring Boot para o jogo de conquista territorial LigaRun.
 
 ## Requisitos
 
-- JDK 21
+- JDK 25
 - PostgreSQL 15+ com PostGIS
-- Gradle 8.5+
+- Gradle 9.1+
 
 ## Setup Local
 

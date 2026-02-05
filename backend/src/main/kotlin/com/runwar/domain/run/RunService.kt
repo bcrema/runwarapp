@@ -3,6 +3,7 @@ package com.runwar.domain.run
 import com.runwar.config.GameProperties
 import com.runwar.domain.tile.TileRepository
 import com.runwar.domain.user.User
+import com.runwar.domain.user.UserRepository
 import com.runwar.game.LatLngPoint
 import com.runwar.game.LoopValidationFlagService
 import com.runwar.game.LoopValidationInput
@@ -28,7 +29,8 @@ class RunService(
         private val gameProperties: GameProperties,
         private val tileRepository: TileRepository,
         private val capsService: CapsService,
-        private val runTelemetryService: RunTelemetryService
+        private val runTelemetryService: RunTelemetryService,
+        private val userRepository: UserRepository
 ) {
 
         data class RunDto(
@@ -91,14 +93,16 @@ class RunService(
                 gpxFile: MultipartFile,
                 origin: RunOrigin = RunOrigin.IMPORT
         ): RunSubmissionResult {
+                val managedUser = loadUserWithBandeira(user.id)
+
                 // Check daily cap
-                val capsCheck = capsService.checkCaps(user)
+                val capsCheck = capsService.checkCaps(managedUser)
 
                 // Parse GPX
                 val parsed = gpxParser.parse(gpxFile)
 
                 // Validate loop
-                val loopFlags = loopValidationFlagService.resolveFlags(user.bandeira?.slug)
+                val loopFlags = loopValidationFlagService.resolveFlags(managedUser.bandeira?.slug)
                 val validation =
                         loopValidator.validate(
                                 LoopValidationInput(parsed.coordinates, parsed.timestamps),
@@ -110,7 +114,7 @@ class RunService(
                 // Create run record
                 val run =
                         Run(
-                                user = user,
+                                user = managedUser,
                                 origin = origin,
                                 status = status,
                                 distance = BigDecimal.valueOf(parsed.totalDistance),
@@ -141,7 +145,10 @@ class RunService(
 
                         if (!capsCheck.userCapReached && !capsCheck.bandeiraCapReached) {
                                 territoryResult =
-                                        shieldMechanics.processAction(validation.primaryTile, user)
+                                        shieldMechanics.processAction(
+                                                validation.primaryTile,
+                                                managedUser
+                                        )
                         }
 
                         if (territoryResult?.success == true) {
@@ -153,16 +160,16 @@ class RunService(
                 val savedRun = runRepository.save(run)
 
                 // Update user stats
-                user.totalRuns++
-                user.totalDistance =
-                        user.totalDistance.add(BigDecimal.valueOf(parsed.totalDistance))
+                managedUser.totalRuns++
+                managedUser.totalDistance =
+                        managedUser.totalDistance.add(BigDecimal.valueOf(parsed.totalDistance))
 
                 val turnResult =
                         buildTurnResult(
                                 validation,
                                 territoryResult,
                                 previousOwner,
-                                user,
+                                managedUser,
                                 capsCheck.actionsToday,
                                 capsCheck.bandeiraActionsToday
                         )
@@ -190,11 +197,13 @@ class RunService(
                 timestamps: List<Instant>,
                 origin: RunOrigin = RunOrigin.WEB
         ): RunSubmissionResult {
+                val managedUser = loadUserWithBandeira(user.id)
+
                 // Check daily cap
-                val capsCheck = capsService.checkCaps(user)
+                val capsCheck = capsService.checkCaps(managedUser)
 
                 // Validate loop
-                val loopFlags = loopValidationFlagService.resolveFlags(user.bandeira?.slug)
+                val loopFlags = loopValidationFlagService.resolveFlags(managedUser.bandeira?.slug)
                 val validation =
                         loopValidator.validate(
                                 LoopValidationInput(coordinates, timestamps),
@@ -210,7 +219,7 @@ class RunService(
                 // Create run record
                 val run =
                         Run(
-                                user = user,
+                                user = managedUser,
                                 origin = origin,
                                 status = status,
                                 distance =
@@ -241,7 +250,10 @@ class RunService(
 
                         if (!capsCheck.userCapReached && !capsCheck.bandeiraCapReached) {
                                 territoryResult =
-                                        shieldMechanics.processAction(validation.primaryTile, user)
+                                        shieldMechanics.processAction(
+                                                validation.primaryTile,
+                                                managedUser
+                                        )
                         }
 
                         if (territoryResult?.success == true) {
@@ -256,7 +268,7 @@ class RunService(
                                 validation,
                                 territoryResult,
                                 previousOwner,
-                                user,
+                                managedUser,
                                 capsCheck.actionsToday,
                                 capsCheck.bandeiraActionsToday
                         )
@@ -393,25 +405,23 @@ class RunService(
 
         @Transactional(readOnly = true)
         fun getDailyStatus(user: User): DailyStatusInfo {
-                // Re-attach user to session if needed or just rely on transactional to allow lazy
-                // loading if user is managed
-                // Since 'user' comes from Principal, it might be detached.
-                // Safer to reload user or just access if we trust the session is active.
-                // Actually, if user is detached, accessing .bandeira might still fail unless we
-                // merge it.
-                // A better approach is to fetch user again if we are unsure.
-                // But let's try just Transactional first.
-                val actionsUsed = capsService.getDailyActionCount(user.id)
+                val managedUser = loadUserWithBandeira(user.id)
+                val actionsUsed = capsService.getDailyActionCount(managedUser.id)
                 val bandeiraActionsUsed =
-                        user.bandeira?.let { capsService.getBandeiraDailyActionCount(it.id) }
+                        managedUser.bandeira?.let { capsService.getBandeiraDailyActionCount(it.id) }
 
                 return DailyStatusInfo(
                         userActionsUsed = actionsUsed,
                         userActionsRemaining =
                                 maxOf(0, gameProperties.userDailyActionCap - actionsUsed),
                         bandeiraActionsUsed = bandeiraActionsUsed,
-                        bandeiraActionCap = user.bandeira?.dailyActionCap
+                        bandeiraActionCap = managedUser.bandeira?.dailyActionCap
                 )
+        }
+
+        private fun loadUserWithBandeira(userId: UUID): User {
+                return userRepository.findByIdWithBandeira(userId)
+                        ?: throw IllegalArgumentException("User not found")
         }
 
         private data class BoundingBox(

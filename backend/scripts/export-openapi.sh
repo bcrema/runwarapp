@@ -11,7 +11,7 @@ mkdir -p "${OUTPUT_DIR}"
 mkdir -p "$(dirname "${APP_LOG}")"
 
 if [[ -z "${JAVA_HOME:-}" ]] && command -v mise >/dev/null 2>&1; then
-  if JAVA_HOME="$(mise where java@21.0.2 2>/dev/null)"; then
+  if JAVA_HOME="$(mise where java@25 2>/dev/null)"; then
     export JAVA_HOME
   fi
 fi

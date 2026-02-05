@@ -3,6 +3,8 @@ package com.runwar.domain.user
 import com.runwar.config.JwtProperties
 import com.runwar.config.JwtService
 import com.runwar.config.UnauthorizedException
+import com.runwar.domain.bandeira.Bandeira
+import com.runwar.domain.bandeira.BandeiraCategory
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.slot
@@ -86,6 +88,56 @@ class UserServiceTest {
     }
 
     @Test
+    fun `login returns bandeira information when user belongs to a bandeira`() {
+        val userRepository = mockk<UserRepository>()
+        val passwordEncoder = mockk<PasswordEncoder>()
+        val jwtService = mockk<JwtService>()
+        val refreshTokenRepository = mockk<RefreshTokenRepository>()
+        val jwtProperties = JwtProperties(refreshExpiration = 3_600_000)
+
+        val creator = User(
+            id = UUID.randomUUID(),
+            email = "creator@example.com",
+            username = "creator",
+            passwordHash = "hash"
+        )
+        val bandeira = Bandeira(
+            id = UUID.randomUUID(),
+            name = "Alpha Team",
+            slug = "alpha-team",
+            category = BandeiraCategory.GRUPO,
+            color = "#FF5733",
+            createdBy = creator
+        )
+        val user = User(
+            id = UUID.randomUUID(),
+            email = "alpha.admin+seed@runwar.local",
+            username = "alpha.admin",
+            passwordHash = "encoded",
+            bandeira = bandeira
+        )
+
+        every { userRepository.findWithBandeiraByEmail(user.email) } returns user
+        every { passwordEncoder.matches("password", "encoded") } returns true
+        every { jwtService.generateToken(user.id, user.email) } returns "access-token"
+        every { refreshTokenRepository.save(any()) } answers { firstArg() }
+
+        val service = UserService(
+            userRepository,
+            passwordEncoder,
+            jwtService,
+            refreshTokenRepository,
+            jwtProperties
+        )
+
+        val result = service.login(user.email, "password")
+
+        assertEquals(bandeira.id, result.user.bandeiraId)
+        assertEquals("Alpha Team", result.user.bandeiraName)
+        verify(exactly = 1) { userRepository.findWithBandeiraByEmail(user.email) }
+    }
+
+    @Test
     fun `refresh rejects invalid refresh token format before hitting repository`() {
         val userRepository = mockk<UserRepository>(relaxed = true)
         val passwordEncoder = mockk<PasswordEncoder>(relaxed = true)
@@ -106,6 +158,53 @@ class UserServiceTest {
         }
 
         verify(exactly = 0) { refreshTokenRepository.findByTokenHash(any()) }
+    }
+
+    @Test
+    fun `get profile loads user with bandeira association`() {
+        val userRepository = mockk<UserRepository>()
+        val passwordEncoder = mockk<PasswordEncoder>(relaxed = true)
+        val jwtService = mockk<JwtService>(relaxed = true)
+        val refreshTokenRepository = mockk<RefreshTokenRepository>(relaxed = true)
+        val jwtProperties = JwtProperties(refreshExpiration = 3_600_000)
+
+        val creator = User(
+            id = UUID.randomUUID(),
+            email = "creator@example.com",
+            username = "creator",
+            passwordHash = "hash"
+        )
+        val bandeira = Bandeira(
+            id = UUID.randomUUID(),
+            name = "Alpha Team",
+            slug = "alpha-team",
+            category = BandeiraCategory.GRUPO,
+            color = "#FF5733",
+            createdBy = creator
+        )
+        val user = User(
+            id = UUID.randomUUID(),
+            email = "member@example.com",
+            username = "member",
+            passwordHash = "hash",
+            bandeira = bandeira
+        )
+
+        every { userRepository.findByIdWithBandeira(user.id) } returns user
+
+        val service = UserService(
+            userRepository,
+            passwordEncoder,
+            jwtService,
+            refreshTokenRepository,
+            jwtProperties
+        )
+
+        val profile = service.getProfile(user.id)
+
+        assertEquals(bandeira.id, profile.bandeiraId)
+        assertEquals("Alpha Team", profile.bandeiraName)
+        verify(exactly = 1) { userRepository.findByIdWithBandeira(user.id) }
     }
 
     @Test

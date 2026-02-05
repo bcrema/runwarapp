@@ -1,4 +1,4 @@
-FROM eclipse-temurin:21-jdk-alpine as builder
+FROM eclipse-temurin:25-jdk-alpine as builder
 
 WORKDIR /app
 COPY gradle gradle
@@ -8,7 +8,7 @@ COPY src src
 RUN chmod +x gradlew
 RUN ./gradlew build -x test --no-daemon
 
-FROM eclipse-temurin:21-jre-alpine
+FROM eclipse-temurin:25-jre-alpine
 
 WORKDIR /app
 COPY --from=builder /app/build/libs/*.jar app.jar
