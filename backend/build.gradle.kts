@@ -74,7 +74,7 @@ kotlin {
 }
 
 tasks.withType<JavaCompile> {
-    options.release.set(25)
+    options.release.set(24)
 }
 
 tasks.withType<Test> {
