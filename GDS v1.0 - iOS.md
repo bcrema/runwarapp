@@ -1,7 +1,7 @@
 # GDS v1.0 — V1 iOS (Foco Corrida + Território)
 
 ## 1) Visão e objetivo da V1 iOS
-Entregar o **loop principal** do jogo no iOS: **correr → validar → conquistar/defender tiles**, garantindo que o corredor viva a experiência de território desde a primeira corrida.
+Entregar o **loop principal** do jogo no iOS: **correr no Fitness/Saúde → sincronizar no LigaRun → validar → conquistar/defender tiles**, garantindo que o corredor viva a experiência de território desde a primeira corrida.
 
 **Objetivo de experiência:** terminar a corrida e ver claramente o impacto territorial (conquista/ataque/defesa) com feedback direto no mapa.
 
@@ -9,7 +9,7 @@ Entregar o **loop principal** do jogo no iOS: **correr → validar → conquista
 
 ## 2) Escopo da V1 iOS (o que entra)
 - **Mapa com tiles** (estados: neutro, dominado, em disputa)
-- **Gravação de corrida (GPS)**
+- **Companion de corrida** (acompanhar no app) + **sincronização via Fitness/Saúde** (iPhone/Apple Watch)
 - **Validação do loop** + antifraude mínimo
 - **Resultado territorial pós-corrida** (conquistou/atacou/defendeu)
 - **Perfil básico do corredor** (stats simples e histórico de ações)
@@ -23,15 +23,16 @@ Entregar o **loop principal** do jogo no iOS: **correr → validar → conquista
 - Badges, missões, temporadas completas
 - Dashboard de coach
 - Bairros, raids, hubs de bandeira
-- Integrações externas (Strava/Garmin/Apple Health)
+- Integrações externas (Strava/Garmin)
 
 ---
 
 ## 4) Fluxos essenciais (jornadas-chave)
-1. **Primeiro uso → permissões → mapa → iniciar corrida**
-   - Permissões de localização concedidas
+1. **Primeiro uso → permissões → mapa → iniciar no Fitness**
+   - Permissões de Saúde (HealthKit) e localização concedidas
    - Mapa centralizado na área do usuário
-2. **Finalizar corrida → validação → feedback territorial**
+   - Corrida iniciada no app Fitness (iPhone/Apple Watch), com LigaRun em modo companion
+2. **Finalizar corrida no Fitness → sincronizar → validação → feedback territorial**
    - Loop válido gera ação territorial
    - Feedback imediato: conquista, ataque, defesa ou inválida
 3. **Entrar/criar bandeira → ações passam a contar para o time**
@@ -39,12 +40,19 @@ Entregar o **loop principal** do jogo no iOS: **correr → validar → conquista
 
 ---
 
-## 5) Diretrizes de UX iOS (decisões)
-- **Mapa é a home**: abre centralizado no usuário e já mostra tiles e estados.
-- **CTA de corrida sempre visível**: botão primário “Iniciar corrida” fixo no mapa; muda para “Pausar/Finalizar” durante a gravação.
-- **Tela de gravação simples e legível**: tempo, distância, pace e status do GPS; mapa com trilha do percurso.
-- **Resultado pós-corrida focado no território**: card destacando “conquistou/atacou/defendeu/sem efeito” + tile(s) realçados no mapa.
-- **Estados de tile visuais e consistentes**: neutro (cinza), dominado (cor da bandeira ou do usuário), em disputa (contorno/escudo destacado).
+## 5) Diretrizes de UX/UI iOS (decisões)
+- **Linguagem visual clean (referência)**: interface clara, cards brancos, bordas suaves, sombras leves e foco em legibilidade.
+- **Hierarquia tipográfica objetiva**: título forte de estado (“Corrida concluída”), subtítulo curto (tipo de treino + distância) e blocos de informação com labels curtos.
+- **Mapa é a home**: abre centralizado no usuário e já mostra tiles e estados, com overlays mínimos para não poluir a leitura.
+- **CTA de corrida sempre visível**: botão primário “Acompanhar corrida” fixo no mapa, com ação de abrir/instruir uso do Fitness.
+- **Tela companion simples e legível**: métricas essenciais (tempo, distância, pace) em blocos limpos; status de sincronização/monitoramento e mapa com trilha quando disponível.
+- **Resultado pós-corrida em formato de resumo clean**:
+  - Cabeçalho com status da corrida + distância total.
+  - Linha de métricas em cards/círculos (distância, tempo, tiles).
+  - Card territorial principal com status “conquistou/atacou/defendeu/sem efeito”.
+  - Lista curta de ações territoriais com variação de escudo.
+- **Estados de tile visuais e consistentes**: neutro (cinza claro), dominado (cor da bandeira/usuário), em disputa (destaque laranja com contorno).
+- **Paleta base (clean)**: fundo claro/neutro, acento principal verde/teal, disputa em laranja, texto principal em alto contraste.
 - **Bandeiras objetivas**: lista de bandeiras + ação de criar/entrar; confirma que ações passam a contar para o time.
 - **Perfil básico**: métricas simples e histórico curto de ações territoriais.
 
@@ -104,15 +112,15 @@ Entregar o **loop principal** do jogo no iOS: **correr → validar → conquista
 
 ## 10) Telas mínimas iOS
 - Mapa
-- Gravação de corrida
-- Resultado da corrida (conquista/ataque/defesa/sem efeito)
+- Acompanhamento de corrida (companion Fitness/Saúde)
+- Resultado da corrida clean (resumo + métricas + ações territoriais)
 - Bandeiras (criar/entrar)
 - Perfil básico
 
 ---
 
 ## 11) Critérios de aceite da V1 iOS
-1. Um corredor consegue **registrar uma corrida** e ver o **resultado territorial** no mapa.
+1. Um corredor consegue **correr pelo Fitness/Saúde** e ver a corrida **sincronizada e registrada** no LigaRun com resultado territorial no mapa.
 2. Loop válido gera **conquista/ataque/defesa** conforme regras definidas.
 3. Loop inválido salva a corrida, mas **não gera ação territorial**.
 4. Ao entrar numa bandeira, **ações futuras contam para o time**.
@@ -121,8 +129,9 @@ Entregar o **loop principal** do jogo no iOS: **correr → validar → conquista
 ---
 
 ## 12) Checklist técnico de aceite (mínimo)
-- Permissões de localização tratadas (negado, quando em uso, sempre)
-- GPS com precisão mínima configurada e feedback de “sinal ruim”
+- Permissões de Saúde (HealthKit) e localização tratadas
+- Sincronização de corrida via Fitness/Saúde funcional (iPhone/Apple Watch)
+- Qualidade de rota/sinal ruim tratada na validação (não gera efeito competitivo quando inválida)
 - Corrida inválida salva sem efeito territorial
 - Upload/validação responde em menos de 10s em rede estável
 - Tiles atualizam no mapa após resultado (sem precisar reiniciar o app)

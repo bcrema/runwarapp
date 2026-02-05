@@ -36,15 +36,25 @@ def main():
     # This follows the official image generation guidance for gpt-image-1. 
     # If your SDK version differs, update the call accordingly.
     try:
-        # Common pattern: request returns base64 image data
-        # Some SDK versions return .data[0].b64_json; adjust if needed.
-        resp = client.images.generate(
-            model="gpt-image-1",
-            prompt=args.prompt,
-            size=args.size,
-            quality=args.quality,
-            seed=args.seed,
-        )
+        # Common pattern: request returns base64 image data.
+        # Some SDK versions may not support "seed" in images.generate.
+        params = {
+            "model": "gpt-image-1",
+            "prompt": args.prompt,
+            "size": args.size,
+            "quality": args.quality,
+        }
+        if args.seed is not None:
+            params["seed"] = args.seed
+
+        try:
+            resp = client.images.generate(**params)
+        except TypeError as e:
+            if "seed" in str(e):
+                params.pop("seed", None)
+                resp = client.images.generate(**params)
+            else:
+                raise
         b64 = resp.data[0].b64_json
         img_bytes = base64.b64decode(b64)
         out_path.write_bytes(img_bytes)
