@@ -68,12 +68,13 @@ dependencies {
 kotlin {
     compilerOptions {
         freeCompilerArgs.addAll("-Xjsr305=strict")
+        // Kotlin 2.2 currently supports JVM targets up to 24
         jvmTarget.set(org.jetbrains.kotlin.gradle.dsl.JvmTarget.JVM_24)
     }
 }
 
 tasks.withType<JavaCompile> {
-    options.release.set(24)
+    options.release.set(25)
 }
 
 tasks.withType<Test> {
