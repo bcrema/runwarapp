@@ -96,7 +96,7 @@ class UserService(
     }
     
     fun login(email: String, password: String): AuthResult {
-        val user = userRepository.findByEmail(email)
+        val user = userRepository.findWithBandeiraByEmail(email)
             ?: throw IllegalArgumentException("Invalid credentials")
         
         if (!passwordEncoder.matches(password, user.passwordHash)) {
@@ -159,7 +159,7 @@ class UserService(
         }
     }
     
-    fun findById(id: UUID): User? = userRepository.findById(id).orElse(null)
+    fun findById(id: UUID): User? = userRepository.findByIdWithBandeira(id)
     
     fun getProfile(userId: UUID): UserDto {
         val user = findUser(userId)
@@ -213,8 +213,8 @@ class UserService(
     }
 
     private fun findUser(userId: UUID): User {
-        return userRepository.findById(userId)
-            .orElseThrow { IllegalArgumentException("User not found") }
+        return userRepository.findByIdWithBandeira(userId)
+            ?: throw IllegalArgumentException("User not found")
     }
 
     private fun applyUsernameUpdate(user: User, username: String?) {
