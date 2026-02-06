@@ -15,7 +15,7 @@
 | `03` | Agente iOS Runtime/UX | `feat/ios-gds-03-companion-states` | `../runwarapp-wt-03` | |
 | `04` | Agente iOS Maps | `feat/ios-gds-04-mapa-home-cta` | `../runwarapp-wt-04` | |
 | `05` | Agente iOS UX Flow | `feat/ios-gds-05-resultado-pos-corrida` | `../runwarapp-wt-05` | |
-| `06` | Agente iOS Social | `feat/ios-gds-06-bandeiras` | `../runwarapp-wt-06` | |
+| `06` | Agente iOS Social | `feat/ios-gds-06-bandeiras` | `/tmp/runwarapp-wt-06` | |
 | `07` | Agente iOS Profile | `feat/ios-gds-07-perfil` | `../runwarapp-wt-07` | |
 | `08` | Agente iOS QA | `feat/ios-gds-08-qa-gates` | `../runwarapp-wt-08` | |
 | `09` | Agente iOS Release | `feat/ios-gds-09-hardening` | `../runwarapp-wt-09` | |
@@ -27,7 +27,6 @@
 - [ ] `03` Companion HUD estados - Dono: `Agente iOS Runtime/UX` (depende de `02`)
 - [ ] `04` Mapa home CTA tiles - Dono: `Agente iOS Maps` (depende de `01`)
 - [ ] `05` Resultado pos-corrida - Dono: `Agente iOS UX Flow` (depende de `02`)
-- [ ] `06` Bandeiras fluxo completo - Dono: `Agente iOS Social`
 - [ ] `07` Perfil basico historico - Dono: `Agente iOS Profile`
 - [ ] `08` Testes QA gates - Dono: `Agente iOS QA` (evolutivo)
 - [ ] `09` Hardening release - Dono: `Agente iOS Release` (depende de `03`,`04`,`05`,`06`,`07`)
@@ -42,6 +41,7 @@
 - [x] `00` Decisoes V1 iOS registradas
 - [x] Estrutura documental `ios/docs/gds-v1-ios/` criada
 - [x] `01` Fundacao permissoes config - Dono: `Agente iOS Platform`
+- [x] `06` Bandeiras fluxo completo - Dono: `Agente iOS Social`
 
 ## Tabela de acompanhamento
 | Passo | Status | Dono | Dependencias | Bloqueio | Ultima atualizacao |
@@ -51,7 +51,7 @@
 | `03` | To Do | Agente iOS Runtime/UX | `02` | - | 2026-02-05 |
 | `04` | To Do | Agente iOS Maps | `01` | - | 2026-02-05 |
 | `05` | To Do | Agente iOS UX Flow | `02` | - | 2026-02-05 |
-| `06` | To Do | Agente iOS Social | - | - | 2026-02-05 |
+| `06` | Done | Agente iOS Social | - | - | 2026-02-06 |
 | `07` | To Do | Agente iOS Profile | - | - | 2026-02-05 |
 | `08` | To Do | Agente iOS QA | paralelo | - | 2026-02-05 |
 | `09` | To Do | Agente iOS Release | `03`,`04`,`05`,`06`,`07` | - | 2026-02-05 |
@@ -62,6 +62,10 @@
 - [ ] 6 casos de aceite do GDS validados
 
 ## Atualizacoes
+- `06` 2026-02-06 — Status: Done. Resumo: fluxo completo de bandeiras finalizado com criacao via formulario (nome/categoria/cor/descricao), entrar/sair com feedback de sucesso e mensagem de impacto nas acoes futuras, estados vazio/erro recuperaveis de busca/lista e sincronizacao de estado apos join/leave. Cobertura de testes adicionada para `join`, `leave`, criacao com sucesso e erro (`BandeirasViewModelTests`), `RunsViewModelTests` reativado no target e corrigido, e `project.yml` ajustado para preservar chaves de permissao no `Info.plist` apos regeneracao do projeto. Branch: `feat/ios-gds-06-bandeiras`. Worktree: `/tmp/runwarapp-wt-06`. Testes: `xcodebuild -project LigaRun.xcodeproj -scheme LigaRun -destination "platform=iOS Simulator,name=iPhone 17,OS=26.2" -derivedDataPath /Users/brunocrema/runwarapp/ios/LigaRun/DerivedData -clonedSourcePackagesDirPath /Users/brunocrema/runwarapp/ios/LigaRun/SourcePackages -disableAutomaticPackageResolution test` (passou; 31 testes, 0 falhas); `xcodebuild` retries anteriores durante a retomada (falharam por erros de compilacao de testes, corrigidos); `xcodegen generate` (passou; incluiu `BandeirasViewModelTests.swift` e `RunsViewModelTests.swift` no target de testes).
+- `06` 2026-02-06 — Status: In Progress. Resumo: bloqueio de espaco em disco removido; retomada de execucao de testes do passo 06 para validar entrega final. Branch: `feat/ios-gds-06-bandeiras`. Worktree: `/tmp/runwarapp-wt-06`. Testes: em andamento.
+- `06` 2026-02-06 — Status: Blocked. Resumo: entregue fluxo completo de bandeiras no iOS com criacao (formulario nome/categoria/cor/descricao), entrar/sair com feedback de sucesso, mensagem de impacto nas acoes futuras, estados vazio/erro recuperaveis, sincronizacao de `session.currentUser` apos mudanca e novos testes unitarios de `BandeirasViewModel` para `join/leave/create` (sucesso/erro). Branch: `feat/ios-gds-06-bandeiras`. Worktree: `/tmp/runwarapp-wt-06`. Testes: `xcodebuild -project LigaRun.xcodeproj -scheme LigaRun -destination "platform=iOS Simulator,name=iPhone 17,OS=26.2" -derivedDataPath /tmp/runwarapp-wt-06/DerivedData -clonedSourcePackagesDirPath /tmp/runwarapp-wt-06/SourcePackages test` (falhou: CoreSimulator indisponivel + sem rede para SPM); `xcodebuild -project LigaRun.xcodeproj -scheme LigaRun -destination "platform=iOS Simulator,name=iPhone 17,OS=26.2" -derivedDataPath /tmp/runwarapp-wt-06/DerivedData -clonedSourcePackagesDirPath /Users/brunocrema/runwarapp/ios/LigaRun/SourcePackages -disableAutomaticPackageResolution test` (falhou: sandbox/CoreSimulator); `/bin/bash -lc "cd /tmp/runwarapp-wt-06/ios/LigaRun && CLANG_MODULE_CACHE_PATH=$(pwd)/ModuleCache SWIFT_MODULE_CACHE_PATH=$(pwd)/ModuleCache SWIFTPM_CACHE_PATH=$(pwd)/.swiftpm/cache xcodebuild -project LigaRun.xcodeproj -scheme LigaRun -destination 'platform=iOS Simulator,name=iPhone 17,OS=26.2' -derivedDataPath $(pwd)/DerivedData -clonedSourcePackagesDirPath /Users/brunocrema/runwarapp/ios/LigaRun/SourcePackages -disableAutomaticPackageResolution test"` (falhou: `No space left on device` durante build, testes cancelados).
+- `06` 2026-02-06 — Status: In Progress. Resumo: inicio do passo 06 com branch/worktree dedicados e levantamento de implementacao para fluxo completo de bandeiras (criar/entrar/sair + estados de erro/vazio). Branch: `feat/ios-gds-06-bandeiras`. Worktree: `/tmp/runwarapp-wt-06`. Testes: em andamento.
 - `01` 2026-02-06 — Status: Done. Resumo: fluxo de permissoes (Saude/localizacao) com card na tela de corridas validado; logica de autorizacao ajustada para refletir leitura real e CTA de Ajustes. Testes: `xcodebuild -scheme LigaRun -destination "platform=iOS Simulator,name=iPhone 17" test` (passou - informado pelo usuario); manual dispositivo (permissoes corridas) (passou).
 - `01` 2026-02-06 — Status: Blocked. Resumo: reteste manual do card de permissao concluido com sucesso (3 passos). Aguardando confirmacao de testes unitarios/build. Testes: manual (permissoes corridas) (passou).
 - `01` 2026-02-06 — Status: Blocked. Resumo: ajuste de deteccao de autorizacao HealthKit para considerar amostra real de workout (evita falso autorizado quando acesso negado) e texto do card atualizado para refletir ausencia de dados. Testes: `xcodebuild -scheme LigaRun -destination "platform=iOS Simulator,name=iPhone 17,OS=26.2" test` (falhou: sem projeto no cwd); `/bin/bash -lc "cd /Users/brunocrema/runwarapp/ios/LigaRun && CLANG_MODULE_CACHE_PATH=$(pwd)/ModuleCache SWIFT_MODULE_CACHE_PATH=$(pwd)/ModuleCache SWIFTPM_CACHE_PATH=$(pwd)/.swiftpm/cache xcodebuild -project LigaRun.xcodeproj -scheme LigaRun -destination 'platform=iOS Simulator,name=iPhone 17,OS=26.2' -derivedDataPath $(pwd)/DerivedData -clonedSourcePackagesDirPath $(pwd)/SourcePackages test"` (falhou: CoreSimulator indisponivel + sem rede para SPM).
