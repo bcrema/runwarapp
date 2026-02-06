@@ -25,11 +25,11 @@
 	<key>MAPBOX_ACCESS_TOKEN</key>
 	<string>$(MAPBOX_ACCESS_TOKEN)</string>
 	<key>NSHealthShareUsageDescription</key>
-	<string>Usamos o Saúde para ler suas corridas e importar automaticamente.</string>
+	<string>Usamos o Saude para ler suas corridas e importar automaticamente.</string>
 	<key>NSLocationAlwaysAndWhenInUseUsageDescription</key>
-	<string>Permita acesso à localização sempre para registrar sua corrida mesmo com a tela bloqueada.</string>
+	<string>Permita acesso a localizacao sempre para registrar sua corrida mesmo com a tela bloqueada.</string>
 	<key>NSLocationWhenInUseUsageDescription</key>
-	<string>Usamos sua localização para acompanhar sua corrida e desenhar o território.</string>
+	<string>Usamos sua localizacao para acompanhar sua corrida e desenhar o territorio.</string>
 	<key>UIBackgroundModes</key>
 	<array>
 		<string>location</string>
