@@ -12,6 +12,32 @@ Fornecer prompts curtos para paralelizar execucao com varios agentes mantendo es
 3. Nao alterar backend.
 4. Incluir testes da propria etapa.
 5. Atualizar `STATUS.md` ao iniciar e ao concluir.
+6. Padrao de execucao: `1 agente = 1 branch = 1 worktree`.
+
+## Setup obrigatorio com worktree
+1. Partir da raiz do repo principal:
+   - `cd /Users/brunocrema/runwarapp`
+2. Criar worktree por passo/agente (exemplos):
+   - `git worktree add ../runwarapp-wt-01 -b feat/ios-gds-01-fundacao`
+   - `git worktree add ../runwarapp-wt-02 -b feat/ios-gds-02-healthkit-sync`
+   - `git worktree add ../runwarapp-wt-03 -b feat/ios-gds-03-companion-states`
+3. Entrar no diretorio do agente:
+   - `cd ../runwarapp-wt-01`
+4. Validar contexto antes de codar:
+   - `git rev-parse --abbrev-ref HEAD`
+   - `pwd`
+5. Ao encerrar o trabalho do agente:
+   - subir branch e abrir PR;
+   - remover worktree local quando nao for mais necessario:
+     - `cd /Users/brunocrema/runwarapp`
+     - `git worktree remove ../runwarapp-wt-01`
+
+## Convencao de nomes
+1. Branch: `feat/ios-gds-<passo>-<slug-curto>`.
+2. Worktree path: `../runwarapp-wt-<passo>`.
+3. Exemplo:
+   - passo `04` -> branch `feat/ios-gds-04-mapa-home-cta`
+   - passo `04` -> path `../runwarapp-wt-04`
 
 ## Ordem recomendada de kickoff
 1. Rodada 1 (paralela): `01`, `06`, `07`, `08`
@@ -26,10 +52,12 @@ Voce e o dono do passo <PASSO>. Execute somente o que esta em ios/docs/gds-v1-io
 Regras:
 1) Nao alterar backend.
 2) Cumprir criterios de pronto e plano de testes do passo.
-3) Se houver bloqueio, registrar em ios/docs/gds-v1-ios/STATUS.md e parar.
-4) Ao concluir, registrar no STATUS.md:
+3) Trabalhar em worktree dedicado e branch dedicada do passo.
+4) Se houver bloqueio, registrar em ios/docs/gds-v1-ios/STATUS.md e parar.
+5) Ao concluir, registrar no STATUS.md:
    - status
    - resumo do que foi entregue
+   - branch e path do worktree usados
    - comandos de teste executados e resultado
 ```
 
@@ -108,3 +136,4 @@ Atualize STATUS.md no inicio e no fim.
 1. Consolidar resultados no `STATUS.md`.
 2. Confirmar `xcodebuild ... iPhone 17 ... test` verde no branch final.
 3. Anexar evidencias de smoke real e checklist GDS no PR.
+4. Remover worktrees locais finalizados para evitar acoplamento acidental.

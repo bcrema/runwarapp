@@ -7,7 +7,7 @@
 4. Apple Watch: `sem app watchOS nativo`.
 5. Fluxo principal: `Fitness/Saude -> sincronizacao -> validacao -> territorio`.
 6. Regras territoriais, antifraude e caps: backend e fonte de verdade.
-7. Branching: sempre branch de feature dedicada; sem commit/merge direto na `main`.
+7. Branching/worktree: sempre `1 agente = 1 branch de feature = 1 worktree`; sem commit/merge direto na `main`.
 8. Gate final de testes: `xcodebuild -scheme LigaRun -destination "platform=iOS Simulator,name=iPhone 17" test` passando.
 
 ## Convencoes operacionais
