@@ -42,7 +42,7 @@ final class RunsViewModelTests: XCTestCase {
         let endDate = startDate.addingTimeInterval(1800)
         let startTime = formatter.string(from: startDate)
         let endTime = formatter.string(from: endDate)
-        Run(
+        return Run(
             id: UUID().uuidString,
             userId: UUID().uuidString,
             distance: 5.0,
