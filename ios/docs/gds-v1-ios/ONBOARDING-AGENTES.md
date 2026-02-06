@@ -16,7 +16,7 @@ Fornecer prompts curtos para paralelizar execucao com varios agentes mantendo es
 
 ## Setup obrigatorio com worktree
 1. Partir da raiz do repo principal:
-   - `cd /Users/brunocrema/runwarapp`
+   - `cd [your-main-repo-path]`
 2. Criar worktree por passo/agente (exemplos):
    - `git worktree add ../runwarapp-wt-01 -b feat/ios-gds-01-fundacao`
    - `git worktree add ../runwarapp-wt-02 -b feat/ios-gds-02-healthkit-sync`
@@ -29,7 +29,7 @@ Fornecer prompts curtos para paralelizar execucao com varios agentes mantendo es
 5. Ao encerrar o trabalho do agente:
    - subir branch e abrir PR;
    - remover worktree local quando nao for mais necessario:
-     - `cd /Users/brunocrema/runwarapp`
+     - `cd [your-main-repo-path]`
      - `git worktree remove ../runwarapp-wt-01`
 
 ## Convencao de nomes
