@@ -5,6 +5,12 @@ Este pacote organiza a entrega do GDS v1.0 iOS em passos independentes para exec
 Cada arquivo `01` a `09` representa um passo com escopo, entregaveis, arquivos impactados, testes e criterio de pronto.
 Use `STATUS.md` para acompanhamento diario e `ONBOARDING-AGENTES.md` para copiar prompts de execucao por agente.
 
+## Estrategia de paralelizacao (worktree)
+1. Padrao obrigatorio: `1 agente = 1 branch = 1 worktree`.
+2. Nao compartilhar a mesma branch entre agentes.
+3. Nao executar dois agentes no mesmo diretorio de trabalho.
+4. Registrar branch e path do worktree no `STATUS.md`.
+
 ## Ordem sugerida de execucao
 1. Executar `00-decisoes-v1-ios.md` como referencia obrigatoria.
 2. Iniciar em paralelo: `01`, `06`, `07`, `08`.

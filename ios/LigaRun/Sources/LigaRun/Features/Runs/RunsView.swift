@@ -9,6 +9,7 @@ struct RunsView: View {
     @State private var showingActiveRun = false
     @EnvironmentObject private var session: SessionStore
     @Environment(\.openURL) private var openURL
+    @Environment(\.scenePhase) private var scenePhase
 
     init(session: SessionStore) {
         _viewModel = StateObject(wrappedValue: RunsViewModel(session: session))
@@ -23,6 +24,17 @@ struct RunsView: View {
     @ViewBuilder
     private var content: some View {
         List {
+            if healthKitStore.shouldShowPermissionCard {
+                Section("Permissões") {
+                    HealthKitPermissionCard(
+                        availability: healthKitStore.availability,
+                        status: healthKitStore.status,
+                        onRequest: { healthKitStore.requestAuthorization() },
+                        onOpenSettings: openSettings
+                    )
+                }
+            }
+
             Section("Corrida") {
                 Button {
                     showingActiveRun = true
@@ -109,7 +121,16 @@ struct RunsView: View {
             await viewModel.load()
         }
         .onAppear {
-            healthKitStore.refreshStatus()
+            Task { @MainActor in
+                await healthKitStore.refreshStatus()
+            }
+        }
+        .onChange(of: scenePhase) { newPhase in
+            if newPhase == .active {
+                Task { @MainActor in
+                    await healthKitStore.refreshStatus()
+                }
+            }
         }
         .alert("Erro", isPresented: Binding(get: {
             viewModel.errorMessage != nil
@@ -163,6 +184,11 @@ struct RunsView: View {
                 .navigationViewStyle(StackNavigationViewStyle())
         }
     }
+
+    private func openSettings() {
+        guard let url = URL(string: UIApplication.openSettingsURLString) else { return }
+        openURL(url)
+    }
 }
 
 private struct HealthKitPermissionCard: View {
@@ -214,11 +240,18 @@ private struct HealthKitPermissionCard: View {
     private var descriptionText: String {
         switch availability {
         case .notAvailable:
-            return "O HealthKit não está disponível neste dispositivo."
+            return "O Saúde (HealthKit) não está disponível neste dispositivo."
         case .checking:
             return "Verificando disponibilidade do Saúde..."
         case .available:
-            return "Permita que o LigaRun leia suas corridas para importar automaticamente."
+            switch status {
+            case .authorized:
+                return "Acesso concedido. O LigaRun pode importar suas corridas automaticamente."
+            case .notDetermined:
+                return "Permita que o LigaRun leia suas corridas para importar automaticamente."
+            case .denied, .restricted:
+                return "A permissão foi negada, restrita ou não há corridas disponíveis no Saúde. Abra os Ajustes para permitir o acesso ao Saúde."
+            }
         }
     }
 

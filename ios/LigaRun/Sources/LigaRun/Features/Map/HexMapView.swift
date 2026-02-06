@@ -192,7 +192,7 @@ struct HexMapView: UIViewRepresentable {
                 let coordinate = focusCoordinate
             else { return }
 
-            let currentCenter = mapView.cameraState.center
+            let currentCenter = mapView.mapboxMap.cameraState.center
             if abs(currentCenter.latitude - coordinate.latitude) < 0.00001,
                abs(currentCenter.longitude - coordinate.longitude) < 0.00001 {
                 return
