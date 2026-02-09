@@ -33,14 +33,24 @@ func makeLoopValidationFixture(
     isValid: Bool = true,
     primaryTile: String? = "tile-primary",
     failureReasons: [String] = [],
-    fraudFlags: [String] = []
+    fraudFlags: [String] = [],
+    tilesCovered: [String]? = nil
 ) -> LoopValidation {
-    LoopValidation(
+    let resolvedTilesCovered: [String]
+    if let tilesCovered = tilesCovered {
+        resolvedTilesCovered = tilesCovered
+    } else if let primaryTile = primaryTile {
+        resolvedTilesCovered = [primaryTile]
+    } else {
+        resolvedTilesCovered = ["tile-primary"]
+    }
+
+    return LoopValidation(
         isValid: isValid,
         distance: 5000,
         duration: 1800,
         closingDistance: 10,
-        tilesCovered: ["tile-primary"],
+        tilesCovered: resolvedTilesCovered,
         primaryTile: primaryTile,
         primaryTileCoverage: 0.7,
         fraudFlags: fraudFlags,

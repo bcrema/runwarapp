@@ -9,4 +9,5 @@ fi
 cd "$(dirname "$0")/.."
 
 xcodegen generate
-xcodebuild -scheme LigaRun -destination "platform=iOS Simulator,name=iPhone 17" test
+XCODE_DESTINATION=${XCODE_DESTINATION:-platform=iOS Simulator,OS=latest,name=iPhone 15}
+xcodebuild -scheme LigaRun -destination "${XCODE_DESTINATION}" test

@@ -17,7 +17,7 @@
 | `05` | Agente iOS UX Flow | `feat/ios-gds-05-resultado-pos-corrida` | `../runwarapp-wt-05` | |
 | `06` | Agente iOS Social | `feat/ios-gds-06-bandeiras` | `../runwarapp-wt-06` | |
 | `07` | Agente iOS Profile | `feat/ios-gds-07-perfil` | `../runwarapp-wt-07` | |
-| `08` | Agente iOS QA | `feat/ios-gds-08-qa-gates` | `/private/tmp/runwarapp-wt-08` | Worktree ativo desta execucao |
+| `08` | Agente iOS QA | `feat/ios-gds-08-qa-gates` | `../runwarapp-wt-08` | Worktree ativo desta execucao |
 | `09` | Agente iOS Release | `feat/ios-gds-09-hardening` | `../runwarapp-wt-09` | |
 
 ## Kanban
@@ -52,18 +52,16 @@
 | `05` | To Do | Agente iOS UX Flow | `02` | - | 2026-02-05 |
 | `06` | To Do | Agente iOS Social | - | - | 2026-02-05 |
 | `07` | To Do | Agente iOS Profile | - | - | 2026-02-05 |
-| `08` | Blocked | Agente iOS QA | paralelo | smoke real bloqueado por assinatura/provisioning do Team `Z76YM922M4` | 2026-02-06 |
+| `08` | Blocked | Agente iOS QA | paralelo | smoke real bloqueado por assinatura/provisioning do Team `<TEAM_ID>` | 2026-02-06 |
 | `09` | To Do | Agente iOS Release | `03`,`04`,`05`,`06`,`07` | - | 2026-02-05 |
 
 ## Gate de qualidade geral
-- [x] `xcodebuild -scheme LigaRun -destination "platform=iOS Simulator,name=iPhone 17" test` verde no branch final
+- [x] `xcodebuild -scheme LigaRun -destination "${XCODE_DESTINATION:-platform=iOS Simulator,OS=latest,name=iPhone 15}" test` verde no branch final
 - [ ] Smoke real em dispositivo concluido e registrado
 - [x] 6 casos de aceite do GDS validados
 
 ## Atualizacoes
-- `08` 2026-02-06 — Status: Blocked. Resumo: matriz de testes e gate de merge entregues (novos testes para sync/submissao, companion, mapa, bandeiras e resultado; script padrao atualizado para iPhone 17; documentacao do passo 08 atualizada). Smoke real em device bloqueado por assinatura/provisioning. Branch/worktree: `feat/ios-gds-08-qa-gates` em `/private/tmp/runwarapp-wt-08`. Testes: `cd ios/LigaRun && xcodegen generate` (passou); `xcodebuild -scheme LigaRun -destination "platform=iOS Simulator,name=iPhone 17" test` (passou, 45 testes); `xcrun xctrace list devices` (passou, device detectado); `xcodebuild -scheme LigaRun -destination "platform=iOS,id=00008120-0019186926C2201E" test` (falhou: development team nao configurado); `xcodebuild -scheme LigaRun -destination "platform=iOS,id=00008120-0019186926C2201E" test DEVELOPMENT_TEAM=Z76YM922M4 CODE_SIGN_STYLE=Automatic -allowProvisioningUpdates -allowProvisioningDeviceRegistration` (falhou: No Account for Team + sem certificado/perfil).
-- `08` 2026-02-06 — Status: In Progress. Resumo: implementada base de testabilidade (protocolos de API para mocks), adicionados testes unitarios para sync/submissao (`RunUploadService`), estados companion (`CompanionRunManager`), refresh/foco de tile (`MapViewModel`), fluxo bandeiras (`create/join/leave`) e mapeamento de reasons/tile foco no resultado. Branch/worktree: `feat/ios-gds-08-qa-gates` em `/private/tmp/runwarapp-wt-08`. Testes: pendente validacao via `xcodebuild` no simulador padrao.
-- `08` 2026-02-06 — Status: In Progress. Resumo: worktree dedicado criado e branch dedicada iniciada para matriz de testes + QA gates do passo 08. Branch/worktree: `feat/ios-gds-08-qa-gates` em `/private/tmp/runwarapp-wt-08`. Testes: preparacao inicial (sem execucao ainda).
+- `08` 2026-02-06 — Status: Blocked. Resumo: matriz de testes e gate de merge entregues (novos testes para sync/submissao, companion, mapa, bandeiras e resultado; script padrao atualizado; documentacao do passo 08 atualizada). Smoke real em device bloqueado por assinatura/provisioning. Branch/worktree: `feat/ios-gds-08-qa-gates` em `../runwarapp-wt-08`. Testes: `cd ios/LigaRun && xcodegen generate` (passou); `xcodebuild -scheme LigaRun -destination "${XCODE_DESTINATION:-platform=iOS Simulator,OS=latest,name=iPhone 15}" test` (passou, 45 testes); `xcrun xctrace list devices` (passou, device `<DEVICE_ID>` detectado); `xcodebuild -scheme LigaRun -destination "platform=iOS,id=<DEVICE_ID>" test` (falhou: development team nao configurado); `xcodebuild -scheme LigaRun -destination "platform=iOS,id=<DEVICE_ID>" test DEVELOPMENT_TEAM=<TEAM_ID> CODE_SIGN_STYLE=Automatic -allowProvisioningUpdates -allowProvisioningDeviceRegistration` (falhou: No Account for Team + sem certificado/perfil). Proximo passo: configurar DEVELOPMENT_TEAM com conta valida e perfis/certificados no Xcode e repetir os testes em device real.
 - `01` 2026-02-06 — Status: Done. Resumo: fluxo de permissoes (Saude/localizacao) com card na tela de corridas validado; logica de autorizacao ajustada para refletir leitura real e CTA de Ajustes. Testes: `xcodebuild -scheme LigaRun -destination "platform=iOS Simulator,name=iPhone 17" test` (passou - informado pelo usuario); manual dispositivo (permissoes corridas) (passou).
 - `01` 2026-02-06 — Status: Blocked. Resumo: reteste manual do card de permissao concluido com sucesso (3 passos). Aguardando confirmacao de testes unitarios/build. Testes: manual (permissoes corridas) (passou).
 - `01` 2026-02-06 — Status: Blocked. Resumo: ajuste de deteccao de autorizacao HealthKit para considerar amostra real de workout (evita falso autorizado quando acesso negado) e texto do card atualizado para refletir ausencia de dados. Testes: `xcodebuild -scheme LigaRun -destination "platform=iOS Simulator,name=iPhone 17,OS=26.2" test` (falhou: sem projeto no cwd); `/bin/bash -lc "cd /Users/brunocrema/runwarapp/ios/LigaRun && CLANG_MODULE_CACHE_PATH=$(pwd)/ModuleCache SWIFT_MODULE_CACHE_PATH=$(pwd)/ModuleCache SWIFTPM_CACHE_PATH=$(pwd)/.swiftpm/cache xcodebuild -project LigaRun.xcodeproj -scheme LigaRun -destination 'platform=iOS Simulator,name=iPhone 17,OS=26.2' -derivedDataPath $(pwd)/DerivedData -clonedSourcePackagesDirPath $(pwd)/SourcePackages test"` (falhou: CoreSimulator indisponivel + sem rede para SPM).

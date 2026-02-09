@@ -87,9 +87,9 @@
 
 ### Gate de merge (definido)
 - Bloquear merge se:
-  - `xcodebuild -scheme LigaRun -destination "platform=iOS Simulator,name=iPhone 17" test` falhar;
+  - `xcodebuild -scheme LigaRun -destination "${XCODE_DESTINATION:-platform=iOS Simulator,OS=latest,name=iPhone 15}" test` falhar;
   - qualquer caso de aceite 1-6 ficar sem cobertura/validacao;
   - smoke real em dispositivo nao for executado/registrado.
 
 ### Comando padrao de validacao
-- `cd ios/LigaRun && xcodebuild -scheme LigaRun -destination "platform=iOS Simulator,name=iPhone 17" test`
+- `cd ios/LigaRun && xcodebuild -scheme LigaRun -destination "${XCODE_DESTINATION:-platform=iOS Simulator,OS=latest,name=iPhone 15}" test`

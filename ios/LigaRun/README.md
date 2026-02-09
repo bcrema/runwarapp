@@ -26,7 +26,12 @@ cd ios/LigaRun
 
 Comando base do gate de merge:
 ```bash
-xcodebuild -scheme LigaRun -destination "platform=iOS Simulator,name=iPhone 17" test
+# Descubra destinos disponíveis (simuladores / devices) com:
+# xcodebuild -scheme LigaRun -showdestinations
+#
+# Em CI, defina XCODE_DESTINATION para o destino desejado, por exemplo:
+# export XCODE_DESTINATION='platform=iOS Simulator,OS=latest,name=iPhone 15'
+xcodebuild -scheme LigaRun -destination "${XCODE_DESTINATION:-platform=iOS Simulator,OS=latest,name=iPhone 15}" test
 ```
 
 ## Estrutura
