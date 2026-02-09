@@ -7,10 +7,16 @@ final class BandeirasViewModel: ObservableObject {
     @Published var isLoading = false
     @Published var errorMessage: String?
 
-    private let session: SessionStore
+    private let api: BandeirasAPIProviding
+    private let refreshUserAction: () async throws -> Void
 
-    init(session: SessionStore) {
-        self.session = session
+    init(
+        session: SessionStore,
+        api: BandeirasAPIProviding? = nil,
+        refreshUser: (() async throws -> Void)? = nil
+    ) {
+        self.api = api ?? session.api
+        refreshUserAction = refreshUser ?? { try await session.refreshUser() }
     }
 
     func load() async {
@@ -19,7 +25,7 @@ final class BandeirasViewModel: ObservableObject {
         defer { isLoading = false }
 
         do {
-            bandeiras = try await session.api.getBandeiras()
+            bandeiras = try await api.getBandeiras()
         } catch {
             errorMessage = error.localizedDescription
         }
@@ -32,7 +38,24 @@ final class BandeirasViewModel: ObservableObject {
         }
 
         do {
-            bandeiras = try await session.api.searchBandeiras(query: searchQuery)
+            bandeiras = try await api.searchBandeiras(query: searchQuery)
+        } catch {
+            errorMessage = error.localizedDescription
+        }
+    }
+
+    func create(name: String, category: String, color: String, description: String? = nil) async {
+        do {
+            _ = try await api.createBandeira(
+                request: CreateBandeiraRequest(
+                    name: name,
+                    category: category,
+                    color: color,
+                    description: description
+                )
+            )
+            await load()
+            try? await refreshUserAction()
         } catch {
             errorMessage = error.localizedDescription
         }
@@ -40,9 +63,9 @@ final class BandeirasViewModel: ObservableObject {
 
     func join(bandeira: Bandeira) async {
         do {
-            _ = try await session.api.joinBandeira(id: bandeira.id)
+            _ = try await api.joinBandeira(id: bandeira.id)
             await load()
-            try? await session.refreshUser()
+            try? await refreshUserAction()
         } catch {
             errorMessage = error.localizedDescription
         }
@@ -50,8 +73,8 @@ final class BandeirasViewModel: ObservableObject {
 
     func leave() async {
         do {
-            try await session.api.leaveBandeira()
-            try? await session.refreshUser()
+            try await api.leaveBandeira()
+            try? await refreshUserAction()
             await load()
         } catch {
             errorMessage = error.localizedDescription

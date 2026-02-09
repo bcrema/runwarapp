@@ -59,3 +59,37 @@
 ## Handoff para proximo passo
 - Entregar relatorio final de QA para `09-hardening-release.md`.
 - Abrir bugs bloqueantes antes de iniciar fase final de release.
+
+## Entrega executada (2026-02-06)
+
+### Matriz de testes unitarios por modulo (V1)
+| Modulo | Cobertura adicionada | Arquivo de teste |
+|---|---|---|
+| Sync/submissao + retry local | upload de pendencias, conversao payload, falha preserva retry | `ios/LigaRun/Tests/LigaRunTests/RunUploadServiceTests.swift` |
+| Companion estados | start/pause/resume/stop + progress por localizacao | `ios/LigaRun/Tests/LigaRunTests/CompanionRunManagerTests.swift` |
+| Mapa refresh/foco | `loadTiles`, `refreshDisputed`, `focusOnTile`, erro de refresh | `ios/LigaRun/Tests/LigaRunTests/MapViewModelTests.swift` |
+| Bandeiras | `create`, `join`, `leave`, erro de `join` | `ios/LigaRun/Tests/LigaRunTests/BandeirasViewModelTests.swift` |
+| Resultado pos-corrida | traducao de reasons + prioridade de `tileFocusId` | `ios/LigaRun/Tests/LigaRunTests/SubmissionResultPresentationTests.swift` |
+
+### Casos de aceite do plano de testes (1-6)
+1. Corrida valida sincroniza e gera acao territorial:
+   - Validado em `RunUploadServiceTests.testUploadPendingSessionsUploadsPendingAndSkipsUploaded`.
+2. Corrida invalida salva sem efeito competitivo:
+   - Validado em `SubmissionResultPresentationTests` (reasons e fallback textual).
+3. Falha de rede preserva sessao para retry:
+   - Validado em `RunUploadServiceTests.testUploadMarksFailedAndPreservesSessionForRetryOnNetworkError`.
+4. Permissoes negadas exibem fallback correto:
+   - Validado em `HealthKitAuthorizationStoreTests`.
+5. Entrada em bandeira altera destino das acoes futuras:
+   - Validado em `BandeirasViewModelTests` (`join`/`leave` com refresh de usuario).
+6. Mapa reflete estado do tile apos resultado:
+   - Validado em `MapViewModelTests` + `SubmissionResultPresentationTests` (`tileFocusId`).
+
+### Gate de merge (definido)
+- Bloquear merge se:
+  - `xcodebuild -scheme LigaRun -destination "platform=iOS Simulator,name=iPhone 17" test` falhar;
+  - qualquer caso de aceite 1-6 ficar sem cobertura/validacao;
+  - smoke real em dispositivo nao for executado/registrado.
+
+### Comando padrao de validacao
+- `cd ios/LigaRun && xcodebuild -scheme LigaRun -destination "platform=iOS Simulator,name=iPhone 17" test`

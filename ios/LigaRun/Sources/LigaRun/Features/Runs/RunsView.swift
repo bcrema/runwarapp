@@ -318,7 +318,7 @@ struct SubmissionResultView: View {
     }
 
     private var tileFocusId: String? {
-        result.turnResult?.tileId ?? result.territoryResult?.tileId ?? result.loopValidation.primaryTile
+        submissionTileFocusId(for: result)
     }
 
     private var shieldBefore: String {
@@ -363,7 +363,7 @@ struct SubmissionResultView: View {
         if let territoryReason = result.territoryResult?.reason {
             output.append(territoryReason)
         }
-        return output.map { translateReason($0) }
+        return output.map { translateSubmissionReason($0) }
     }
 
     var body: some View {
@@ -444,7 +444,10 @@ struct SubmissionResultView: View {
     }
 }
 
-private func translateReason(_ reason: String) -> String {
+func submissionTileFocusId(for result: RunSubmissionResult) -> String? {
+    result.turnResult?.tileId ?? result.territoryResult?.tileId ?? result.loopValidation.primaryTile
+}
+func translateSubmissionReason(_ reason: String) -> String {
     if reason.hasPrefix("fraud_flag:") {
         let flag = reason.replacingOccurrences(of: "fraud_flag:", with: "")
         return "Padrão suspeito detectado (\(flag))"

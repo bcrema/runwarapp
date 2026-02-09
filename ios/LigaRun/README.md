@@ -24,6 +24,11 @@ cd ios/LigaRun
 ./scripts/run-tests.sh
 ```
 
+Comando base do gate de merge:
+```bash
+xcodebuild -scheme LigaRun -destination "platform=iOS Simulator,name=iPhone 17" test
+```
+
 ## Estrutura
 - `project.yml`: definição do projeto (XcodeGen) com dependência Mapbox via SPM.
 - `Config/*.xcconfig`: configuração de ambiente (API base e token Mapbox).

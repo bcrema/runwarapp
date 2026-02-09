@@ -1,5 +1,26 @@
 import Foundation
 
+@MainActor
+protocol RunSubmissionAPIProviding: Sendable {
+    func submitRunCoordinates(coordinates: [[String: Double]], timestamps: [Int]) async throws -> RunSubmissionResult
+}
+
+@MainActor
+protocol MapAPIProviding: Sendable {
+    func getTiles(bounds: (minLat: Double, minLng: Double, maxLat: Double, maxLng: Double)) async throws -> [Tile]
+    func getDisputedTiles() async throws -> [Tile]
+    func getTile(id: String) async throws -> Tile
+}
+
+@MainActor
+protocol BandeirasAPIProviding: Sendable {
+    func getBandeiras() async throws -> [Bandeira]
+    func searchBandeiras(query: String) async throws -> [Bandeira]
+    func createBandeira(request: CreateBandeiraRequest) async throws -> Bandeira
+    func joinBandeira(id: String) async throws -> Bandeira
+    func leaveBandeira() async throws
+}
+
 struct APIError: LocalizedError, Codable {
     let error: String?
     let message: String
@@ -7,6 +28,8 @@ struct APIError: LocalizedError, Codable {
 
     var errorDescription: String? { message }
 }
+
+extension APIClient: RunSubmissionAPIProviding, MapAPIProviding, BandeirasAPIProviding {}
 
 private struct EmptyBody: Encodable {}
 
