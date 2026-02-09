@@ -128,15 +128,18 @@ final class BandeirasViewModel: ObservableObject {
         defer { isLoading = false }
 
         do {
-            bandeiras = try await api.searchBandeiras(query: searchQuery)
+            bandeiras = try await service.searchBandeiras(query: query)
         } catch {
-            errorMessage = error.localizedDescription
+            errorMessage = makeUserFacingMessage(
+                for: error,
+                fallback: "Nao foi possivel buscar bandeiras. Tente novamente."
+            )
         }
     }
 
     func create(name: String, category: String, color: String, description: String? = nil) async {
         do {
-            _ = try await api.createBandeira(
+            _ = try await service.createBandeira(
                 request: CreateBandeiraRequest(
                     name: name,
                     category: category,

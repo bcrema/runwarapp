@@ -5,21 +5,21 @@ final class BandeirasViewModelTests: XCTestCase {
     @MainActor
     func testCreateJoinsLoadAndRefreshesUser() async {
         let bandeira = makeBandeiraFixture(id: "new-b", name: "Nova Bandeira")
-        let api = BandeirasAPISpy()
-        api.bandeiras = [bandeira]
+        let service = BandeirasServiceSpy()
+        service.bandeiras = [bandeira]
 
         var refreshCalls = 0
         let viewModel = BandeirasViewModel(
-            session: SessionStore(),
-            api: api,
-            refreshUser: { () async throws in
+            service: service,
+            currentUserProvider: { nil },
+            refreshUserAction: { () async throws in
                 refreshCalls += 1
             }
         )
 
         await viewModel.create(name: "Nova Bandeira", category: "running", color: "#FF6600", description: "Time")
 
-        XCTAssertEqual(api.createdRequests.count, 1)
+        XCTAssertEqual(service.createdRequests.count, 1)
         XCTAssertEqual(viewModel.bandeiras.first?.id, "new-b")
         XCTAssertEqual(refreshCalls, 1)
         XCTAssertNil(viewModel.errorMessage)
@@ -28,21 +28,21 @@ final class BandeirasViewModelTests: XCTestCase {
     @MainActor
     func testJoinReloadsAndRefreshesUser() async {
         let bandeira = makeBandeiraFixture(id: "join-1", name: "Liga Join")
-        let api = BandeirasAPISpy()
-        api.bandeiras = [bandeira]
+        let service = BandeirasServiceSpy()
+        service.bandeiras = [bandeira]
 
         var refreshCalls = 0
         let viewModel = BandeirasViewModel(
-            session: SessionStore(),
-            api: api,
-            refreshUser: { () async throws in
+            service: service,
+            currentUserProvider: { nil },
+            refreshUserAction: { () async throws in
                 refreshCalls += 1
             }
         )
 
         await viewModel.join(bandeira: bandeira)
 
-        XCTAssertEqual(api.joinCalls, ["join-1"])
+        XCTAssertEqual(service.joinCalls, ["join-1"])
         XCTAssertEqual(viewModel.bandeiras.first?.name, "Liga Join")
         XCTAssertEqual(refreshCalls, 1)
         XCTAssertNil(viewModel.errorMessage)
@@ -50,30 +50,34 @@ final class BandeirasViewModelTests: XCTestCase {
 
     @MainActor
     func testLeaveReloadsAndRefreshesUser() async {
-        let api = BandeirasAPISpy()
-        api.bandeiras = [makeBandeiraFixture(id: "left")]
+        let service = BandeirasServiceSpy()
+        service.bandeiras = [makeBandeiraFixture(id: "left")]
 
         var refreshCalls = 0
         let viewModel = BandeirasViewModel(
-            session: SessionStore(),
-            api: api,
-            refreshUser: { () async throws in
+            service: service,
+            currentUserProvider: { nil },
+            refreshUserAction: { () async throws in
                 refreshCalls += 1
             }
         )
 
         await viewModel.leave()
 
-        XCTAssertEqual(api.leaveCalls, 1)
+        XCTAssertEqual(service.leaveCalls, 1)
         XCTAssertEqual(refreshCalls, 1)
     }
 
     @MainActor
     func testJoinFailureSetsErrorMessage() async {
         let bandeira = makeBandeiraFixture(id: "error-b")
-        let api = BandeirasAPISpy()
-        api.joinError = APIError(error: "JOIN_ERROR", message: "Nao foi possivel entrar", details: nil)
-        let viewModel = BandeirasViewModel(session: SessionStore(), api: api, refreshUser: { () async throws in })
+        let service = BandeirasServiceSpy()
+        service.joinError = APIError(error: "JOIN_ERROR", message: "Nao foi possivel entrar", details: nil)
+        let viewModel = BandeirasViewModel(
+            service: service,
+            currentUserProvider: { nil },
+            refreshUserAction: { () async throws in }
+        )
 
         await viewModel.join(bandeira: bandeira)
 
@@ -82,7 +86,7 @@ final class BandeirasViewModelTests: XCTestCase {
 }
 
 @MainActor
-private final class BandeirasAPISpy: BandeirasAPIProviding {
+private final class BandeirasServiceSpy: BandeirasServiceProtocol {
     var bandeiras: [Bandeira] = []
     var joinError: Error?
     private(set) var createdRequests: [CreateBandeiraRequest] = []
