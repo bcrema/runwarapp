@@ -28,6 +28,11 @@ targets:
         UIUserInterfaceStyle: Dark
         API_BASE_URL: $(API_BASE_URL)
         MAPBOX_ACCESS_TOKEN: $(MAPBOX_ACCESS_TOKEN)
+        NSHealthShareUsageDescription: Usamos o Saude para ler suas corridas e importar automaticamente.
+        NSLocationAlwaysAndWhenInUseUsageDescription: Permita acesso a localizacao sempre para registrar sua corrida mesmo com a tela bloqueada.
+        NSLocationWhenInUseUsageDescription: Usamos sua localizacao para acompanhar sua corrida e desenhar o territorio.
+        UIBackgroundModes:
+          - location
     settings:
       base:
         PRODUCT_BUNDLE_IDENTIFIER: com.runwar.ligarun
