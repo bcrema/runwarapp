@@ -1,166 +1,116 @@
 import XCTest
 @testable import LigaRun
 
-@MainActor
 final class BandeirasViewModelTests: XCTestCase {
-    func testJoinUpdatesCurrentStateAndShowsImpactMessage() async {
-        let joined = makeBandeira(id: "bandeira-red")
-        let service = BandeirasServiceStub()
-        service.joinResult = .success(joined)
-        service.getBandeirasResult = .success([joined])
+    @MainActor
+    func testCreateJoinsLoadAndRefreshesUser() async {
+        let bandeira = makeBandeiraFixture(id: "new-b", name: "Nova Bandeira")
+        let api = BandeirasAPISpy()
+        api.bandeiras = [bandeira]
 
-        var currentUser = makeUser(bandeiraId: nil)
+        var refreshCalls = 0
         let viewModel = BandeirasViewModel(
-            service: service,
-            currentUserProvider: { currentUser },
-            refreshUserAction: {
-                currentUser.bandeiraId = joined.id
-                currentUser.bandeiraName = joined.name
+            session: SessionStore(),
+            api: api,
+            refreshUser: { () async throws in
+                refreshCalls += 1
             }
         )
 
-        await viewModel.join(bandeira: joined)
+        await viewModel.create(name: "Nova Bandeira", category: "running", color: "#FF6600", description: "Time")
 
-        XCTAssertEqual(viewModel.currentBandeiraId, joined.id)
-        XCTAssertEqual(viewModel.bandeiras.first?.id, joined.id)
+        XCTAssertEqual(api.createdRequests.count, 1)
+        XCTAssertEqual(viewModel.bandeiras.first?.id, "new-b")
+        XCTAssertEqual(refreshCalls, 1)
         XCTAssertNil(viewModel.errorMessage)
-        XCTAssertTrue(viewModel.noticeMessage?.contains("proxima corrida valida") == true)
     }
 
-    func testLeaveClearsCurrentBandeiraState() async {
-        let service = BandeirasServiceStub()
-        service.leaveResult = .success(())
-        service.getBandeirasResult = .success([])
+    @MainActor
+    func testJoinReloadsAndRefreshesUser() async {
+        let bandeira = makeBandeiraFixture(id: "join-1", name: "Liga Join")
+        let api = BandeirasAPISpy()
+        api.bandeiras = [bandeira]
 
-        var currentUser = makeUser(bandeiraId: "bandeira-red")
+        var refreshCalls = 0
         let viewModel = BandeirasViewModel(
-            service: service,
-            currentUserProvider: { currentUser },
-            refreshUserAction: {
-                currentUser.bandeiraId = nil
-                currentUser.bandeiraName = nil
+            session: SessionStore(),
+            api: api,
+            refreshUser: { () async throws in
+                refreshCalls += 1
+            }
+        )
+
+        await viewModel.join(bandeira: bandeira)
+
+        XCTAssertEqual(api.joinCalls, ["join-1"])
+        XCTAssertEqual(viewModel.bandeiras.first?.name, "Liga Join")
+        XCTAssertEqual(refreshCalls, 1)
+        XCTAssertNil(viewModel.errorMessage)
+    }
+
+    @MainActor
+    func testLeaveReloadsAndRefreshesUser() async {
+        let api = BandeirasAPISpy()
+        api.bandeiras = [makeBandeiraFixture(id: "left")]
+
+        var refreshCalls = 0
+        let viewModel = BandeirasViewModel(
+            session: SessionStore(),
+            api: api,
+            refreshUser: { () async throws in
+                refreshCalls += 1
             }
         )
 
         await viewModel.leave()
 
-        XCTAssertNil(viewModel.currentBandeiraId)
-        XCTAssertTrue(viewModel.bandeiras.isEmpty)
-        XCTAssertNil(viewModel.errorMessage)
-        XCTAssertTrue(viewModel.noticeMessage?.contains("acoes voltam para sua conta") == true)
+        XCTAssertEqual(api.leaveCalls, 1)
+        XCTAssertEqual(refreshCalls, 1)
     }
 
-    func testCreateBandeiraSuccessAddsItemAndResetsForm() async {
-        let created = makeBandeira(id: "novo-time", name: "Novo Time")
-        let service = BandeirasServiceStub()
-        service.createResult = .success(created)
-        service.getBandeirasResult = .success([created])
+    @MainActor
+    func testJoinFailureSetsErrorMessage() async {
+        let bandeira = makeBandeiraFixture(id: "error-b")
+        let api = BandeirasAPISpy()
+        api.joinError = APIError(error: "JOIN_ERROR", message: "Nao foi possivel entrar", details: nil)
+        let viewModel = BandeirasViewModel(session: SessionStore(), api: api, refreshUser: { () async throws in })
 
-        var currentUser = makeUser(bandeiraId: nil)
-        let viewModel = BandeirasViewModel(
-            service: service,
-            currentUserProvider: { currentUser },
-            refreshUserAction: { _ = currentUser.id }
-        )
+        await viewModel.join(bandeira: bandeira)
 
-        viewModel.createName = "Novo Time"
-        viewModel.createCategory = "SOCIAL"
-        viewModel.createColor = "#123ABC"
-        viewModel.createDescription = "Descricao do time"
-
-        await viewModel.createBandeira()
-
-        XCTAssertEqual(service.createdRequests.count, 1)
-        XCTAssertEqual(viewModel.bandeiras.first?.id, created.id)
-        XCTAssertEqual(viewModel.createName, "")
-        XCTAssertEqual(viewModel.createCategory, "")
-        XCTAssertEqual(viewModel.createColor, "#22C55E")
-        XCTAssertEqual(viewModel.createDescription, "")
-        XCTAssertNil(viewModel.errorMessage)
-    }
-
-    func testCreateBandeiraErrorShowsApiMessage() async {
-        let service = BandeirasServiceStub()
-        service.createResult = .failure(APIError(error: "VALIDATION_ERROR", message: "Nome ja existe", details: nil))
-
-        let viewModel = BandeirasViewModel(
-            service: service,
-            currentUserProvider: { self.makeUser(bandeiraId: nil) },
-            refreshUserAction: {}
-        )
-
-        viewModel.createName = "Duplicada"
-        viewModel.createCategory = "SOCIAL"
-        viewModel.createColor = "#22C55E"
-        viewModel.createDescription = ""
-
-        await viewModel.createBandeira()
-
-        XCTAssertEqual(viewModel.errorMessage, "Nome ja existe")
-        XCTAssertTrue(viewModel.bandeiras.isEmpty)
-        XCTAssertEqual(service.createdRequests.count, 1)
-    }
-
-    private func makeBandeira(id: String, name: String = "Time Red") -> Bandeira {
-        Bandeira(
-            id: id,
-            name: name,
-            slug: name.lowercased().replacingOccurrences(of: " ", with: "-"),
-            category: "SOCIAL",
-            color: "#22C55E",
-            logoUrl: nil,
-            description: "Descricao",
-            memberCount: 12,
-            totalTiles: 7,
-            createdById: "user-1",
-            createdByUsername: "runner"
-        )
-    }
-
-    private func makeUser(bandeiraId: String?) -> User {
-        User(
-            id: "user-1",
-            email: "runner@example.com",
-            username: "runner",
-            avatarUrl: nil,
-            isPublic: true,
-            bandeiraId: bandeiraId,
-            bandeiraName: bandeiraId == nil ? nil : "Time Red",
-            role: "USER",
-            totalRuns: 10,
-            totalDistance: 42.0,
-            totalTilesConquered: 5
-        )
+        XCTAssertEqual(viewModel.errorMessage, "Nao foi possivel entrar")
     }
 }
 
 @MainActor
-private final class BandeirasServiceStub: BandeirasServiceProtocol {
-    var getBandeirasResult: Result<[Bandeira], Error> = .success([])
-    var searchResult: Result<[Bandeira], Error> = .success([])
-    var createResult: Result<Bandeira, Error> = .failure(APIError(error: "NOT_CONFIGURED", message: "Missing stub", details: nil))
-    var joinResult: Result<Bandeira, Error> = .failure(APIError(error: "NOT_CONFIGURED", message: "Missing stub", details: nil))
-    var leaveResult: Result<Void, Error> = .failure(APIError(error: "NOT_CONFIGURED", message: "Missing stub", details: nil))
-    var createdRequests: [CreateBandeiraRequest] = []
+private final class BandeirasAPISpy: BandeirasAPIProviding {
+    var bandeiras: [Bandeira] = []
+    var joinError: Error?
+    private(set) var createdRequests: [CreateBandeiraRequest] = []
+    private(set) var joinCalls: [String] = []
+    private(set) var leaveCalls = 0
 
     func getBandeiras() async throws -> [Bandeira] {
-        try getBandeirasResult.get()
+        bandeiras
     }
 
     func searchBandeiras(query: String) async throws -> [Bandeira] {
-        try searchResult.get()
+        bandeiras.filter { $0.name.localizedCaseInsensitiveContains(query) }
     }
 
     func createBandeira(request: CreateBandeiraRequest) async throws -> Bandeira {
         createdRequests.append(request)
-        return try createResult.get()
+        return bandeiras.first ?? makeBandeiraFixture(id: "created", name: request.name)
     }
 
     func joinBandeira(id: String) async throws -> Bandeira {
-        try joinResult.get()
+        if let joinError {
+            throw joinError
+        }
+        joinCalls.append(id)
+        return bandeiras.first ?? makeBandeiraFixture(id: id)
     }
 
     func leaveBandeira() async throws {
-        try leaveResult.get()
+        leaveCalls += 1
     }
 }

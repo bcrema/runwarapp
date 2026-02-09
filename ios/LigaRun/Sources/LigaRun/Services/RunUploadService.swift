@@ -6,11 +6,11 @@ protocol RunUploadServiceProtocol: Sendable {
 }
 
 final class RunUploadService: RunUploadServiceProtocol {
-    private let api: APIClient
+    private let api: RunSubmissionAPIProviding
     private let store: RunSessionStore
     private let logger = Logger(subsystem: AppEnvironment.keychainService, category: "RunUploadService")
 
-    init(api: APIClient, store: RunSessionStore) {
+    init(api: RunSubmissionAPIProviding, store: RunSessionStore) {
         self.api = api
         self.store = store
     }

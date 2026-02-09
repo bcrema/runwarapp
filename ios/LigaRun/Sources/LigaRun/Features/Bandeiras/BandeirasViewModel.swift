@@ -128,7 +128,24 @@ final class BandeirasViewModel: ObservableObject {
         defer { isLoading = false }
 
         do {
-            bandeiras = try await service.searchBandeiras(query: query)
+            bandeiras = try await api.searchBandeiras(query: searchQuery)
+        } catch {
+            errorMessage = error.localizedDescription
+        }
+    }
+
+    func create(name: String, category: String, color: String, description: String? = nil) async {
+        do {
+            _ = try await api.createBandeira(
+                request: CreateBandeiraRequest(
+                    name: name,
+                    category: category,
+                    color: color,
+                    description: description
+                )
+            )
+            await load()
+            try? await refreshUserAction()
         } catch {
             errorMessage = makeUserFacingMessage(
                 for: error,
