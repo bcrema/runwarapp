@@ -26,11 +26,11 @@ enum HealthKitRunSyncError: LocalizedError {
     var errorDescription: String? {
         switch self {
         case .healthDataUnavailable:
-            return "Dados do HealthKit indisponiveis neste dispositivo."
+            return "Dados do HealthKit indisponíveis neste dispositivo."
         case .workoutNotFound:
             return "Nenhum treino encontrado no intervalo informado."
         case .routeNotFound:
-            return "Rota do treino ainda indisponivel no HealthKit."
+            return "Rota do treino ainda indisponível no HealthKit."
         case .routeTimedOut:
             return "Tempo limite ao sincronizar rota do HealthKit."
         case .routeEmpty:

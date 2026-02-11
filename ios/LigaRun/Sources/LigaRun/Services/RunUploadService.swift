@@ -5,10 +5,12 @@ import OSLog
 @MainActor
 protocol RunUploadServiceProtocol {
     func uploadPendingSessions() async -> [RunSubmissionResult]
+    func enqueueHealthKitSync(startDate: Date, endDate: Date) async
     func enqueueHealthKitSync(startDate: Date, endDate: Date, timeout: TimeInterval) async
 }
 
 extension RunUploadServiceProtocol {
+    func enqueueHealthKitSync(startDate: Date, endDate: Date) async {}
     func enqueueHealthKitSync(startDate: Date, endDate: Date, timeout: TimeInterval) async {}
 }
 
@@ -48,7 +50,11 @@ final class RunUploadService: RunUploadServiceProtocol {
         return results
     }
 
-    func enqueueHealthKitSync(startDate: Date, endDate: Date, timeout: TimeInterval = 15) async {
+    func enqueueHealthKitSync(startDate: Date, endDate: Date) async {
+        await enqueueHealthKitSync(startDate: startDate, endDate: endDate, timeout: healthKitTimeout)
+    }
+
+    func enqueueHealthKitSync(startDate: Date, endDate: Date, timeout: TimeInterval) async {
         guard let healthKitSync else { return }
 
         do {
@@ -194,13 +200,33 @@ final class RunUploadService: RunUploadServiceProtocol {
     }
 
     private func shouldKeepSessionPendingAfterFailure(_ error: Error) -> Bool {
-        guard let syncError = error as? HealthKitRunSyncError else { return false }
-        switch syncError {
-        case .routeTimedOut, .routeNotFound, .routeEmpty:
-            return true
-        case .healthDataUnavailable, .workoutNotFound:
-            return false
+        if let syncError = error as? HealthKitRunSyncError {
+            switch syncError {
+            case .routeTimedOut, .routeNotFound, .routeEmpty:
+                return true
+            case .healthDataUnavailable, .workoutNotFound:
+                return false
+            }
         }
+
+        return isTimeoutError(error)
+    }
+
+    private func isTimeoutError(_ error: Error) -> Bool {
+        if let urlError = error as? URLError {
+            return urlError.code == .timedOut
+        }
+
+        let nsError = error as NSError
+        if nsError.domain == NSURLErrorDomain, nsError.code == URLError.timedOut.rawValue {
+            return true
+        }
+
+        if let underlyingError = nsError.userInfo[NSUnderlyingErrorKey] as? Error {
+            return isTimeoutError(underlyingError)
+        }
+
+        return false
     }
 
     private func shouldPersistPendingHealthKitSession(for error: Error) -> Bool {

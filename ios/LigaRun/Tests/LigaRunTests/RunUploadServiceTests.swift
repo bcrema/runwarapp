@@ -106,6 +106,26 @@ final class RunUploadServiceTests: XCTestCase {
     }
 
     @MainActor
+    func testUploadKeepsSessionPendingOnURLTimeoutError() async throws {
+        let store = RunSessionStore(fileURL: makeTempFileURL())
+        let session = makeSessionFixture(id: UUID(), status: .pending)
+        _ = try await store.append(session)
+
+        let api = RunSubmissionAPISpy(result: .failure(URLError(.timedOut)))
+        let service = RunUploadService(api: api, store: store)
+
+        do {
+            _ = try await service.upload(session)
+            XCTFail("Expected upload to throw")
+        } catch {
+            // expected
+        }
+
+        let persisted = await store.loadSessions().first { $0.id == session.id }
+        XCTAssertEqual(persisted?.status, .pending)
+    }
+
+    @MainActor
     func testEnqueueHealthKitSyncTimeoutPersistsPendingSessionForRetry() async throws {
         let startedAt = Date().addingTimeInterval(-600)
         let endedAt = Date()
@@ -123,6 +143,20 @@ final class RunUploadServiceTests: XCTestCase {
         XCTAssertEqual(sessions.first?.status, .pending)
         XCTAssertTrue(sessions.first?.points.isEmpty ?? false)
         XCTAssertEqual(sessions.first?.lastError, HealthKitRunSyncError.routeTimedOut.localizedDescription)
+    }
+
+    @MainActor
+    func testEnqueueHealthKitSyncWithoutTimeoutUsesConfiguredHealthKitTimeout() async throws {
+        let startedAt = Date().addingTimeInterval(-600)
+        let endedAt = Date()
+        let store = RunSessionStore(fileURL: makeTempFileURL())
+        let syncSpy = HealthKitRunSyncSpy(result: .success(makeSyncedPayload(startedAt: startedAt, endedAt: endedAt)))
+        let api = RunSubmissionAPISpy(result: .success(makeRunSubmissionResultFixture(runId: "run-healthkit-timeout")))
+        let service = RunUploadService(api: api, store: store, healthKitSync: syncSpy, healthKitTimeout: 42)
+
+        await service.enqueueHealthKitSync(startDate: startedAt, endDate: endedAt)
+
+        XCTAssertEqual(syncSpy.lastTimeout, 42)
     }
 
     private func makeSessionFixture(
@@ -205,6 +239,7 @@ private final class RunSubmissionAPISpy: RunSubmissionAPIProviding {
 private final class HealthKitRunSyncSpy: HealthKitRunSyncProviding {
     private let result: Result<SyncedWorkoutPayload, Error>
     private(set) var syncCalls = 0
+    private(set) var lastTimeout: TimeInterval?
 
     init(result: Result<SyncedWorkoutPayload, Error>) {
         self.result = result
@@ -212,6 +247,7 @@ private final class HealthKitRunSyncSpy: HealthKitRunSyncProviding {
 
     func syncWorkout(startDate: Date, endDate: Date, timeout: TimeInterval) async throws -> SyncedWorkoutPayload {
         syncCalls += 1
+        lastTimeout = timeout
         return try result.get()
     }
 }
