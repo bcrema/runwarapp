@@ -5,22 +5,30 @@ import Combine
 @MainActor
 final class CompanionRunManager: ObservableObject {
     @Published var state: RunState = .idle
+    @Published var syncState: CompanionSyncState = .running
     @Published var distanceMeters: Double = 0
     @Published var duration: TimeInterval = 0
     @Published var currentPace: Double = 0 // seconds per km
     @Published var loopProgress: Double = 0 // 0..1 for 1.2km goal
     @Published var locations: [CLLocation] = []
     @Published var currentLocation: CLLocation?
+    @Published var submissionResult: RunSubmissionResult?
 
     private let locationManager: LocationManager
+    private let syncCoordinator: RunSyncCoordinating
     private var timer: AnyCancellable?
     private var cancellables = Set<AnyCancellable>()
     private var startTime: Date?
 
     let loopGoal: Double = 1200
 
-    init(locationManager: LocationManager = LocationManager()) {
+    init(
+        locationManager: LocationManager = LocationManager(),
+        syncCoordinator: RunSyncCoordinating
+    ) {
         self.locationManager = locationManager
+        self.syncCoordinator = syncCoordinator
+        self.syncState = syncCoordinator.state
 
         locationManager.$location
             .receive(on: DispatchQueue.main)
@@ -28,6 +36,13 @@ final class CompanionRunManager: ObservableObject {
                 self?.handleNewLocation(location)
             }
             .store(in: &cancellables)
+
+        syncCoordinator.onStateChange = { [weak self] newState in
+            self?.syncState = newState
+            if case .completed(let result) = newState {
+                self?.submissionResult = result
+            }
+        }
     }
 
     func startIfNeeded() {
@@ -42,6 +57,8 @@ final class CompanionRunManager: ObservableObject {
         currentPace = 0
         loopProgress = 0
         locations = []
+        submissionResult = nil
+        syncState = .running
         startTime = Date()
         locationManager.requestPermission()
         locationManager.startTracking()
@@ -76,10 +93,42 @@ final class CompanionRunManager: ObservableObject {
     }
 
     func stop() {
+        stopAndSync()
+    }
+
+    func stopAndSync() {
+        guard state != .idle else { return }
         state = .idle
         timer?.cancel()
         locationManager.stopTracking()
-        startTime = nil
+
+        guard let startTime else {
+            syncState = .failed(message: "Nao foi possivel iniciar a sincronizacao.")
+            return
+        }
+
+        let endTime = Date()
+        let capturedDuration = duration
+        let capturedDistance = distanceMeters
+        let capturedLocations = locations
+        self.startTime = nil
+
+        Task { [weak self] in
+            guard let self else { return }
+            await syncCoordinator.finishRun(
+                startedAt: startTime,
+                endedAt: endTime,
+                duration: capturedDuration,
+                distanceMeters: capturedDistance,
+                locations: capturedLocations
+            )
+        }
+    }
+
+    func retrySync() {
+        Task { [weak self] in
+            await self?.syncCoordinator.retry()
+        }
     }
 
     private func handleNewLocation(_ location: CLLocation?) {
