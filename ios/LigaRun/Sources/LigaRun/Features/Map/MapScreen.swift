@@ -94,8 +94,8 @@ struct MapScreen: View {
         .onChange(of: session.mapFocusTileId) { newValue in
             guard let tileId = newValue else { return }
             Task {
-                await viewModel.focusOnTile(id: tileId)
                 await viewModel.refreshVisibleTiles()
+                await viewModel.focusOnTile(id: tileId)
                 session.mapFocusTileId = nil
             }
         }
