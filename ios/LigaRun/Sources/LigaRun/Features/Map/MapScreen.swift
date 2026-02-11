@@ -4,6 +4,7 @@ import MapboxMaps
 struct MapScreen: View {
     @ObservedObject private var session: SessionStore
     @StateObject private var viewModel: MapViewModel
+    @State private var showingActiveRun = false
 
     init(session: SessionStore) {
         self.session = session
@@ -11,7 +12,7 @@ struct MapScreen: View {
     }
 
     var body: some View {
-        ZStack(alignment: .topTrailing) {
+        ZStack {
             HexMapView(
                 selectedTile: $viewModel.selectedTile,
                 tiles: viewModel.tiles,
@@ -25,24 +26,51 @@ struct MapScreen: View {
             )
             .ignoresSafeArea()
 
-            VStack(alignment: .trailing, spacing: 8) {
-                if viewModel.isLoading {
-                    ProgressView("Carregando tiles...")
-                        .padding(8)
-                        .background(.ultraThinMaterial, in: Capsule())
+            VStack(spacing: 16) {
+                HStack(alignment: .top) {
+                    tileStateLegend
+                    Spacer()
+                    VStack(alignment: .trailing, spacing: 8) {
+                        if viewModel.isLoading {
+                            ProgressView("Carregando tiles...")
+                                .padding(8)
+                                .background(.ultraThinMaterial, in: Capsule())
+                        }
+
+                        Button {
+                            Task { await viewModel.refreshDisputed() }
+                        } label: {
+                            Label("Ver disputas", systemImage: "flame")
+                                .font(.subheadline.weight(.semibold))
+                                .padding(.horizontal, 12)
+                                .padding(.vertical, 8)
+                                .background(.thinMaterial, in: Capsule())
+                        }
+                    }
                 }
+                .padding(.horizontal)
+                .padding(.top)
+
+                Spacer()
 
                 Button {
-                    Task { await viewModel.refreshDisputed() }
+                    showingActiveRun = true
                 } label: {
-                    Label("Ver disputas", systemImage: "flame")
-                        .font(.subheadline.weight(.semibold))
-                        .padding(.horizontal, 12)
-                        .padding(.vertical, 8)
-                        .background(.thinMaterial, in: Capsule())
+                    HStack(spacing: 10) {
+                        Image(systemName: "figure.run")
+                        Text("Acompanhar corrida")
+                            .fontWeight(.semibold)
+                        Spacer()
+                        Image(systemName: "arrow.right")
+                    }
+                    .font(.headline)
+                    .padding()
+                    .frame(maxWidth: .infinity)
+                    .background(.ultraThinMaterial, in: RoundedRectangle(cornerRadius: 14, style: .continuous))
                 }
+                .padding(.horizontal)
+                .padding(.bottom, 20)
             }
-            .padding()
         }
         .sheet(item: $viewModel.selectedTile) { tile in
             if #available(iOS 16, *) {
@@ -66,10 +94,36 @@ struct MapScreen: View {
         .onChange(of: session.mapFocusTileId) { newValue in
             guard let tileId = newValue else { return }
             Task {
+                await viewModel.refreshVisibleTiles()
                 await viewModel.focusOnTile(id: tileId)
                 session.mapFocusTileId = nil
             }
         }
+        .onChange(of: session.selectedTabIndex) { newValue in
+            guard newValue == 0 else { return }
+            Task {
+                await viewModel.refreshVisibleTiles()
+            }
+        }
+        .fullScreenCover(isPresented: $showingActiveRun) {
+            ActiveRunHUD(session: session)
+        }
+    }
+
+    private var tileStateLegend: some View {
+        let summary = viewModel.tileStateSummary
+        return VStack(alignment: .leading, spacing: 6) {
+            Label("\(summary.neutral) \(summary.neutral == 1 ? "neutro" : "neutros")", systemImage: "circle.fill")
+                .foregroundColor(.gray)
+            Label("\(summary.owned) \(summary.owned == 1 ? "dominado" : "dominados")", systemImage: "shield.fill")
+                .foregroundColor(.green)
+            Label("\(summary.disputed) \(summary.disputed == 1 ? "disputa" : "disputas")", systemImage: "flame.fill")
+                .foregroundColor(.orange)
+        }
+        .font(.caption.weight(.semibold))
+        .padding(.horizontal, 12)
+        .padding(.vertical, 10)
+        .background(.thinMaterial, in: RoundedRectangle(cornerRadius: 12, style: .continuous))
     }
 }
 
