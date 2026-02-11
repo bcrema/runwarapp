@@ -113,11 +113,11 @@ struct MapScreen: View {
     private var tileStateLegend: some View {
         let summary = viewModel.tileStateSummary
         return VStack(alignment: .leading, spacing: 6) {
-            Label("\(summary.neutral) neutro", systemImage: "circle.fill")
+            Label("\(summary.neutral) \(summary.neutral == 1 ? "neutro" : "neutros")", systemImage: "circle.fill")
                 .foregroundColor(.gray)
-            Label("\(summary.owned) dominado", systemImage: "shield.fill")
+            Label("\(summary.owned) \(summary.owned == 1 ? "dominado" : "dominados")", systemImage: "shield.fill")
                 .foregroundColor(.green)
-            Label("\(summary.disputed) disputa", systemImage: "flame.fill")
+            Label("\(summary.disputed) \(summary.disputed == 1 ? "disputa" : "disputas")", systemImage: "flame.fill")
                 .foregroundColor(.orange)
         }
         .font(.caption.weight(.semibold))
