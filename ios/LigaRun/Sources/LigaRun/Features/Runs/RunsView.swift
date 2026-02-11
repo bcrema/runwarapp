@@ -313,143 +313,188 @@ struct SubmissionResultView: View {
     @EnvironmentObject private var session: SessionStore
     @Environment(\.dismiss) private var dismiss
 
-    private var actionTypeLabel: String {
-        let actionType = result.turnResult?.actionType ?? result.territoryResult?.actionType
-        switch actionType {
-        case "CONQUEST":
-            return "🏴 Conquistou"
-        case "ATTACK":
-            return "⚔️ Atacou"
-        case "DEFENSE":
-            return "🛡️ Defendeu"
-        default:
-            return "😐 Sem efeito"
-        }
+    private var territoryImpact: SubmissionTerritoryImpact {
+        submissionTerritoryImpact(for: result)
     }
 
     private var tileFocusId: String? {
         submissionTileFocusId(for: result)
     }
 
-    private var shieldBefore: String {
-        if let value = result.turnResult?.shieldBefore {
-            return "\(value)"
-        }
-        if let territory = result.territoryResult {
-            return "\(territory.shieldBefore)"
-        }
-        return "—"
-    }
-
-    private var shieldAfter: String {
-        if let value = result.turnResult?.shieldAfter {
-            return "\(value)"
-        }
-        if let territory = result.territoryResult {
-            return "\(territory.shieldAfter)"
-        }
-        return "—"
-    }
-
-    private var cooldownLabel: String {
-        guard let cooldown = result.turnResult?.cooldownUntil else { return "—" }
-        let formatter = DateFormatter()
-        formatter.locale = Locale(identifier: "pt_BR")
-        formatter.dateStyle = .short
-        formatter.timeStyle = .short
-        guard let date = ISO8601DateFormatter().date(from: cooldown) else {
-            return cooldown
-        }
-        return formatter.string(from: date)
-    }
-
     private var reasons: [String] {
-        var output: [String] = []
-        if let turnReasons = result.turnResult?.reasons {
-            output.append(contentsOf: turnReasons)
+        submissionResultReasons(for: result)
+    }
+
+    private var impactColor: Color {
+        switch territoryImpact {
+        case .conquest:
+            return .green
+        case .attack:
+            return .orange
+        case .defense:
+            return .blue
+        case .noEffect:
+            return .secondary
         }
-        output.append(contentsOf: result.loopValidation.failureReasons)
-        output.append(contentsOf: result.loopValidation.fraudFlags.map { "fraud_flag:\($0)" })
-        if let territoryReason = result.territoryResult?.reason {
-            output.append(territoryReason)
+    }
+
+    private var impactIcon: String {
+        switch territoryImpact {
+        case .conquest:
+            return "flag.fill"
+        case .attack:
+            return "flame.fill"
+        case .defense:
+            return "shield.fill"
+        case .noEffect:
+            return "figure.walk"
         }
-        return output.map { translateSubmissionReason($0) }
+    }
+
+    private var impactSubtitle: String {
+        if !result.loopValidation.isValid {
+            return "Treino salvo sem efeito competitivo."
+        }
+
+        switch territoryImpact {
+        case .conquest:
+            return "A corrida conquistou um tile para sua conta/bandeira."
+        case .attack:
+            return "A corrida causou impacto ofensivo no tile alvo."
+        case .defense:
+            return "A corrida reforcou a defesa do tile alvo."
+        case .noEffect:
+            return "A corrida foi salva, mas nao alterou territorio."
+        }
     }
 
     var body: some View {
         ScrollView {
             VStack(alignment: .leading, spacing: 16) {
-                Text("Resultado da corrida")
-                    .font(.headline)
+                territoryCard
+                metricsCard
 
-                Text(result.loopValidation.isValid ? "Loop válido" : "Loop inválido")
-                    .foregroundColor(result.loopValidation.isValid ? .green : .red)
-
-                VStack(alignment: .leading, spacing: 12) {
-                    HStack {
-                        Text("Tipo de ação")
-                            .font(.subheadline.weight(.semibold))
-                        Spacer()
-                        Text(actionTypeLabel)
-                            .font(.subheadline)
-                    }
-                    HStack {
-                        Text("Tile afetado")
-                            .font(.subheadline.weight(.semibold))
-                        Spacer()
-                        Text(tileFocusId ?? "—")
-                            .font(.subheadline)
-                            .multilineTextAlignment(.trailing)
-                    }
-                    HStack {
-                        Text("Escudo antes/depois")
-                            .font(.subheadline.weight(.semibold))
-                        Spacer()
-                        Text("\(shieldBefore) → \(shieldAfter)")
-                            .font(.subheadline)
-                    }
-                    HStack {
-                        Text("Cooldown")
-                            .font(.subheadline.weight(.semibold))
-                        Spacer()
-                        Text(cooldownLabel)
-                            .font(.subheadline)
-                            .multilineTextAlignment(.trailing)
-                    }
-                }
-                .padding()
-                .background(Color(.secondarySystemBackground))
-                .clipShape(RoundedRectangle(cornerRadius: 12))
-
-                if !reasons.isEmpty {
-                    VStack(alignment: .leading, spacing: 8) {
-                        Text("Por que não contou:")
-                            .font(.subheadline.bold())
-                        ForEach(reasons, id: \.self) { reason in
-                            Text("• \(reason)")
-                                .font(.caption)
-                                .foregroundColor(.secondary)
-                        }
-                    }
+                if !result.loopValidation.isValid || !reasons.isEmpty {
+                    invalidReasonCard
                 }
 
-                Button {
-                    guard let tileId = tileFocusId else { return }
-                    session.mapFocusTileId = tileId
-                    session.selectedTabIndex = 0
-                    dismiss()
-                } label: {
-                    Text("Ver no mapa")
-                        .font(.headline)
-                        .frame(maxWidth: .infinity)
-                        .padding(.vertical, 12)
-                }
-                .buttonStyle(.borderedProminent)
-                .disabled(tileFocusId == nil)
-
-                Spacer()
+                actionButtons
             }
             .padding()
         }
+    }
+
+    private var territoryCard: some View {
+        VStack(alignment: .leading, spacing: 10) {
+            HStack(spacing: 8) {
+                Image(systemName: impactIcon)
+                    .foregroundColor(impactColor)
+                Text(submissionTerritoryImpactTitle(for: territoryImpact))
+                    .font(.headline)
+                Spacer()
+                Text(result.loopValidation.isValid ? "Loop valido" : "Loop invalido")
+                    .font(.caption.bold())
+                    .foregroundColor(result.loopValidation.isValid ? .green : .red)
+            }
+
+            Text(impactSubtitle)
+                .font(.subheadline)
+                .foregroundColor(.secondary)
+
+            if let cooldown = result.turnResult?.cooldownUntil {
+                HStack(spacing: 6) {
+                    Image(systemName: "clock.arrow.circlepath")
+                    Text("Cooldown: \(formattedCooldown(cooldown))")
+                        .font(.caption)
+                }
+                .foregroundColor(.secondary)
+            }
+        }
+        .padding()
+        .background(Color(.secondarySystemBackground))
+        .clipShape(RoundedRectangle(cornerRadius: 14))
+    }
+
+    private var metricsCard: some View {
+        let columns = [GridItem(.flexible()), GridItem(.flexible())]
+
+        return LazyVGrid(columns: columns, spacing: 10) {
+            metricCell(title: "Distancia", value: String(format: "%.2f km", result.run.distance))
+            metricCell(title: "Tempo", value: submissionRunDurationLabel(for: result))
+            metricCell(title: "Tile foco", value: tileFocusId ?? "—")
+            metricCell(title: "Escudo", value: submissionShieldDeltaLabel(for: result))
+        }
+    }
+
+    private func metricCell(title: String, value: String) -> some View {
+        VStack(alignment: .leading, spacing: 6) {
+            Text(title)
+                .font(.caption)
+                .foregroundColor(.secondary)
+            Text(value)
+                .font(.subheadline.weight(.semibold))
+                .lineLimit(2)
+                .multilineTextAlignment(.leading)
+        }
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .padding(12)
+        .background(Color(.tertiarySystemBackground))
+        .clipShape(RoundedRectangle(cornerRadius: 12))
+    }
+
+    private var invalidReasonCard: some View {
+        VStack(alignment: .leading, spacing: 8) {
+            Text("Treino salvo sem efeito competitivo")
+                .font(.subheadline.bold())
+
+            Text("Veja abaixo os motivos processados para esta submissao:")
+                .font(.caption)
+                .foregroundColor(.secondary)
+
+            ForEach(reasons, id: \.self) { reason in
+                Text("• \(reason)")
+                    .font(.caption)
+                    .foregroundColor(.secondary)
+            }
+        }
+        .padding()
+        .background(Color(.secondarySystemBackground))
+        .clipShape(RoundedRectangle(cornerRadius: 14))
+    }
+
+    private var actionButtons: some View {
+        VStack(spacing: 10) {
+            Button {
+                guard let tileId = tileFocusId else { return }
+                session.mapFocusTileId = tileId
+                session.selectedTabIndex = 0
+                dismiss()
+            } label: {
+                Text("Ver no mapa")
+                    .font(.headline)
+                    .frame(maxWidth: .infinity)
+                    .padding(.vertical, 12)
+            }
+            .buttonStyle(.borderedProminent)
+            .disabled(tileFocusId == nil)
+
+            Button("Fechar") {
+                dismiss()
+            }
+            .buttonStyle(.bordered)
+            .frame(maxWidth: .infinity)
+        }
+    }
+
+    private func formattedCooldown(_ value: String) -> String {
+        let formatter = DateFormatter()
+        formatter.locale = Locale(identifier: "pt_BR")
+        formatter.dateStyle = .short
+        formatter.timeStyle = .short
+
+        guard let date = ISO8601DateFormatter().date(from: value) else {
+            return value
+        }
+        return formatter.string(from: date)
     }
 }

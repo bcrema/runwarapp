@@ -4,6 +4,8 @@ import Foundation
 
 func makeRunFixture(
     id: String = UUID().uuidString,
+    distance: Double = 5000,
+    duration: Double = 1800,
     isLoopValid: Bool = true,
     territoryAction: String? = nil,
     targetTileId: String? = nil
@@ -15,8 +17,8 @@ func makeRunFixture(
     return Run(
         id: id,
         userId: UUID().uuidString,
-        distance: 5000,
-        duration: 1800,
+        distance: distance,
+        duration: duration,
         startTime: formatter.string(from: startDate),
         endTime: formatter.string(from: endDate),
         isLoopValid: isLoopValid,
@@ -61,6 +63,8 @@ func makeLoopValidationFixture(
 func makeTerritoryResultFixture(
     actionType: String? = "CONQUEST",
     reason: String? = nil,
+    shieldBefore: Int = 65,
+    shieldAfter: Int = 85,
     tileId: String? = "tile-territory"
 ) -> TerritoryResult {
     TerritoryResult(
@@ -68,9 +72,9 @@ func makeTerritoryResultFixture(
         actionType: actionType,
         reason: reason,
         ownerChanged: true,
-        shieldChange: 20,
-        shieldBefore: 65,
-        shieldAfter: 85,
+        shieldChange: shieldAfter - shieldBefore,
+        shieldBefore: shieldBefore,
+        shieldAfter: shieldAfter,
         inDispute: false,
         tileId: tileId
     )
@@ -79,6 +83,8 @@ func makeTerritoryResultFixture(
 func makeTurnResultFixture(
     actionType: String? = "CONQUEST",
     tileId: String? = "tile-turn",
+    shieldBefore: Int? = 65,
+    shieldAfter: Int? = 85,
     reasons: [String] = []
 ) -> TurnResult {
     TurnResult(
@@ -87,8 +93,8 @@ func makeTurnResultFixture(
         h3Index: nil,
         previousOwner: nil,
         newOwner: nil,
-        shieldBefore: 65,
-        shieldAfter: 85,
+        shieldBefore: shieldBefore,
+        shieldAfter: shieldAfter,
         cooldownUntil: nil,
         disputeState: nil,
         capsRemaining: TurnCapsRemaining(userActionsRemaining: 1, bandeiraActionsRemaining: nil),
