@@ -23,10 +23,16 @@ final class MapViewModel: ObservableObject {
     }
 
     var tileStateSummary: TileStateSummary {
-        let disputed = tiles.filter(\.isInDispute).count
-        let owned = tiles.filter { !$0.isInDispute && $0.ownerType != nil }.count
-        let neutral = tiles.filter { !$0.isInDispute && $0.ownerType == nil }.count
-        return TileStateSummary(neutral: neutral, owned: owned, disputed: disputed)
+        let counts = tiles.reduce(into: (neutral: 0, owned: 0, disputed: 0)) { result, tile in
+            if tile.isInDispute {
+                result.disputed += 1
+            } else if tile.ownerType != nil {
+                result.owned += 1
+            } else {
+                result.neutral += 1
+            }
+        }
+        return TileStateSummary(neutral: counts.neutral, owned: counts.owned, disputed: counts.disputed)
     }
 
     func loadTiles(bounds: (minLat: Double, minLng: Double, maxLat: Double, maxLng: Double)) async {
