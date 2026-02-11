@@ -20,6 +20,7 @@
 		4A71D24F2F575A37D29DC64E /* RunUploadServiceTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = DC2E56500A7DDAA10C8E4500 /* RunUploadServiceTests.swift */; };
 		4BD2C417BBA74CA787C77817 /* HealthKitAuthorizationStoreTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = DF28D4B9293A3AE9EF358F7F /* HealthKitAuthorizationStoreTests.swift */; };
 		532970604BDC326CC3C445D7 /* BandeirasViewModelTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = D56C2F8711166F1582C2B3CA /* BandeirasViewModelTests.swift */; };
+		5CA49102985C5F34D817F883 /* HealthKitRunSyncService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4F90AB19C8B78C9A9BC20A01 /* HealthKitRunSyncService.swift */; };
 		5D6E46DABDB85C4724F6B1FD /* StrategicMapView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5D8DEFA61C26D1DBF72C2F17 /* StrategicMapView.swift */; };
 		687D08AA35AF49AFE7AA1F40 /* TileService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 868F9127D460C6187D54C342 /* TileService.swift */; };
 		6A5C14AF83F03E4B64061676 /* RunsViewModelTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 788CCFC00DB261E33D463C15 /* RunsViewModelTests.swift */; };
@@ -78,7 +79,8 @@
 		3458657E74B93B192484D16C /* ProfileView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProfileView.swift; sourceTree = "<group>"; };
 		36317B4036D4EC17DAAE3D05 /* SessionStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SessionStore.swift; sourceTree = "<group>"; };
 		3DBD6363768644A41C6EDDC6 /* SubmissionResultPresentation.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SubmissionResultPresentation.swift; sourceTree = "<group>"; };
-		4460EDCA5A8392F6B0412BD1 /* LigaRun.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = LigaRun.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		4460EDCA5A8392F6B0412BD1 /* LigaRun.app */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = wrapper.application; path = LigaRun.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		4F90AB19C8B78C9A9BC20A01 /* HealthKitRunSyncService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HealthKitRunSyncService.swift; sourceTree = "<group>"; };
 		4F97C7EC05598F2091E1DA28 /* StrategicMapViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StrategicMapViewModel.swift; sourceTree = "<group>"; };
 		4FCA68DFEAEAEFFEEA94FAC3 /* CompanionRunManagerTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CompanionRunManagerTests.swift; sourceTree = "<group>"; };
 		5120777A2B8A3D3C793D3036 /* CompanionRunManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CompanionRunManager.swift; sourceTree = "<group>"; };
@@ -88,7 +90,7 @@
 		687A5818C9839BD446B9CCBA /* BandeirasViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BandeirasViewModel.swift; sourceTree = "<group>"; };
 		68A46DA068E959FFAEE24347 /* AuthViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AuthViewModel.swift; sourceTree = "<group>"; };
 		6A2084EF36D9101EA1AAC5A0 /* KeychainStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = KeychainStore.swift; sourceTree = "<group>"; };
-		6D90C1473BE29FA146C52610 /* LigaRunTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = LigaRunTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
+		6D90C1473BE29FA146C52610 /* LigaRunTests.xctest */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = wrapper.cfbundle; path = LigaRunTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		77D7169C2E064CB5E6F569DB /* BandeirasView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BandeirasView.swift; sourceTree = "<group>"; };
 		788CCFC00DB261E33D463C15 /* RunsViewModelTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RunsViewModelTests.swift; sourceTree = "<group>"; };
 		7CF9246D57FA43D354D503E3 /* TestFixtures.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TestFixtures.swift; sourceTree = "<group>"; };
@@ -200,6 +202,7 @@
 			isa = PBXGroup;
 			children = (
 				130949A44776191A527B5206 /* HealthKitAuthorizationStore.swift */,
+				4F90AB19C8B78C9A9BC20A01 /* HealthKitRunSyncService.swift */,
 				6A2084EF36D9101EA1AAC5A0 /* KeychainStore.swift */,
 				B3E368A6F9923688C82AA9CD /* LocationManager.swift */,
 				C44CA3A3941B2BF370DDF251 /* RunService.swift */,
@@ -372,7 +375,7 @@
 			isa = PBXProject;
 			attributes = {
 				BuildIndependentTargetsInParallel = YES;
-				LastUpgradeCheck = 2620;
+				LastUpgradeCheck = 1430;
 			};
 			buildConfigurationList = FF89B698C33EEECA18A3DAC1 /* Build configuration list for PBXProject "LigaRun" */;
 			compatibilityVersion = "Xcode 14.0";
@@ -387,6 +390,7 @@
 			packageReferences = (
 				08A1DAF369C22FABD28B48AE /* XCRemoteSwiftPackageReference "mapbox-maps-ios" */,
 			);
+			preferredProjectObjectVersion = 77;
 			projectDirPath = "";
 			projectRoot = "";
 			targets = (
@@ -442,6 +446,7 @@
 				DDCACD33EDBE6317E060075E /* CompanionRunManager.swift in Sources */,
 				AFC9F94528C7FB52CD2CA02B /* GeoUtils.swift in Sources */,
 				7DEDDC97CA4E3E6EA8C88603 /* HealthKitAuthorizationStore.swift in Sources */,
+				5CA49102985C5F34D817F883 /* HealthKitRunSyncService.swift in Sources */,
 				CE4BE5CEDC2D309246DD9912 /* HexMapView.swift in Sources */,
 				059E37FEC2AEFF5B21783FA7 /* KeychainStore.swift in Sources */,
 				462F351EBDE24FBBE380D238 /* LigaRunApp.swift in Sources */,
@@ -484,7 +489,6 @@
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CODE_SIGN_ENTITLEMENTS = Config/LigaRun.entitlements;
 				CODE_SIGN_IDENTITY = "iPhone Developer";
-
 				INFOPLIST_FILE = Resources/Info.plist;
 				IPHONEOS_DEPLOYMENT_TARGET = 16.0;
 				LD_RUNPATH_SEARCH_PATHS = (
@@ -502,7 +506,6 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
-				ASSETCATALOG_COMPILER_GENERATE_SWIFT_ASSET_SYMBOL_EXTENSIONS = YES;
 				CLANG_ANALYZER_NONNULL = YES;
 				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
 				CLANG_CXX_LANGUAGE_STANDARD = "gnu++14";
@@ -536,7 +539,6 @@
 				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
 				ENABLE_NS_ASSERTIONS = NO;
 				ENABLE_STRICT_OBJC_MSGSEND = YES;
-				ENABLE_USER_SCRIPT_SANDBOXING = YES;
 				GCC_C_LANGUAGE_STANDARD = gnu11;
 				GCC_NO_COMMON_BLOCKS = YES;
 				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
@@ -550,7 +552,6 @@
 				MTL_FAST_MATH = YES;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SDKROOT = iphoneos;
-				STRING_CATALOG_GENERATE_SYMBOLS = YES;
 				SWIFT_COMPILATION_MODE = wholemodule;
 				SWIFT_OPTIMIZATION_LEVEL = "-O";
 				SWIFT_VERSION = 5.0;
@@ -564,7 +565,6 @@
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CODE_SIGN_ENTITLEMENTS = Config/LigaRun.entitlements;
 				CODE_SIGN_IDENTITY = "iPhone Developer";
-				DEVELOPMENT_TEAM = D3TUSJSBC5;
 				INFOPLIST_FILE = Resources/Info.plist;
 				IPHONEOS_DEPLOYMENT_TARGET = 16.0;
 				LD_RUNPATH_SEARCH_PATHS = (
@@ -618,7 +618,6 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
-				ASSETCATALOG_COMPILER_GENERATE_SWIFT_ASSET_SYMBOL_EXTENSIONS = YES;
 				CLANG_ANALYZER_NONNULL = YES;
 				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
 				CLANG_CXX_LANGUAGE_STANDARD = "gnu++14";
@@ -652,7 +651,6 @@
 				DEBUG_INFORMATION_FORMAT = dwarf;
 				ENABLE_STRICT_OBJC_MSGSEND = YES;
 				ENABLE_TESTABILITY = YES;
-				ENABLE_USER_SCRIPT_SANDBOXING = YES;
 				GCC_C_LANGUAGE_STANDARD = gnu11;
 				GCC_DYNAMIC_NO_PIC = NO;
 				GCC_NO_COMMON_BLOCKS = YES;
@@ -673,7 +671,6 @@
 				ONLY_ACTIVE_ARCH = YES;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SDKROOT = iphoneos;
-				STRING_CATALOG_GENERATE_SYMBOLS = YES;
 				SWIFT_ACTIVE_COMPILATION_CONDITIONS = DEBUG;
 				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
 				SWIFT_VERSION = 5.0;

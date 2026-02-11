@@ -34,13 +34,19 @@ enum RunSessionStatus: String, Codable {
     case failed
 }
 
+enum RunSessionSource: String, Codable {
+    case localTracking
+    case healthKit
+}
+
 struct RunSessionRecord: Codable, Identifiable, Equatable {
     let id: UUID
     let startedAt: Date
     let endedAt: Date
     let duration: TimeInterval
     let distanceMeters: Double
-    let points: [RunTrackPoint]
+    var points: [RunTrackPoint]
+    var source: RunSessionSource = .localTracking
     var status: RunSessionStatus
     var lastUploadAttempt: Date?
     var lastError: String?
@@ -52,6 +58,7 @@ struct RunSessionRecord: Codable, Identifiable, Equatable {
               lhs.duration == rhs.duration,
               lhs.distanceMeters == rhs.distanceMeters,
               lhs.points == rhs.points,
+              lhs.source == rhs.source,
               lhs.status == rhs.status,
               datesEqual(lhs.lastUploadAttempt, rhs.lastUploadAttempt),
               lhs.lastError == rhs.lastError

@@ -26,7 +26,6 @@ final class RunsViewModel: ObservableObject {
         errorMessage = nil
         defer { isLoading = false }
 
-        async let uploadResultsTask = uploadService.uploadPendingSessions()
         async let runsTask = runService.getMyRuns()
         async let dailyStatusTask = runService.getDailyStatus()
         var runsError: Error?
@@ -43,7 +42,7 @@ final class RunsViewModel: ObservableObject {
             dailyStatus = nil
         }
 
-        let uploadResults = await uploadResultsTask
+        let uploadResults = await uploadService.uploadPendingSessions()
         if uploadResults.count == 1 {
             submissionResult = uploadResults[0]
         } else {
