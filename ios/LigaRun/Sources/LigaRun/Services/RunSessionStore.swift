@@ -34,16 +34,73 @@ enum RunSessionStatus: String, Codable {
     case failed
 }
 
+enum RunSessionSource: String, Codable {
+    case localTracking
+    case healthKit
+}
+
 struct RunSessionRecord: Codable, Identifiable, Equatable {
     let id: UUID
     let startedAt: Date
     let endedAt: Date
     let duration: TimeInterval
     let distanceMeters: Double
-    let points: [RunTrackPoint]
+    var points: [RunTrackPoint]
+    var source: RunSessionSource = .localTracking
     var status: RunSessionStatus
     var lastUploadAttempt: Date?
     var lastError: String?
+
+    private enum CodingKeys: String, CodingKey {
+        case id
+        case startedAt
+        case endedAt
+        case duration
+        case distanceMeters
+        case points
+        case source
+        case status
+        case lastUploadAttempt
+        case lastError
+    }
+
+    init(
+        id: UUID,
+        startedAt: Date,
+        endedAt: Date,
+        duration: TimeInterval,
+        distanceMeters: Double,
+        points: [RunTrackPoint],
+        source: RunSessionSource = .localTracking,
+        status: RunSessionStatus,
+        lastUploadAttempt: Date?,
+        lastError: String?
+    ) {
+        self.id = id
+        self.startedAt = startedAt
+        self.endedAt = endedAt
+        self.duration = duration
+        self.distanceMeters = distanceMeters
+        self.points = points
+        self.source = source
+        self.status = status
+        self.lastUploadAttempt = lastUploadAttempt
+        self.lastError = lastError
+    }
+
+    init(from decoder: Decoder) throws {
+        let container = try decoder.container(keyedBy: CodingKeys.self)
+        id = try container.decode(UUID.self, forKey: .id)
+        startedAt = try container.decode(Date.self, forKey: .startedAt)
+        endedAt = try container.decode(Date.self, forKey: .endedAt)
+        duration = try container.decode(TimeInterval.self, forKey: .duration)
+        distanceMeters = try container.decode(Double.self, forKey: .distanceMeters)
+        points = try container.decode([RunTrackPoint].self, forKey: .points)
+        source = try container.decodeIfPresent(RunSessionSource.self, forKey: .source) ?? .localTracking
+        status = try container.decode(RunSessionStatus.self, forKey: .status)
+        lastUploadAttempt = try container.decodeIfPresent(Date.self, forKey: .lastUploadAttempt)
+        lastError = try container.decodeIfPresent(String.self, forKey: .lastError)
+    }
 
     static func == (lhs: RunSessionRecord, rhs: RunSessionRecord) -> Bool {
         guard lhs.id == rhs.id,
@@ -52,6 +109,7 @@ struct RunSessionRecord: Codable, Identifiable, Equatable {
               lhs.duration == rhs.duration,
               lhs.distanceMeters == rhs.distanceMeters,
               lhs.points == rhs.points,
+              lhs.source == rhs.source,
               lhs.status == rhs.status,
               datesEqual(lhs.lastUploadAttempt, rhs.lastUploadAttempt),
               lhs.lastError == rhs.lastError
