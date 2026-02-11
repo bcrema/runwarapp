@@ -1,6 +1,12 @@
 import Foundation
 import CoreLocation
 
+struct TileStateSummary: Equatable {
+    let neutral: Int
+    let owned: Int
+    let disputed: Int
+}
+
 @MainActor
 final class MapViewModel: ObservableObject {
     @Published var tiles: [Tile] = []
@@ -10,9 +16,17 @@ final class MapViewModel: ObservableObject {
     @Published var errorMessage: String?
 
     private let api: MapAPIProviding
+    private var lastVisibleBounds: (minLat: Double, minLng: Double, maxLat: Double, maxLng: Double)?
 
     init(session: SessionStore, api: MapAPIProviding? = nil) {
         self.api = api ?? session.api
+    }
+
+    var tileStateSummary: TileStateSummary {
+        let disputed = tiles.filter(\.isInDispute).count
+        let owned = tiles.filter { !$0.isInDispute && $0.ownerType != nil }.count
+        let neutral = tiles.filter { !$0.isInDispute && $0.ownerType == nil }.count
+        return TileStateSummary(neutral: neutral, owned: owned, disputed: disputed)
     }
 
     func loadTiles(bounds: (minLat: Double, minLng: Double, maxLat: Double, maxLng: Double)) async {
@@ -22,9 +36,15 @@ final class MapViewModel: ObservableObject {
 
         do {
             tiles = try await api.getTiles(bounds: bounds)
+            lastVisibleBounds = bounds
         } catch {
             errorMessage = error.localizedDescription
         }
+    }
+
+    func refreshVisibleTiles() async {
+        guard let lastVisibleBounds else { return }
+        await loadTiles(bounds: lastVisibleBounds)
     }
 
     func refreshDisputed() async {
@@ -39,8 +59,17 @@ final class MapViewModel: ObservableObject {
         do {
             let tile = try await api.getTile(id: id)
             focusCoordinate = CLLocationCoordinate2D(latitude: tile.lat, longitude: tile.lng)
+            upsert(tile: tile)
         } catch {
             errorMessage = error.localizedDescription
         }
+    }
+
+    private func upsert(tile: Tile) {
+        if let existingIndex = tiles.firstIndex(where: { $0.id == tile.id }) {
+            tiles[existingIndex] = tile
+            return
+        }
+        tiles.insert(tile, at: 0)
     }
 }
