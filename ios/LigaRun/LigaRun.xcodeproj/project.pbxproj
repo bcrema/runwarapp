@@ -20,6 +20,7 @@
 		4A71D24F2F575A37D29DC64E /* RunUploadServiceTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = DC2E56500A7DDAA10C8E4500 /* RunUploadServiceTests.swift */; };
 		4BD2C417BBA74CA787C77817 /* HealthKitAuthorizationStoreTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = DF28D4B9293A3AE9EF358F7F /* HealthKitAuthorizationStoreTests.swift */; };
 		532970604BDC326CC3C445D7 /* BandeirasViewModelTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = D56C2F8711166F1582C2B3CA /* BandeirasViewModelTests.swift */; };
+		5CA49102985C5F34D817F883 /* HealthKitRunSyncService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4F90AB19C8B78C9A9BC20A01 /* HealthKitRunSyncService.swift */; };
 		5D6E46DABDB85C4724F6B1FD /* StrategicMapView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5D8DEFA61C26D1DBF72C2F17 /* StrategicMapView.swift */; };
 		687D08AA35AF49AFE7AA1F40 /* TileService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 868F9127D460C6187D54C342 /* TileService.swift */; };
 		6A5C14AF83F03E4B64061676 /* RunsViewModelTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 788CCFC00DB261E33D463C15 /* RunsViewModelTests.swift */; };
@@ -79,6 +80,7 @@
 		36317B4036D4EC17DAAE3D05 /* SessionStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SessionStore.swift; sourceTree = "<group>"; };
 		3DBD6363768644A41C6EDDC6 /* SubmissionResultPresentation.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SubmissionResultPresentation.swift; sourceTree = "<group>"; };
 		4460EDCA5A8392F6B0412BD1 /* LigaRun.app */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = wrapper.application; path = LigaRun.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		4F90AB19C8B78C9A9BC20A01 /* HealthKitRunSyncService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HealthKitRunSyncService.swift; sourceTree = "<group>"; };
 		4F97C7EC05598F2091E1DA28 /* StrategicMapViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StrategicMapViewModel.swift; sourceTree = "<group>"; };
 		4FCA68DFEAEAEFFEEA94FAC3 /* CompanionRunManagerTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CompanionRunManagerTests.swift; sourceTree = "<group>"; };
 		5120777A2B8A3D3C793D3036 /* CompanionRunManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CompanionRunManager.swift; sourceTree = "<group>"; };
@@ -200,6 +202,7 @@
 			isa = PBXGroup;
 			children = (
 				130949A44776191A527B5206 /* HealthKitAuthorizationStore.swift */,
+				4F90AB19C8B78C9A9BC20A01 /* HealthKitRunSyncService.swift */,
 				6A2084EF36D9101EA1AAC5A0 /* KeychainStore.swift */,
 				B3E368A6F9923688C82AA9CD /* LocationManager.swift */,
 				C44CA3A3941B2BF370DDF251 /* RunService.swift */,
@@ -387,6 +390,7 @@
 			packageReferences = (
 				08A1DAF369C22FABD28B48AE /* XCRemoteSwiftPackageReference "mapbox-maps-ios" */,
 			);
+			preferredProjectObjectVersion = 77;
 			projectDirPath = "";
 			projectRoot = "";
 			targets = (
@@ -442,6 +446,7 @@
 				DDCACD33EDBE6317E060075E /* CompanionRunManager.swift in Sources */,
 				AFC9F94528C7FB52CD2CA02B /* GeoUtils.swift in Sources */,
 				7DEDDC97CA4E3E6EA8C88603 /* HealthKitAuthorizationStore.swift in Sources */,
+				5CA49102985C5F34D817F883 /* HealthKitRunSyncService.swift in Sources */,
 				CE4BE5CEDC2D309246DD9912 /* HexMapView.swift in Sources */,
 				059E37FEC2AEFF5B21783FA7 /* KeychainStore.swift in Sources */,
 				462F351EBDE24FBBE380D238 /* LigaRunApp.swift in Sources */,
