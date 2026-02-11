@@ -26,7 +26,6 @@
 - [ ] `02` Sync HealthKit pipeline - Dono: `Agente iOS Data/Health` (depende de `01`)
 - [ ] `03` Companion HUD estados - Dono: `Agente iOS Runtime/UX` (depende de `02`)
 - [ ] `04` Mapa home CTA tiles - Dono: `Agente iOS Maps` (depende de `01`)
-- [ ] `05` Resultado pos-corrida - Dono: `Agente iOS UX Flow` (depende de `02`)
 - [ ] `06` Bandeiras fluxo completo - Dono: `Agente iOS Social`
 - [ ] `07` Perfil basico historico - Dono: `Agente iOS Profile`
 - [ ] `09` Hardening release - Dono: `Agente iOS Release` (depende de `03`,`04`,`05`,`06`,`07`)
@@ -41,6 +40,7 @@
 - [x] `00` Decisoes V1 iOS registradas
 - [x] Estrutura documental `ios/docs/gds-v1-ios/` criada
 - [x] `01` Fundacao permissoes config - Dono: `Agente iOS Platform`
+- [x] `05` Resultado pos-corrida - Dono: `Agente iOS UX Flow`
 - [x] `07` Perfil basico historico - Dono: `Agente iOS Profile`
 - [x] `06` Bandeiras fluxo completo - Dono: `Agente iOS Social`
 
@@ -51,7 +51,7 @@
 | `02` | To Do | Agente iOS Data/Health | `01` | - | 2026-02-05 |
 | `03` | To Do | Agente iOS Runtime/UX | `02` | - | 2026-02-05 |
 | `04` | To Do | Agente iOS Maps | `01` | - | 2026-02-05 |
-| `05` | To Do | Agente iOS UX Flow | `02` | - | 2026-02-05 |
+| `05` | Done | Agente iOS UX Flow | `02` | - | 2026-02-11 |
 | `06` | To Do | Agente iOS Social | - | - | 2026-02-05 |
 | `07` | Done | Agente iOS Profile | - | - | 2026-02-06 |
 | `06` | Done | Agente iOS Social | - | - | 2026-02-06 |
@@ -65,6 +65,8 @@
 - [x] 6 casos de aceite do GDS validados
 
 ## Atualizacoes
+- `05` 2026-02-11 — Status: Done. Resumo tecnico: `SubmissionResultView` refatorada para layout clean com card de impacto territorial (conquistou/atacou/defendeu/sem efeito), metricas essenciais (distancia, duracao, tile foco e escudo antes/depois), bloco de razoes de invalidade agrupadas/traduzidas e CTA `Ver no mapa` com foco consistente no tile alvo. `SubmissionResultPresentation` foi expandido com mapeamentos de impacto, labels de escudo/duracao e composicao deduplicada de reasons; fixtures e testes unitarios foram atualizados para cobrir os novos cenarios. Branch/worktree: `feat/ios-gds-05-resultado-pos-corrida` em `/private/tmp/runwarapp-wt-05`. Testes: `cd /private/tmp/runwarapp-wt-05/ios/LigaRun && xcodegen generate && CLANG_MODULE_CACHE_PATH=$(pwd)/ModuleCache SWIFT_MODULE_CACHE_PATH=$(pwd)/ModuleCache SWIFTPM_CACHE_PATH=$(pwd)/.swiftpm/cache xcodebuild -project LigaRun.xcodeproj -scheme LigaRun -destination 'platform=iOS Simulator,name=iPhone 17,OS=26.2' -derivedDataPath $(pwd)/DerivedData -clonedSourcePackagesDirPath /Users/brunocrema/runwarapp/ios/LigaRun/SourcePackages -disableAutomaticPackageResolution test` (passou, 55 testes, 0 falhas, `TEST SUCCEEDED`).
+- `05` 2026-02-11 — Status: In Progress. Resumo tecnico: implementacao iniciada da rodada 3 para refatorar resultado pos-corrida no formato clean com destaque de impacto territorial, razoes de invalidade agrupadas e CTA consistente de foco no mapa. Branch/worktree: `feat/ios-gds-05-resultado-pos-corrida` em `/private/tmp/runwarapp-wt-05`. Testes: planejados `cd ios/LigaRun && xcodegen generate` e `xcodebuild -project LigaRun.xcodeproj -scheme LigaRun -destination 'platform=iOS Simulator,name=iPhone 17,OS=26.2' -derivedDataPath $(pwd)/DerivedData -clonedSourcePackagesDirPath /Users/brunocrema/runwarapp/ios/LigaRun/SourcePackages -disableAutomaticPackageResolution test`; resultado inicial: em andamento.
 - `08` 2026-02-06 — Status: Blocked. Resumo: matriz de testes e gate de merge entregues (novos testes para sync/submissao, companion, mapa, bandeiras e resultado; script padrao atualizado; documentacao do passo 08 atualizada). Smoke real em device bloqueado por assinatura/provisioning. Branch/worktree: `feat/ios-gds-08-qa-gates` em `../runwarapp-wt-08`. Testes: `cd ios/LigaRun && xcodegen generate` (passou); `xcodebuild -scheme LigaRun -destination "${XCODE_DESTINATION:-platform=iOS Simulator,OS=latest,name=iPhone 15}" test` (passou, 45 testes); `xcrun xctrace list devices` (passou, device `<DEVICE_ID>` detectado); `xcodebuild -scheme LigaRun -destination "platform=iOS,id=<DEVICE_ID>" test` (falhou: development team nao configurado); `xcodebuild -scheme LigaRun -destination "platform=iOS,id=<DEVICE_ID>" test DEVELOPMENT_TEAM=<TEAM_ID> CODE_SIGN_STYLE=Automatic -allowProvisioningUpdates -allowProvisioningDeviceRegistration` (falhou: No Account for Team + sem certificado/perfil). Proximo passo: configurar DEVELOPMENT_TEAM com conta valida e perfis/certificados no Xcode e repetir os testes em device real.
 - `07` 2026-02-06 — Status: Done. Resumo: perfil agora exibe bloco de stats basicas (corridas, distancia total e tiles conquistados) e historico curto (limite 10) com status valido/invalido e acao territorial, incluindo estado vazio legivel; fluxo de salvar alteracoes/logout preservado. Cobertura unitária do perfil adicionada em arquivo incluído no target (`ProfileViewModelTests`). Branch/worktree: `feat/ios-gds-07-perfil` em `../runwarapp-wt-07`. Testes: `CLANG_MODULE_CACHE_PATH=$(pwd)/ModuleCache SWIFT_MODULE_CACHE_PATH=$(pwd)/ModuleCache SWIFTPM_CACHE_PATH=$(pwd)/.swiftpm/cache xcodebuild -project LigaRun.xcodeproj -scheme LigaRun -destination 'platform=iOS Simulator,name=iPhone 17,OS=26.2' -derivedDataPath $(pwd)/DerivedData -clonedSourcePackagesDirPath /Users/brunocrema/runwarapp/ios/SourcePackages test` (passou, 29 testes).
 - `07` 2026-02-06 — Status: In Progress. Resumo: passo iniciado para entregar stats basicas e historico curto no perfil com cobertura de testes e validacao de regressao em salvar perfil/logout. Branch/worktree: `feat/ios-gds-07-perfil` em `../runwarapp-wt-07`. Testes: em andamento.
