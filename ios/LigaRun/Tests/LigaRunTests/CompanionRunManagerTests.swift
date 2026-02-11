@@ -6,7 +6,8 @@ final class CompanionRunManagerTests: XCTestCase {
     @MainActor
     func testStartPauseResumeStopTransitionsAndTrackingCalls() async {
         let locationManager = LocationManagerSpy()
-        let runManager = CompanionRunManager(locationManager: locationManager)
+        let syncCoordinator = RunSyncCoordinatorSpy()
+        let runManager = CompanionRunManager(locationManager: locationManager, syncCoordinator: syncCoordinator)
 
         runManager.startIfNeeded()
         XCTAssertTrue(isState(runManager.state, .running))
@@ -24,12 +25,15 @@ final class CompanionRunManagerTests: XCTestCase {
         runManager.stop()
         XCTAssertTrue(isState(runManager.state, .idle))
         XCTAssertEqual(locationManager.stopTrackingCalls, 2)
+        await Task.yield()
+        XCTAssertEqual(syncCoordinator.finishRunCalls, 1)
     }
 
     @MainActor
     func testStartIfNeededDoesNotRestartWhenAlreadyRunning() {
         let locationManager = LocationManagerSpy()
-        let runManager = CompanionRunManager(locationManager: locationManager)
+        let syncCoordinator = RunSyncCoordinatorSpy()
+        let runManager = CompanionRunManager(locationManager: locationManager, syncCoordinator: syncCoordinator)
 
         runManager.startIfNeeded()
         runManager.startIfNeeded()
@@ -41,7 +45,8 @@ final class CompanionRunManagerTests: XCTestCase {
     @MainActor
     func testReceivingLocationsUpdatesDistanceAndProgress() async {
         let locationManager = LocationManagerSpy()
-        let runManager = CompanionRunManager(locationManager: locationManager)
+        let syncCoordinator = RunSyncCoordinatorSpy()
+        let runManager = CompanionRunManager(locationManager: locationManager, syncCoordinator: syncCoordinator)
 
         runManager.start()
         locationManager.emit(CLLocation(latitude: -25.4295, longitude: -49.2717))
@@ -51,6 +56,30 @@ final class CompanionRunManagerTests: XCTestCase {
         XCTAssertEqual(runManager.locations.count, 2)
         XCTAssertGreaterThan(runManager.distanceMeters, 0)
         XCTAssertGreaterThan(runManager.loopProgress, 0)
+    }
+
+    @MainActor
+    func testRetrySyncDelegatesToCoordinator() async {
+        let locationManager = LocationManagerSpy()
+        let syncCoordinator = RunSyncCoordinatorSpy()
+        let runManager = CompanionRunManager(locationManager: locationManager, syncCoordinator: syncCoordinator)
+
+        runManager.retrySync()
+        await Task.yield()
+
+        XCTAssertEqual(syncCoordinator.retryCalls, 1)
+    }
+
+    @MainActor
+    func testCompletedSyncPublishesSubmissionResult() {
+        let locationManager = LocationManagerSpy()
+        let syncCoordinator = RunSyncCoordinatorSpy()
+        let runManager = CompanionRunManager(locationManager: locationManager, syncCoordinator: syncCoordinator)
+        let result = makeRunSubmissionResultFixture(runId: "run-completed")
+
+        syncCoordinator.emit(state: .completed(result))
+
+        XCTAssertEqual(runManager.submissionResult?.run.id, "run-completed")
     }
 
     private func isState(_ lhs: RunState, _ rhs: RunState) -> Bool {
@@ -82,5 +111,35 @@ private final class LocationManagerSpy: LocationManager {
 
     func emit(_ location: CLLocation) {
         self.location = location
+    }
+}
+
+@MainActor
+private final class RunSyncCoordinatorSpy: RunSyncCoordinating {
+    var state: CompanionSyncState = .running
+    var onStateChange: ((CompanionSyncState) -> Void)?
+
+    private(set) var finishRunCalls = 0
+    private(set) var retryCalls = 0
+
+    func finishRun(
+        startedAt: Date,
+        endedAt: Date,
+        duration: TimeInterval,
+        distanceMeters: Double,
+        locations: [CLLocation]
+    ) async {
+        finishRunCalls += 1
+    }
+
+    func retry() async {
+        retryCalls += 1
+    }
+
+    func cancel() {}
+
+    func emit(state: CompanionSyncState) {
+        self.state = state
+        onStateChange?(state)
     }
 }

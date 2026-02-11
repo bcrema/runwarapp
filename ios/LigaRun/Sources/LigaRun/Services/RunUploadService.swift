@@ -3,6 +3,7 @@ import OSLog
 
 protocol RunUploadServiceProtocol: Sendable {
     func uploadPendingSessions() async -> [RunSubmissionResult]
+    func upload(_ session: RunSessionRecord) async throws -> RunSubmissionResult
 }
 
 final class RunUploadService: RunUploadServiceProtocol {
