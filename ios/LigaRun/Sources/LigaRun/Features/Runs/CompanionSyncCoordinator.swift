@@ -79,6 +79,20 @@ enum RunSyncCoordinatorError: LocalizedError {
     }
 }
 
+private actor FirstUploadResultResolver {
+    private var continuation: CheckedContinuation<RunSubmissionResult, Error>?
+
+    init(_ continuation: CheckedContinuation<RunSubmissionResult, Error>) {
+        self.continuation = continuation
+    }
+
+    func resumeIfNeeded(with result: Result<RunSubmissionResult, Error>) {
+        guard let continuation else { return }
+        self.continuation = nil
+        continuation.resume(with: result)
+    }
+}
+
 @MainActor
 final class RunSyncCoordinator: RunSyncCoordinating {
     private(set) var state: CompanionSyncState = .running {
@@ -176,22 +190,35 @@ final class RunSyncCoordinator: RunSyncCoordinating {
     }
 
     private func uploadWithTimeout(_ session: RunSessionRecord) async throws -> RunSubmissionResult {
-        try await withThrowingTaskGroup(of: RunSubmissionResult.self) { group in
-            group.addTask { [uploadService] in
-                try await uploadService.upload(session)
-            }
-            group.addTask { [timeout] in
-                let nanos = UInt64(timeout * 1_000_000_000)
-                try await Task.sleep(nanoseconds: nanos)
-                throw RunSyncCoordinatorError.timeout
+        let nanos = UInt64(timeout * 1_000_000_000)
+        var uploadTask: Task<Void, Never>?
+        var timeoutTask: Task<Void, Never>?
+
+        let result = try await withCheckedThrowingContinuation { continuation in
+            let resolver = FirstUploadResultResolver(continuation)
+
+            uploadTask = Task { @MainActor [uploadService] in
+                do {
+                    let uploadResult = try await uploadService.upload(session)
+                    await resolver.resumeIfNeeded(with: .success(uploadResult))
+                } catch {
+                    await resolver.resumeIfNeeded(with: .failure(error))
+                }
             }
 
-            guard let firstFinished = try await group.next() else {
-                throw RunSyncCoordinatorError.timeout
+            timeoutTask = Task { [nanos] in
+                do {
+                    try await Task.sleep(nanoseconds: nanos)
+                    await resolver.resumeIfNeeded(with: .failure(RunSyncCoordinatorError.timeout))
+                } catch {
+                    // Task was cancelled after upload finished first.
+                }
             }
-            group.cancelAll()
-            return firstFinished
         }
+
+        uploadTask?.cancel()
+        timeoutTask?.cancel()
+        return result
     }
 
     private func transition(_ event: CompanionSyncEvent) {

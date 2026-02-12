@@ -83,7 +83,7 @@
 		36317B4036D4EC17DAAE3D05 /* SessionStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SessionStore.swift; sourceTree = "<group>"; };
 		3CF5C9F70C59A082A68337D8 /* RunSyncCoordinatorTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RunSyncCoordinatorTests.swift; sourceTree = "<group>"; };
 		3DBD6363768644A41C6EDDC6 /* SubmissionResultPresentation.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SubmissionResultPresentation.swift; sourceTree = "<group>"; };
-		4460EDCA5A8392F6B0412BD1 /* LigaRun.app */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = wrapper.application; path = LigaRun.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		4460EDCA5A8392F6B0412BD1 /* LigaRun.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = LigaRun.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		4F90AB19C8B78C9A9BC20A01 /* HealthKitRunSyncService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HealthKitRunSyncService.swift; sourceTree = "<group>"; };
 		4F97C7EC05598F2091E1DA28 /* StrategicMapViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StrategicMapViewModel.swift; sourceTree = "<group>"; };
 		4FCA68DFEAEAEFFEEA94FAC3 /* CompanionRunManagerTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CompanionRunManagerTests.swift; sourceTree = "<group>"; };
@@ -94,7 +94,7 @@
 		687A5818C9839BD446B9CCBA /* BandeirasViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BandeirasViewModel.swift; sourceTree = "<group>"; };
 		68A46DA068E959FFAEE24347 /* AuthViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AuthViewModel.swift; sourceTree = "<group>"; };
 		6A2084EF36D9101EA1AAC5A0 /* KeychainStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = KeychainStore.swift; sourceTree = "<group>"; };
-		6D90C1473BE29FA146C52610 /* LigaRunTests.xctest */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = wrapper.cfbundle; path = LigaRunTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
+		6D90C1473BE29FA146C52610 /* LigaRunTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = LigaRunTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		77D7169C2E064CB5E6F569DB /* BandeirasView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BandeirasView.swift; sourceTree = "<group>"; };
 		788CCFC00DB261E33D463C15 /* RunsViewModelTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RunsViewModelTests.swift; sourceTree = "<group>"; };
 		7CF9246D57FA43D354D503E3 /* TestFixtures.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TestFixtures.swift; sourceTree = "<group>"; };
@@ -384,7 +384,7 @@
 			isa = PBXProject;
 			attributes = {
 				BuildIndependentTargetsInParallel = YES;
-				LastUpgradeCheck = 1500;
+				LastUpgradeCheck = 1430;
 			};
 			buildConfigurationList = FF89B698C33EEECA18A3DAC1 /* Build configuration list for PBXProject "LigaRun" */;
 			compatibilityVersion = "Xcode 14.0";
@@ -399,7 +399,6 @@
 			packageReferences = (
 				08A1DAF369C22FABD28B48AE /* XCRemoteSwiftPackageReference "mapbox-maps-ios" */,
 			);
-			preferredProjectObjectVersion = 77;
 			projectDirPath = "";
 			projectRoot = "";
 			targets = (
@@ -501,6 +500,7 @@
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CODE_SIGN_ENTITLEMENTS = Config/LigaRun.entitlements;
 				CODE_SIGN_IDENTITY = "iPhone Developer";
+				DEVELOPMENT_TEAM = D3TUSJSBC5;
 				INFOPLIST_FILE = Resources/Info.plist;
 				IPHONEOS_DEPLOYMENT_TARGET = 16.0;
 				LD_RUNPATH_SEARCH_PATHS = (
@@ -549,7 +549,6 @@
 				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
 				COPY_PHASE_STRIP = NO;
 				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
-				DEVELOPMENT_TEAM = D3TUSJSBC5;
 				ENABLE_NS_ASSERTIONS = NO;
 				ENABLE_STRICT_OBJC_MSGSEND = YES;
 				GCC_C_LANGUAGE_STANDARD = gnu11;
@@ -578,6 +577,7 @@
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CODE_SIGN_ENTITLEMENTS = Config/LigaRun.entitlements;
 				CODE_SIGN_IDENTITY = "iPhone Developer";
+				DEVELOPMENT_TEAM = D3TUSJSBC5;
 				INFOPLIST_FILE = Resources/Info.plist;
 				IPHONEOS_DEPLOYMENT_TARGET = 16.0;
 				LD_RUNPATH_SEARCH_PATHS = (
@@ -595,6 +595,7 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				BUNDLE_LOADER = "$(TEST_HOST)";
+				DEVELOPMENT_TEAM = D3TUSJSBC5;
 				INFOPLIST_FILE = Tests/Info.plist;
 				IPHONEOS_DEPLOYMENT_TARGET = 16.0;
 				LD_RUNPATH_SEARCH_PATHS = (
@@ -613,6 +614,7 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				BUNDLE_LOADER = "$(TEST_HOST)";
+				DEVELOPMENT_TEAM = D3TUSJSBC5;
 				INFOPLIST_FILE = Tests/Info.plist;
 				IPHONEOS_DEPLOYMENT_TARGET = 16.0;
 				LD_RUNPATH_SEARCH_PATHS = (
@@ -662,7 +664,6 @@
 				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
 				COPY_PHASE_STRIP = NO;
 				DEBUG_INFORMATION_FORMAT = dwarf;
-				DEVELOPMENT_TEAM = D3TUSJSBC5;
 				ENABLE_STRICT_OBJC_MSGSEND = YES;
 				ENABLE_TESTABILITY = YES;
 				GCC_C_LANGUAGE_STANDARD = gnu11;
