@@ -5,8 +5,7 @@ import OSLog
 @MainActor
 protocol RunUploadServiceProtocol {
     func uploadPendingSessions() async -> [RunSubmissionResult]
-    func enqueueHealthKitSync(startDate: Date, endDate: Date) async
-    func enqueueHealthKitSync(startDate: Date, endDate: Date, timeout: TimeInterval) async
+    func upload(_ session: RunSessionRecord) async throws -> RunSubmissionResult
 }
 
 extension RunUploadServiceProtocol {

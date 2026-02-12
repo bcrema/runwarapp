@@ -92,4 +92,8 @@ private struct RunUploadServiceStub: RunUploadServiceProtocol {
     func uploadPendingSessions() async -> [RunSubmissionResult] {
         results
     }
+
+    func upload(_ session: RunSessionRecord) async throws -> RunSubmissionResult {
+        throw APIError(error: "INTERNAL_ERROR", message: "Not implemented for this test", details: nil)
+    }
 }

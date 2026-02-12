@@ -119,6 +119,7 @@ struct RunsView: View {
         }
         .task { @MainActor in
             await viewModel.load()
+            consumePendingSubmissionResultIfNeeded()
         }
         .onAppear {
             Task { @MainActor in
@@ -131,6 +132,9 @@ struct RunsView: View {
                     await healthKitStore.refreshStatus()
                 }
             }
+        }
+        .onChange(of: session.pendingSubmissionResult?.id) { _ in
+            consumePendingSubmissionResultIfNeeded()
         }
         .alert("Erro", isPresented: Binding(get: {
             viewModel.errorMessage != nil
@@ -188,6 +192,12 @@ struct RunsView: View {
     private func openSettings() {
         guard let url = URL(string: UIApplication.openSettingsURLString) else { return }
         openURL(url)
+    }
+
+    private func consumePendingSubmissionResultIfNeeded() {
+        guard let pendingResult = session.pendingSubmissionResult else { return }
+        viewModel.submissionResult = pendingResult
+        session.pendingSubmissionResult = nil
     }
 }
 
