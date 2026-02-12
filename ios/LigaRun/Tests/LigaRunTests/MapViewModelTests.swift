@@ -53,6 +53,63 @@ final class MapViewModelTests: XCTestCase {
     }
 
     @MainActor
+    func testFocusOnTileUpsertsLatestTileState() async {
+        let staleTile = makeTileFixture(id: "tile-focus", shield: 10)
+        let refreshedTile = makeTileFixture(id: "tile-focus", shield: 88, isInDispute: true)
+        let api = MapAPISpy(
+            tilesResult: .success([staleTile]),
+            disputedResult: .success([]),
+            tileResult: .success(refreshedTile)
+        )
+        let viewModel = MapViewModel(session: SessionStore(), api: api)
+
+        await viewModel.loadTiles(bounds: (minLat: -26, minLng: -50, maxLat: -25, maxLng: -49))
+        await viewModel.focusOnTile(id: "tile-focus")
+
+        XCTAssertEqual(viewModel.tiles.count, 1)
+        XCTAssertEqual(viewModel.tiles.first?.shield, 88)
+        XCTAssertTrue(viewModel.tiles.first?.isInDispute ?? false)
+    }
+
+    @MainActor
+    func testRefreshVisibleTilesUsesLastBounds() async {
+        let tiles = [makeTileFixture(id: "tile-a"), makeTileFixture(id: "tile-b")]
+        let api = MapAPISpy(
+            tilesResult: .success(tiles),
+            disputedResult: .success([]),
+            tileResult: .success(makeTileFixture())
+        )
+        let viewModel = MapViewModel(session: SessionStore(), api: api)
+        let bounds = (minLat: -26.5, minLng: -50.5, maxLat: -25.5, maxLng: -49.5)
+
+        await viewModel.loadTiles(bounds: bounds)
+        await viewModel.refreshVisibleTiles()
+
+        XCTAssertEqual(api.getTilesCallCount, 2)
+        XCTAssertEqual(api.lastBounds?.minLat, bounds.minLat)
+        XCTAssertEqual(api.lastBounds?.maxLng, bounds.maxLng)
+    }
+
+    @MainActor
+    func testTileStateSummaryCountsNeutralOwnedAndDisputed() async {
+        let tiles = [
+            makeTileFixture(id: "neutral", ownerType: nil, ownerName: nil, ownerColor: nil),
+            makeTileFixture(id: "owned", ownerType: .solo),
+            makeTileFixture(id: "disputed", ownerType: .bandeira, isInDispute: true)
+        ]
+        let api = MapAPISpy(
+            tilesResult: .success(tiles),
+            disputedResult: .success([]),
+            tileResult: .success(makeTileFixture())
+        )
+        let viewModel = MapViewModel(session: SessionStore(), api: api)
+
+        await viewModel.loadTiles(bounds: (minLat: -26, minLng: -50, maxLat: -25, maxLng: -49))
+
+        XCTAssertEqual(viewModel.tileStateSummary, TileStateSummary(neutral: 1, owned: 1, disputed: 1))
+    }
+
+    @MainActor
     func testLoadTilesErrorSetsMessage() async {
         let api = MapAPISpy(
             tilesResult: .failure(APIError(error: "MAP_ERROR", message: "Falha no mapa", details: nil)),
@@ -72,6 +129,8 @@ private final class MapAPISpy: MapAPIProviding {
     let tilesResult: Result<[Tile], Error>
     let disputedResult: Result<[Tile], Error>
     let tileResult: Result<Tile, Error>
+    private(set) var getTilesCallCount = 0
+    private(set) var lastBounds: (minLat: Double, minLng: Double, maxLat: Double, maxLng: Double)?
 
     init(
         tilesResult: Result<[Tile], Error>,
@@ -84,7 +143,9 @@ private final class MapAPISpy: MapAPIProviding {
     }
 
     func getTiles(bounds: (minLat: Double, minLng: Double, maxLat: Double, maxLng: Double)) async throws -> [Tile] {
-        try tilesResult.get()
+        getTilesCallCount += 1
+        lastBounds = bounds
+        return try tilesResult.get()
     }
 
     func getDisputedTiles() async throws -> [Tile] {
