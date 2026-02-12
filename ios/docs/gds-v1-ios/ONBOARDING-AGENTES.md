@@ -2,16 +2,19 @@
 
 ## Objetivo
 Fornecer prompts curtos para paralelizar execucao com varios agentes mantendo escopo, dependencia e criterio de qualidade.
+Este arquivo e operacional; o plano mestre de rodadas/dependencias fica em `ios/docs/gds-v1-ios/TAREFAS-AGENTES.md`.
 
 ## Regras gerais para todos os agentes
 1. Ler primeiro:
    - `ios/docs/gds-v1-ios/00-decisoes-v1-ios.md`
    - `ios/docs/gds-v1-ios/README.md`
+   - `ios/docs/gds-v1-ios/TAREFAS-AGENTES.md`
    - `ios/docs/gds-v1-ios/STATUS.md`
 2. Trabalhar apenas no passo atribuido.
 3. Nao alterar backend.
 4. Incluir testes da propria etapa.
 5. Atualizar `STATUS.md` ao iniciar e ao concluir.
+   - obrigatorio incluir: `status`, `resumo tecnico`, `branch/worktree`, `comandos de teste e resultado`.
 6. Padrao de execucao: `1 agente = 1 branch = 1 worktree`.
 
 ## Setup obrigatorio com worktree
