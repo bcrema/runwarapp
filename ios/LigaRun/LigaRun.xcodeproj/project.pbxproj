@@ -384,7 +384,7 @@
 			isa = PBXProject;
 			attributes = {
 				BuildIndependentTargetsInParallel = YES;
-				LastUpgradeCheck = 1430;
+				LastUpgradeCheck = 1500;
 			};
 			buildConfigurationList = FF89B698C33EEECA18A3DAC1 /* Build configuration list for PBXProject "LigaRun" */;
 			compatibilityVersion = "Xcode 14.0";
