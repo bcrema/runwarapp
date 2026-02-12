@@ -28,11 +28,11 @@ func submissionTerritoryImpact(for result: RunSubmissionResult) -> SubmissionTer
 func submissionTerritoryImpactTitle(for impact: SubmissionTerritoryImpact) -> String {
     switch impact {
     case .conquest:
-        return "Conquistou territorio"
+        return "Conquistou território"
     case .attack:
-        return "Atacou territorio rival"
+        return "Atacou território rival"
     case .defense:
-        return "Defendeu territorio"
+        return "Defendeu território"
     case .noEffect:
         return "Sem impacto territorial"
     }

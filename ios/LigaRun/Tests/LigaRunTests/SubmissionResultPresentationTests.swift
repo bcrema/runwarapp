@@ -79,8 +79,8 @@ final class SubmissionResultPresentationTests: XCTestCase {
             reasons,
             [
                 "Tile em cooldown; ataque bloqueado no momento.",
-                "Distancia muito curta (minimo 1.2km)",
-                "Padrao suspeito detectado (high_speed_spike)"
+                "Distância muito curta (mínimo 1.2km)",
+                "Padrão suspeito detectado (high_speed_spike)"
             ]
         )
     }

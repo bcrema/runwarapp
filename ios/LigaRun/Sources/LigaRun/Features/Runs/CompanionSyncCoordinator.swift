@@ -55,6 +55,7 @@ extension CompanionSyncState {
 protocol RunSyncCoordinating: AnyObject {
     var state: CompanionSyncState { get }
     var onStateChange: ((CompanionSyncState) -> Void)? { get set }
+    func reset()
 
     func finishRun(
         startedAt: Date,
@@ -101,6 +102,12 @@ final class RunSyncCoordinator: RunSyncCoordinating {
         self.timeout = timeout
     }
 
+    func reset() {
+        cancelCurrentTask()
+        pendingSession = nil
+        transition(.reset)
+    }
+
     func finishRun(
         startedAt: Date,
         endedAt: Date,
@@ -109,6 +116,7 @@ final class RunSyncCoordinator: RunSyncCoordinating {
         locations: [CLLocation]
     ) async {
         cancelCurrentTask()
+        transition(.reset)
         transition(.runStopped)
 
         let session = RunSessionRecord(

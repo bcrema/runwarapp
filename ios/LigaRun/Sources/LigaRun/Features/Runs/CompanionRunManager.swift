@@ -58,7 +58,8 @@ final class CompanionRunManager: ObservableObject {
         loopProgress = 0
         locations = []
         submissionResult = nil
-        syncState = .running
+        syncCoordinator.reset()
+        syncState = syncCoordinator.state
         startTime = Date()
         locationManager.requestPermission()
         locationManager.startTracking()

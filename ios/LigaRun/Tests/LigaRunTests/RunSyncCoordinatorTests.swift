@@ -31,6 +31,50 @@ final class RunSyncCoordinatorTests: XCTestCase {
         XCTAssertEqual(uploadCalls, 1)
     }
 
+
+    @MainActor
+    func testFinishRunResetsStateBeforeStartingNewPipeline() async {
+        let secondResult = makeRunSubmissionResultFixture(runId: "run-second")
+        let uploadService = RunUploadServiceStub(
+            outcomes: [
+                .failure(APIError(error: "INTERNAL_ERROR", message: "Boom", details: nil)),
+                .success(secondResult)
+            ]
+        )
+        let coordinator = RunSyncCoordinator(
+            runSessionStore: RunSessionStore(fileURL: temporaryStoreURL()),
+            uploadService: uploadService,
+            timeout: 1
+        )
+
+        await coordinator.finishRun(
+            startedAt: Date().addingTimeInterval(-300),
+            endedAt: Date(),
+            duration: 300,
+            distanceMeters: 1300,
+            locations: makeLocations()
+        )
+
+        guard case .failed = coordinator.state else {
+            return XCTFail("Expected failed state after first upload")
+        }
+
+        await coordinator.finishRun(
+            startedAt: Date().addingTimeInterval(-150),
+            endedAt: Date(),
+            duration: 150,
+            distanceMeters: 900,
+            locations: makeLocations()
+        )
+
+        guard case .completed(let result) = coordinator.state else {
+            return XCTFail("Expected completed state after second finish")
+        }
+        XCTAssertEqual(result.run.id, secondResult.run.id)
+        let uploadCalls = await uploadService.recordedUploadCalls()
+        XCTAssertEqual(uploadCalls, 2)
+    }
+
     @MainActor
     func testFailureTransitionsToErrorAndRetryRecovers() async {
         let expectedResult = makeRunSubmissionResultFixture(runId: "run-sync-retry")

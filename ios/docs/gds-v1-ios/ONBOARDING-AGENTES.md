@@ -7,6 +7,7 @@ Fornecer prompts curtos para paralelizar execucao com varios agentes mantendo es
 1. Ler primeiro:
    - `ios/docs/gds-v1-ios/00-decisoes-v1-ios.md`
    - `ios/docs/gds-v1-ios/README.md`
+   - `ios/docs/gds-v1-ios/TAREFAS-AGENTES.md`
    - `ios/docs/gds-v1-ios/STATUS.md`
 2. Trabalhar apenas no passo atribuido.
 3. Nao alterar backend.

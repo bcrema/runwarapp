@@ -13,6 +13,7 @@ final class CompanionRunManagerTests: XCTestCase {
         XCTAssertTrue(isState(runManager.state, .running))
         XCTAssertEqual(locationManager.requestPermissionCalls, 1)
         XCTAssertEqual(locationManager.startTrackingCalls, 1)
+        XCTAssertEqual(syncCoordinator.resetCalls, 1)
 
         runManager.pause()
         XCTAssertTrue(isState(runManager.state, .paused))
@@ -121,6 +122,13 @@ private final class RunSyncCoordinatorSpy: RunSyncCoordinating {
 
     private(set) var finishRunCalls = 0
     private(set) var retryCalls = 0
+    private(set) var resetCalls = 0
+
+    func reset() {
+        resetCalls += 1
+        state = .running
+        onStateChange?(state)
+    }
 
     func finishRun(
         startedAt: Date,
