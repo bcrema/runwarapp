@@ -170,7 +170,8 @@ private enum UploadOutcome {
     case failure(Error)
 }
 
-private actor RunUploadServiceStub: RunUploadServiceProtocol {
+@MainActor
+private final class RunUploadServiceStub: RunUploadServiceProtocol {
     private var outcomes: [UploadOutcome]
     private var uploadCalls = 0
 
