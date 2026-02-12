@@ -12,7 +12,7 @@ final class SubmissionResultPresentationTests: XCTestCase {
     func testTranslateSubmissionReasonFraudFlag() {
         XCTAssertEqual(
             translateSubmissionReason("fraud_flag:high_speed_spike"),
-            "Padrao suspeito detectado (high_speed_spike)"
+            "Padrão suspeito detectado (high_speed_spike)"
         )
     }
 
@@ -79,8 +79,8 @@ final class SubmissionResultPresentationTests: XCTestCase {
             reasons,
             [
                 "Tile em cooldown; ataque bloqueado no momento.",
-                "Distancia muito curta (minimo 1.2km)",
-                "Padrao suspeito detectado (high_speed_spike)"
+                "Distância muito curta (mínimo 1.2km)",
+                "Padrão suspeito detectado (high_speed_spike)"
             ]
         )
     }

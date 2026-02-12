@@ -12,7 +12,7 @@ func makeRunFixture(
 ) -> Run {
     let formatter = ISO8601DateFormatter()
     let startDate = Date()
-    let endDate = startDate.addingTimeInterval(1800)
+    let endDate = startDate.addingTimeInterval(duration)
 
     return Run(
         id: id,
@@ -22,7 +22,7 @@ func makeRunFixture(
         startTime: formatter.string(from: startDate),
         endTime: formatter.string(from: endDate),
         isLoopValid: isLoopValid,
-        loopDistance: 5000,
+        loopDistance: distance,
         territoryAction: territoryAction,
         targetTileId: targetTileId,
         isValidForTerritory: isLoopValid,

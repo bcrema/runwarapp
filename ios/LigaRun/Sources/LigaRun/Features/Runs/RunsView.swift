@@ -352,9 +352,9 @@ struct SubmissionResultView: View {
         case .attack:
             return "A corrida causou impacto ofensivo no tile alvo."
         case .defense:
-            return "A corrida reforcou a defesa do tile alvo."
+            return "A corrida reforçou a defesa do tile alvo."
         case .noEffect:
-            return "A corrida foi salva, mas nao alterou territorio."
+            return "A corrida foi salva, mas não alterou território."
         }
     }
 
@@ -382,7 +382,7 @@ struct SubmissionResultView: View {
                 Text(submissionTerritoryImpactTitle(for: territoryImpact))
                     .font(.headline)
                 Spacer()
-                Text(result.loopValidation.isValid ? "Loop valido" : "Loop invalido")
+                Text(result.loopValidation.isValid ? "Loop válido" : "Loop inválido")
                     .font(.caption.bold())
                     .foregroundColor(result.loopValidation.isValid ? .green : .red)
             }
@@ -409,7 +409,7 @@ struct SubmissionResultView: View {
         let columns = [GridItem(.flexible()), GridItem(.flexible())]
 
         return LazyVGrid(columns: columns, spacing: 10) {
-            metricCell(title: "Distancia", value: String(format: "%.2f km", result.run.distance))
+            metricCell(title: "Distância", value: String(format: "%.2f km", result.run.distance))
             metricCell(title: "Tempo", value: submissionRunDurationLabel(for: result))
             metricCell(title: "Tile foco", value: tileFocusId ?? "—")
             metricCell(title: "Escudo", value: submissionShieldDeltaLabel(for: result))
@@ -437,7 +437,7 @@ struct SubmissionResultView: View {
             Text("Treino salvo sem efeito competitivo")
                 .font(.subheadline.bold())
 
-            Text("Veja abaixo os motivos processados para esta submissao:")
+            Text("Veja abaixo os motivos processados para esta submissão:")
                 .font(.caption)
                 .foregroundColor(.secondary)
 
