@@ -192,9 +192,9 @@ struct ActiveRunHUD: View {
 
     private var territoryStatusText: String {
         guard let tile = currentTile else {
-            return "Buscando territorio..."
+            return "Buscando território..."
         }
-        let owner = tile.ownerName ?? "Territorio neutro"
+        let owner = tile.ownerName ?? "Território neutro"
         var parts = ["\(owner)", "Escudo \(tile.shield)%"]
         if tile.isInDispute {
             parts.append("Em disputa")
@@ -210,7 +210,7 @@ struct ActiveRunHUD: View {
                 .padding(.top, 12)
 
             HStack(spacing: 32) {
-                metricBlock(value: runManager.formattedDistance, label: "DISTANCIA")
+                metricBlock(value: runManager.formattedDistance, label: "DISTÂNCIA")
                 metricBlock(value: runManager.formattedPace, label: "PACE")
             }
 
