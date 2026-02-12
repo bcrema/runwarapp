@@ -1,6 +1,12 @@
 import Foundation
 import CoreLocation
 
+struct TileStateSummary: Equatable {
+    let neutral: Int
+    let owned: Int
+    let disputed: Int
+}
+
 @MainActor
 final class MapViewModel: ObservableObject {
     @Published var tiles: [Tile] = []
@@ -10,9 +16,23 @@ final class MapViewModel: ObservableObject {
     @Published var errorMessage: String?
 
     private let api: MapAPIProviding
+    private var lastVisibleBounds: (minLat: Double, minLng: Double, maxLat: Double, maxLng: Double)?
 
     init(session: SessionStore, api: MapAPIProviding? = nil) {
         self.api = api ?? session.api
+    }
+
+    var tileStateSummary: TileStateSummary {
+        let counts = tiles.reduce(into: (neutral: 0, owned: 0, disputed: 0)) { result, tile in
+            if tile.isInDispute {
+                result.disputed += 1
+            } else if tile.ownerType != nil {
+                result.owned += 1
+            } else {
+                result.neutral += 1
+            }
+        }
+        return TileStateSummary(neutral: counts.neutral, owned: counts.owned, disputed: counts.disputed)
     }
 
     func loadTiles(bounds: (minLat: Double, minLng: Double, maxLat: Double, maxLng: Double)) async {
@@ -22,9 +42,15 @@ final class MapViewModel: ObservableObject {
 
         do {
             tiles = try await api.getTiles(bounds: bounds)
+            lastVisibleBounds = bounds
         } catch {
             errorMessage = error.localizedDescription
         }
+    }
+
+    func refreshVisibleTiles() async {
+        guard let lastVisibleBounds else { return }
+        await loadTiles(bounds: lastVisibleBounds)
     }
 
     func refreshDisputed() async {
@@ -39,8 +65,17 @@ final class MapViewModel: ObservableObject {
         do {
             let tile = try await api.getTile(id: id)
             focusCoordinate = CLLocationCoordinate2D(latitude: tile.lat, longitude: tile.lng)
+            upsert(tile: tile)
         } catch {
             errorMessage = error.localizedDescription
         }
+    }
+
+    private func upsert(tile: Tile) {
+        if let existingIndex = tiles.firstIndex(where: { $0.id == tile.id }) {
+            tiles[existingIndex] = tile
+            return
+        }
+        tiles.insert(tile, at: 0)
     }
 }

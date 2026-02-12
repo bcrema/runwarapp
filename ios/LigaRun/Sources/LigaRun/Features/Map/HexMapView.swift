@@ -222,9 +222,23 @@ struct HexMapView: UIViewRepresentable {
             var feature = Feature(geometry: .polygon(polygon))
             feature.identifier = .string(tile.id)
 
-            let fillColor = tile.ownerColor ?? "#6b7280"
-            let strokeColor = tile.isInDispute ? "#f59e0b" : (tile.ownerColor ?? "#ffffff")
-            let fillOpacity: Double = tile.ownerType == nil ? 0.1 : 0.4
+            let fillColor: String
+            let strokeColor: String
+            let fillOpacity: Double
+
+            if tile.isInDispute {
+                fillColor = tile.ownerColor ?? "#f59e0b"
+                strokeColor = "#f97316"
+                fillOpacity = 0.55
+            } else if tile.ownerType == nil {
+                fillColor = "#6b7280"
+                strokeColor = "#cbd5e1"
+                fillOpacity = 0.18
+            } else {
+                fillColor = tile.ownerColor ?? "#22c55e"
+                strokeColor = "#ffffff"
+                fillOpacity = 0.40
+            }
 
             feature.properties = [
                 "fillColor": .string(fillColor),

@@ -41,3 +41,4 @@ Use `STATUS.md` para acompanhamento diario e `ONBOARDING-AGENTES.md` para copiar
 ## Arquivos de coordenacao
 1. `ios/docs/gds-v1-ios/STATUS.md`
 2. `ios/docs/gds-v1-ios/ONBOARDING-AGENTES.md`
+3. `ios/docs/gds-v1-ios/TAREFAS-AGENTES.md`
