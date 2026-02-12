@@ -3,7 +3,8 @@
 ## Visao geral
 Este pacote organiza a entrega do GDS v1.0 iOS em passos independentes para execucao paralela por varios agentes.
 Cada arquivo `01` a `09` representa um passo com escopo, entregaveis, arquivos impactados, testes e criterio de pronto.
-Use `STATUS.md` para acompanhamento diario e `ONBOARDING-AGENTES.md` para copiar prompts de execucao por agente.
+Use `TAREFAS-AGENTES.md` como plano mestre de rodadas/dependencias.
+Use `STATUS.md` para acompanhamento diario e `ONBOARDING-AGENTES.md` para prompts operacionais.
 
 ## Estrategia de paralelizacao (worktree)
 1. Padrao obrigatorio: `1 agente = 1 branch = 1 worktree`.
@@ -39,6 +40,6 @@ Use `STATUS.md` para acompanhamento diario e `ONBOARDING-AGENTES.md` para copiar
 5. PR em branch de feature, sem merge direto na `main`.
 
 ## Arquivos de coordenacao
-1. `ios/docs/gds-v1-ios/STATUS.md`
-2. `ios/docs/gds-v1-ios/ONBOARDING-AGENTES.md`
-3. `ios/docs/gds-v1-ios/TAREFAS-AGENTES.md`
+1. `ios/docs/gds-v1-ios/TAREFAS-AGENTES.md` (plano mestre)
+2. `ios/docs/gds-v1-ios/STATUS.md`
+3. `ios/docs/gds-v1-ios/ONBOARDING-AGENTES.md`
