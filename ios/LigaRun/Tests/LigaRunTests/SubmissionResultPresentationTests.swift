@@ -12,7 +12,7 @@ final class SubmissionResultPresentationTests: XCTestCase {
     func testTranslateSubmissionReasonFraudFlag() {
         XCTAssertEqual(
             translateSubmissionReason("fraud_flag:high_speed_spike"),
-            "Padrão suspeito detectado (high_speed_spike)"
+            "Padrao suspeito detectado (high_speed_spike)"
         )
     }
 

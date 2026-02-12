@@ -84,25 +84,25 @@ func submissionResultReasons(for result: RunSubmissionResult) -> [String] {
 func translateSubmissionReason(_ reason: String) -> String {
     if reason.hasPrefix("fraud_flag:") {
         let flag = reason.replacingOccurrences(of: "fraud_flag:", with: "")
-        return "Padrão suspeito detectado (\(flag))"
+        return "Padrao suspeito detectado (\(flag))"
     }
 
     let translations: [String: String] = [
-        "distance_too_short": "Distância muito curta (mínimo 1.2km)",
-        "duration_too_short": "Duração muito curta (mínimo 7 minutos)",
-        "loop_not_closed": "Loop não fechado (máximo 40m entre início e fim)",
-        "insufficient_tile_coverage": "Cobertura insuficiente do tile (mínimo 60%)",
-        "fraud_detected": "Padrão suspeito detectado",
-        "outside_game_area": "Fora da área do jogo (Curitiba)",
-        "no_primary_tile": "Não foi possível determinar um tile principal para essa corrida.",
-        "user_daily_cap_reached": "Limite diário de ações atingido.",
-        "bandeira_daily_cap_reached": "Limite diário de ações da bandeira atingido.",
-        "cannot_determine_action": "Não foi possível determinar a ação (conquista/ataque/defesa).",
-        "tile_already_owned": "Tile já possui dono.",
-        "cannot_attack_neutral": "Não é possível atacar um tile neutro.",
-        "cannot_attack_own_tile": "Não é possível atacar o próprio tile.",
+        "distance_too_short": "Distancia muito curta (minimo 1.2km)",
+        "duration_too_short": "Duracao muito curta (minimo 7 minutos)",
+        "loop_not_closed": "Loop nao fechado (maximo 40m entre inicio e fim)",
+        "insufficient_tile_coverage": "Cobertura insuficiente do tile (minimo 60%)",
+        "fraud_detected": "Padrao suspeito detectado",
+        "outside_game_area": "Fora da area do jogo (Curitiba)",
+        "no_primary_tile": "Nao foi possivel determinar um tile principal para essa corrida.",
+        "user_daily_cap_reached": "Limite diario de acoes atingido.",
+        "bandeira_daily_cap_reached": "Limite diario de acoes da bandeira atingido.",
+        "cannot_determine_action": "Nao foi possivel determinar a acao (conquista/ataque/defesa).",
+        "tile_already_owned": "Tile ja possui dono.",
+        "cannot_attack_neutral": "Nao e possivel atacar um tile neutro.",
+        "cannot_attack_own_tile": "Nao e possivel atacar o proprio tile.",
         "tile_in_cooldown": "Tile em cooldown; ataque bloqueado no momento.",
-        "cannot_defend_rival_tile": "Não é possível defender um tile que não é seu."
+        "cannot_defend_rival_tile": "Nao e possivel defender um tile que nao e seu."
     ]
     return translations[reason] ?? reason
 }

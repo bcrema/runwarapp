@@ -39,7 +39,7 @@
 | `06` | Agente iOS Social | `feat/ios-gds-06-bandeiras` | `/tmp/runwarapp-wt-06` | |
 | `07` | Agente iOS Profile | `feat/ios-gds-07-perfil` | `../runwarapp-wt-07` | |
 | `08` | Agente iOS QA | `feat/ios-gds-08-qa-gates` | `../runwarapp-wt-08` | Worktree ativo desta execucao |
-| `09` | Agente iOS Release | `feat/ios-gds-09-hardening` | `../runwarapp-wt-09` | |
+| `09` | Agente iOS Release | `feat/ios-gds-09-hardening` | `/tmp/runwarapp-wt-09` | Rodada final iniciada em 2026-02-11 |
 
 ## Kanban
 
@@ -53,6 +53,7 @@
 
 ### Blocked
 - [ ] `08` Testes QA gates - Dono: `Agente iOS QA` (bloqueio de smoke real por assinatura/provisioning em device)
+- [ ] `09` Hardening release - Dono: `Agente iOS Release` (bloqueio de smoke real em dispositivo por assinatura/provisioning)
 
 ### Done
 - [x] `00` Decisoes V1 iOS registradas
@@ -74,7 +75,20 @@
 | `06` | Done | Agente iOS Social | - | - | 2026-02-06 |
 | `07` | Done | Agente iOS Profile | - | - | 2026-02-06 |
 | `08` | Blocked | Agente iOS QA | paralelo | smoke real bloqueado por assinatura/provisioning do Team `<TEAM_ID>` | 2026-02-06 |
-| `09` | To Do | Agente iOS Release | `03`,`04`,`05`,`06`,`07` | - | 2026-02-05 |
+| `09` | Blocked | Agente iOS Release | `03`,`04`,`05`,`06`,`07` | smoke real em dispositivo bloqueado por assinatura/provisioning do Team `<TEAM_ID>` | 2026-02-11 |
+
+## Controle de rodadas (gate de dependencia)
+| Rodada | Dependencia para liberar | Estado atual |
+|---|---|---|
+| `1` (`01`,`06`,`07`,`08`) | sem dependencia | concluida |
+| `2` (`02`,`04`) | `01` em Done com testes | concluida |
+| `3` (`03`,`05`) | `02` em Done com testes | concluida |
+| `Final` (`09`) | `03`,`04`,`05`,`06`,`07` em Done com testes | em andamento (bloqueada por smoke real em device) |
+
+Regras de operacao:
+1. Cada agente deve atualizar `STATUS.md` no inicio e no fim com `status`, `resumo tecnico`, `branch/worktree`, `comandos de teste e resultado`.
+2. Se houver bloqueio, registrar no `STATUS.md` e pausar o passo.
+3. Nao liberar a rodada seguinte enquanto o gate de dependencia nao estiver em `Done` com testes.
 
 ## Gate de qualidade geral
 - [x] `xcodebuild -scheme LigaRun -destination "${XCODE_DESTINATION:-platform=iOS Simulator,OS=latest,name=iPhone 15}" test` verde no branch final
