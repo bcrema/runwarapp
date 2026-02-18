@@ -48,11 +48,14 @@ class UserService(
         val bandeiraName: String?,
         val role: String,
         val totalRuns: Int,
-        val totalDistance: Double,
+        val totalDistance: Double, // kilometers (iOS compatibility)
+        val totalDistanceMeters: Double,
         val totalTilesConquered: Int
     ) {
         companion object {
-            fun from(user: User) = UserDto(
+            fun from(user: User): UserDto {
+                val totalDistanceMeters = user.totalDistance.toDouble()
+                return UserDto(
                 id = user.id,
                 email = user.email,
                 username = user.username,
@@ -62,9 +65,11 @@ class UserService(
                 bandeiraName = user.bandeira?.name,
                 role = user.role.name,
                 totalRuns = user.totalRuns,
-                totalDistance = user.totalDistance.toDouble(),
+                totalDistance = totalDistanceMeters / 1000.0,
+                totalDistanceMeters = totalDistanceMeters,
                 totalTilesConquered = user.totalTilesConquered
             )
+            }
         }
     }
     

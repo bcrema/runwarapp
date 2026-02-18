@@ -38,7 +38,8 @@ class RunService(
                 val userId: UUID,
                 val origin: RunOrigin,
                 val status: RunStatus,
-                val distance: Double,
+                val distance: Double, // kilometers (iOS compatibility)
+                val distanceMeters: Double,
                 val duration: Int,
                 val startTime: Instant,
                 val endTime: Instant,
@@ -47,7 +48,8 @@ class RunService(
                 val maxLat: Double?,
                 val maxLng: Double?,
                 val isLoopValid: Boolean,
-                val loopDistance: Double?,
+                val loopDistance: Double?, // kilometers (iOS compatibility)
+                val loopDistanceMeters: Double?,
                 val territoryAction: String?,
                 val targetTileId: String?,
                 val isValidForTerritory: Boolean,
@@ -55,13 +57,17 @@ class RunService(
                 val createdAt: Instant
         ) {
                 companion object {
-                        fun from(run: Run) =
-                                RunDto(
+                        fun from(run: Run): RunDto {
+                                val distanceMeters = run.distance.toDouble()
+                                val loopDistanceMeters = run.loopDistance?.toDouble()
+
+                                return RunDto(
                                         id = run.id,
                                         userId = run.user.id,
                                         origin = run.origin,
                                         status = run.status,
-                                        distance = run.distance.toDouble(),
+                                        distance = distanceMeters / 1000.0,
+                                        distanceMeters = distanceMeters,
                                         duration = run.duration,
                                         startTime = run.startTime,
                                         endTime = run.endTime,
@@ -70,19 +76,22 @@ class RunService(
                                         maxLat = run.maxLat,
                                         maxLng = run.maxLng,
                                         isLoopValid = run.isLoopValid,
-                                        loopDistance = run.loopDistance?.toDouble(),
+                                        loopDistance = loopDistanceMeters?.div(1000.0),
+                                        loopDistanceMeters = loopDistanceMeters,
                                         territoryAction = run.territoryAction?.name,
                                         targetTileId = run.targetTile?.id,
                                         isValidForTerritory = run.isValidForTerritory,
                                         fraudFlags = run.fraudFlags,
                                         createdAt = run.createdAt
                                 )
+                        }
                 }
         }
 
         data class RunSubmissionResult(
                 val run: RunDto,
                 val loopValidation: LoopValidator.ValidationResult,
+                val territoryResult: ShieldMechanics.ActionResult?,
                 val turnResult: TurnResult
         )
 
@@ -185,6 +194,7 @@ class RunService(
                 return RunSubmissionResult(
                         run = RunDto.from(savedRun),
                         loopValidation = validation,
+                        territoryResult = territoryResult,
                         turnResult = turnResult
                 )
         }
@@ -263,6 +273,11 @@ class RunService(
 
                 val savedRun = runRepository.save(run)
 
+                // Update user stats for coordinate submissions (same behavior as GPX flow)
+                managedUser.totalRuns++
+                managedUser.totalDistance =
+                        managedUser.totalDistance.add(BigDecimal.valueOf(validation.metrics.loopDistanceMeters))
+
                 val turnResult =
                         buildTurnResult(
                                 validation,
@@ -284,6 +299,7 @@ class RunService(
                 return RunSubmissionResult(
                         run = RunDto.from(savedRun),
                         loopValidation = validation,
+                        territoryResult = territoryResult,
                         turnResult = turnResult
                 )
         }

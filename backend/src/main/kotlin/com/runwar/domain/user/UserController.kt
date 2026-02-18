@@ -5,6 +5,7 @@ import jakarta.validation.constraints.Email
 import jakarta.validation.constraints.NotBlank
 import jakarta.validation.constraints.Size
 import jakarta.servlet.http.HttpServletRequest
+import java.util.UUID
 import org.springframework.http.ResponseEntity
 import org.springframework.security.core.annotation.AuthenticationPrincipal
 import org.springframework.web.bind.annotation.*
@@ -42,8 +43,23 @@ class UserController(
         val password: String
     )
     
+    data class UserResponse(
+        val id: UUID,
+        val email: String,
+        val username: String,
+        val avatarUrl: String?,
+        val isPublic: Boolean,
+        val bandeiraId: UUID?,
+        val bandeiraName: String?,
+        val role: String,
+        val totalRuns: Int,
+        val totalDistance: Double,
+        val totalDistanceMeters: Double,
+        val totalTilesConquered: Int
+    )
+
     data class AuthResponse(
-        val user: UserService.UserDto,
+        val user: UserResponse,
         val accessToken: String,
         val refreshToken: String
     )
@@ -65,7 +81,13 @@ class UserController(
     ): ResponseEntity<AuthResponse> {
         enforceRateLimit("signup", request.email, httpRequest)
         val result = userService.register(request.email, request.username, request.password)
-        return ResponseEntity.ok(AuthResponse(result.user, result.accessToken, result.refreshToken))
+        return ResponseEntity.ok(
+            AuthResponse(
+                user = toUserResponse(result.user),
+                accessToken = result.accessToken,
+                refreshToken = result.refreshToken
+            )
+        )
     }
     
     @PostMapping("/auth/login")
@@ -75,13 +97,25 @@ class UserController(
     ): ResponseEntity<AuthResponse> {
         enforceRateLimit("login", request.email, httpRequest)
         val result = userService.login(request.email, request.password)
-        return ResponseEntity.ok(AuthResponse(result.user, result.accessToken, result.refreshToken))
+        return ResponseEntity.ok(
+            AuthResponse(
+                user = toUserResponse(result.user),
+                accessToken = result.accessToken,
+                refreshToken = result.refreshToken
+            )
+        )
     }
 
     @PostMapping("/auth/refresh")
     fun refresh(@Valid @RequestBody request: RefreshRequest): ResponseEntity<AuthResponse> {
         val result = userService.refresh(request.refreshToken)
-        return ResponseEntity.ok(AuthResponse(result.user, result.accessToken, result.refreshToken))
+        return ResponseEntity.ok(
+            AuthResponse(
+                user = toUserResponse(result.user),
+                accessToken = result.accessToken,
+                refreshToken = result.refreshToken
+            )
+        )
     }
 
     @PostMapping("/auth/logout")
@@ -93,9 +127,9 @@ class UserController(
     // ===== User Endpoints (Authenticated) =====
 
     @GetMapping("/me", "/users/me")
-    fun getMe(@AuthenticationPrincipal principal: UserPrincipal): ResponseEntity<UserService.UserDto> {
+    fun getMe(@AuthenticationPrincipal principal: UserPrincipal): ResponseEntity<UserResponse> {
         val profile = userService.getProfile(principal.user.id)
-        return ResponseEntity.ok(profile)
+        return ResponseEntity.ok(toUserResponse(profile))
     }
     
     data class UpdateProfileRequest(
@@ -109,14 +143,14 @@ class UserController(
     fun updateProfile(
         @AuthenticationPrincipal principal: UserPrincipal,
         @Valid @RequestBody request: UpdateProfileRequest
-    ): ResponseEntity<UserService.UserDto> {
+    ): ResponseEntity<UserResponse> {
         val updated = userService.updateProfile(
             principal.user.id,
             request.username,
             request.avatarUrl,
             request.isPublic
         )
-        return ResponseEntity.ok(updated)
+        return ResponseEntity.ok(toUserResponse(updated))
     }
 
     private fun enforceRateLimit(action: String, email: String, request: HttpServletRequest) {
@@ -130,5 +164,22 @@ class UserController(
         return forwarded?.split(",")?.firstOrNull()?.trim()?.takeIf { it.isNotBlank() }
             ?: request.remoteAddr
             ?: "unknown"
+    }
+
+    private fun toUserResponse(user: UserService.UserDto): UserResponse {
+        return UserResponse(
+            id = user.id,
+            email = user.email,
+            username = user.username,
+            avatarUrl = user.avatarUrl,
+            isPublic = user.isPublic,
+            bandeiraId = user.bandeiraId,
+            bandeiraName = user.bandeiraName,
+            role = user.role,
+            totalRuns = user.totalRuns,
+            totalDistance = user.totalDistance,
+            totalDistanceMeters = user.totalDistanceMeters,
+            totalTilesConquered = user.totalTilesConquered
+        )
     }
 }

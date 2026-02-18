@@ -3,7 +3,6 @@ package com.runwar.domain.run
 import com.fasterxml.jackson.annotation.JsonAlias
 import com.runwar.config.UserPrincipal
 import com.runwar.game.LatLngPoint
-import java.time.Instant
 import java.util.UUID
 import org.springframework.http.MediaType
 import org.springframework.http.ResponseEntity
@@ -82,32 +81,16 @@ class RunIngestionController(private val runService: RunService) {
                             )
                     )
         }
-        val timestampsMillis = request.timestamps
 
-        // Ensure timestamps are in non-decreasing chronological order
-        val hasOutOfOrderTimestamps = timestampsMillis
-                .windowed(size = 2, step = 1, partialWindows = false)
-                .any { (prev, next) -> next < prev }
-        if (hasOutOfOrderTimestamps) {
+        val normalizedTimestamps = try {
+            RunTimestampNormalizer.normalize(request.timestamps)
+        } catch (e: IllegalArgumentException) {
             return ResponseEntity.badRequest()
-                    .body(ValidationErrorResponse("Timestamps must be in non-decreasing chronological order."))
-        }
-
-        // Ensure timestamps are within a reasonable time range relative to now
-        val nowMillis = Instant.now().toEpochMilli()
-        val maxFutureOffsetMillis = 7L * 24 * 60 * 60 * 1000 // 7 days
-        val maxPastOffsetMillis = 365L * 24 * 60 * 60 * 1000 // 365 days
-
-        val hasUnreasonableTimestamp = timestampsMillis.any { ts ->
-            ts > nowMillis + maxFutureOffsetMillis || ts < nowMillis - maxPastOffsetMillis
-        }
-        if (hasUnreasonableTimestamp) {
-            return ResponseEntity.badRequest()
-                    .body(ValidationErrorResponse("Timestamp values are not within an acceptable range."))
+                .body(ValidationErrorResponse(e.message ?: "Invalid timestamps."))
         }
 
         val coordinates = request.coordinates.map { LatLngPoint(it.lat, it.lng) }
-        val timestamps = timestampsMillis.map { Instant.ofEpochMilli(it) }
+        val timestamps = normalizedTimestamps.instants
         val origin = request.origin ?: RunOrigin.IMPORT
 
         val result = runService.submitRunFromCoordinates(principal.user, coordinates, timestamps, origin)

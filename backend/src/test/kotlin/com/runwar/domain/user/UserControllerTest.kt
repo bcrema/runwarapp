@@ -48,6 +48,7 @@ class UserControllerTest {
                 role = "MEMBER",
                 totalRuns = 0,
                 totalDistance = 0.0,
+                totalDistanceMeters = 0.0,
                 totalTilesConquered = 0
             ),
             accessToken = "access-token",
@@ -100,4 +101,3 @@ class UserControllerTest {
             .andExpect(jsonPath("$.details.password").exists())
     }
 }
-

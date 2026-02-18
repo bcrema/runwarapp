@@ -14,6 +14,7 @@ import org.junit.jupiter.api.Assertions.assertNotNull
 import org.junit.jupiter.api.Assertions.assertThrows
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
+import java.math.BigDecimal
 import org.springframework.security.crypto.password.PasswordEncoder
 import java.time.Instant
 import java.util.UUID
@@ -295,5 +296,21 @@ class UserServiceTest {
         service.logout("A".repeat(86))
 
         verify(exactly = 1) { refreshTokenRepository.save(match { it.revokedAt != null }) }
+    }
+
+    @Test
+    fun `user dto exposes both kilometers and meters for total distance`() {
+        val user = User(
+            id = UUID.randomUUID(),
+            email = "runner@example.com",
+            username = "runner",
+            passwordHash = "hash",
+            totalDistance = BigDecimal("5230")
+        )
+
+        val dto = UserService.UserDto.from(user)
+
+        assertEquals(5.23, dto.totalDistance, 0.000001)
+        assertEquals(5230.0, dto.totalDistanceMeters, 0.000001)
     }
 }
