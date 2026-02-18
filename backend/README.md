@@ -77,6 +77,22 @@ docker run -p 8080:8080 --env-file .env runwar-backend
 - `GET /api/runs` - Histórico de corridas
 - `GET /api/runs/daily-status` - Status de ações diárias
 
+### Contrato de compatibilidade iOS v1
+
+- `POST /api/runs/coordinates` aceita `timestamps` em **epoch seconds** e **epoch milliseconds** (normalização automática server-side).
+- Resposta de submissão (`POST /api/runs` e `POST /api/runs/coordinates`) retorna:
+  - `run.distance` e `run.loopDistance` em **km** (compatibilidade iOS atual);
+  - `run.distanceMeters` e `run.loopDistanceMeters` em **metros** (referência canônica);
+  - `loopValidation` no formato `{ isValid, distance, duration, closingDistance, tilesCovered, primaryTile, primaryTileCoverage, fraudFlags, failureReasons }`;
+  - `territoryResult` quando houver ação territorial processada;
+  - `dailyActionsRemaining` derivado de `turnResult.capsRemaining.userActionsRemaining`.
+- `GET /api/users/me` e `AuthResponse.user`:
+  - `totalDistance` em **km**;
+  - `totalDistanceMeters` em **metros**.
+- `GET /api/runs` e `GET /api/runs/{id}`:
+  - `distance` e `loopDistance` em **km**;
+  - `distanceMeters` e `loopDistanceMeters` em **metros**.
+
 ### Rankings
 - `GET /api/bandeiras/rankings` - Ranking de bandeiras
 
