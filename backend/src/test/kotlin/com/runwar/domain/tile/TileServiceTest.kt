@@ -9,15 +9,25 @@ import io.mockk.every
 import io.mockk.mockk
 import io.mockk.verify
 import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.Assertions.assertNotNull
 import org.junit.jupiter.api.Assertions.assertNull
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
 import org.locationtech.jts.geom.Coordinate
 import org.locationtech.jts.geom.GeometryFactory
 import org.locationtech.jts.geom.PrecisionModel
+import org.springframework.transaction.annotation.Transactional
 import java.util.Optional
 
 class TileServiceTest {
+
+    @Test
+    fun `tile service is marked as read only transactional`() {
+        val transactional = TileService::class.java.getAnnotation(Transactional::class.java)
+
+        assertNotNull(transactional)
+        assertTrue(transactional.readOnly)
+    }
 
     @Test
     fun `toBoundingBox converts radius to bounds`() {
@@ -112,4 +122,3 @@ class TileServiceTest {
         verify(exactly = 0) { bandeiraRepository.findAllById(any<Iterable<java.util.UUID>>()) }
     }
 }
-

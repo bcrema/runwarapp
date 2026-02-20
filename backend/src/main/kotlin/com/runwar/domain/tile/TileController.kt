@@ -2,6 +2,8 @@ package com.runwar.domain.tile
 
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.*
+import org.springframework.web.server.ResponseStatusException
+import org.springframework.http.HttpStatus
 import java.util.*
 
 @RestController
@@ -68,7 +70,7 @@ class TileController(private val tileService: TileService) {
     @GetMapping("/{id}")
     fun getTileById(@PathVariable id: String): ResponseEntity<TileService.TileDto> {
         val tile = tileService.getTileById(id)
-            ?: return ResponseEntity.notFound().build()
+            ?: throw ResponseStatusException(HttpStatus.NOT_FOUND, "Tile not found")
         return ResponseEntity.ok(tile)
     }
     
