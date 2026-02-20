@@ -134,7 +134,7 @@ final class MapViewModelTests: XCTestCase {
 
         await viewModel.loadTiles(bounds: (minLat: -26, minLng: -50, maxLat: -25, maxLng: -49))
 
-        XCTAssertEqual(viewModel.errorMessage, "Servico de mapa indisponivel no momento. Tente novamente em instantes.")
+        XCTAssertEqual(viewModel.errorMessage, "Serviço de mapa indisponivel no momento. Tente novamente em instantes.")
     }
 
     @MainActor
@@ -148,7 +148,7 @@ final class MapViewModelTests: XCTestCase {
 
         await viewModel.refreshDisputed()
 
-        XCTAssertEqual(viewModel.errorMessage, "A requisicao demorou demais. Tente novamente em instantes.")
+        XCTAssertEqual(viewModel.errorMessage, "A requisição demorou demais. Tente novamente em instantes.")
     }
 }
 

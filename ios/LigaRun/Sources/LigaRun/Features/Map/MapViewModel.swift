@@ -79,22 +79,18 @@ final class MapViewModel: ObservableObject {
         if let urlError = error as? URLError {
             switch urlError.code {
             case .badServerResponse:
-                return "Servico de mapa indisponivel no momento. Tente novamente em instantes."
+                return "Serviço de mapa indisponível no momento. Tente novamente em instantes."
             case .timedOut:
-                return "A requisicao demorou demais. Tente novamente em instantes."
+                return "A requisição demorou demais. Tente novamente em instantes."
             case .notConnectedToInternet:
-                return "Sem conexao com a internet. Verifique sua rede e tente novamente."
+                return "Sem conexão com a internet. Verifique sua rede e tente novamente."
             default:
                 break
             }
         }
 
-        let nsError = error as NSError
-        if nsError.domain == NSURLErrorDomain, nsError.code == URLError.badServerResponse.rawValue {
-            return "Servico de mapa indisponivel no momento. Tente novamente em instantes."
-        }
 
-        return "Nao foi possivel carregar o mapa agora. Tente novamente."
+        return "Não foi possível carregar o mapa agora. Tente novamente."
     }
 
     private func upsert(tile: Tile) {
