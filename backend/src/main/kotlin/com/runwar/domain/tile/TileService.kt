@@ -5,12 +5,14 @@ import com.runwar.domain.bandeira.BandeiraRepository
 import com.runwar.domain.user.UserRepository
 import com.runwar.game.H3GridService
 import org.springframework.stereotype.Service
+import org.springframework.transaction.annotation.Transactional
 import java.time.Duration
 import java.time.Instant
 import java.util.*
 import java.util.concurrent.ConcurrentHashMap
 
 @Service
+@Transactional(readOnly = true)
 class TileService(
     private val tileRepository: TileRepository,
     private val userRepository: UserRepository,

@@ -122,6 +122,34 @@ final class MapViewModelTests: XCTestCase {
 
         XCTAssertEqual(viewModel.errorMessage, "Falha no mapa")
     }
+
+    @MainActor
+    func testLoadTilesBadServerResponseSetsFriendlyMessage() async {
+        let api = MapAPISpy(
+            tilesResult: .failure(URLError(.badServerResponse)),
+            disputedResult: .success([]),
+            tileResult: .success(makeTileFixture())
+        )
+        let viewModel = MapViewModel(session: SessionStore(), api: api)
+
+        await viewModel.loadTiles(bounds: (minLat: -26, minLng: -50, maxLat: -25, maxLng: -49))
+
+        XCTAssertEqual(viewModel.errorMessage, "Servico de mapa indisponivel no momento. Tente novamente em instantes.")
+    }
+
+    @MainActor
+    func testRefreshDisputedTimedOutSetsFriendlyMessage() async {
+        let api = MapAPISpy(
+            tilesResult: .success([]),
+            disputedResult: .failure(URLError(.timedOut)),
+            tileResult: .success(makeTileFixture())
+        )
+        let viewModel = MapViewModel(session: SessionStore(), api: api)
+
+        await viewModel.refreshDisputed()
+
+        XCTAssertEqual(viewModel.errorMessage, "A requisicao demorou demais. Tente novamente em instantes.")
+    }
 }
 
 @MainActor

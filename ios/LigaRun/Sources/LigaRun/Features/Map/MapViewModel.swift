@@ -44,7 +44,7 @@ final class MapViewModel: ObservableObject {
             tiles = try await api.getTiles(bounds: bounds)
             lastVisibleBounds = bounds
         } catch {
-            errorMessage = error.localizedDescription
+            errorMessage = mapErrorMessage(for: error)
         }
     }
 
@@ -57,7 +57,7 @@ final class MapViewModel: ObservableObject {
         do {
             tiles = try await api.getDisputedTiles()
         } catch {
-            errorMessage = error.localizedDescription
+            errorMessage = mapErrorMessage(for: error)
         }
     }
 
@@ -67,8 +67,34 @@ final class MapViewModel: ObservableObject {
             focusCoordinate = CLLocationCoordinate2D(latitude: tile.lat, longitude: tile.lng)
             upsert(tile: tile)
         } catch {
-            errorMessage = error.localizedDescription
+            errorMessage = mapErrorMessage(for: error)
         }
+    }
+
+    private func mapErrorMessage(for error: Error) -> String {
+        if let apiError = error as? APIError {
+            return apiError.message
+        }
+
+        if let urlError = error as? URLError {
+            switch urlError.code {
+            case .badServerResponse:
+                return "Servico de mapa indisponivel no momento. Tente novamente em instantes."
+            case .timedOut:
+                return "A requisicao demorou demais. Tente novamente em instantes."
+            case .notConnectedToInternet:
+                return "Sem conexao com a internet. Verifique sua rede e tente novamente."
+            default:
+                break
+            }
+        }
+
+        let nsError = error as NSError
+        if nsError.domain == NSURLErrorDomain, nsError.code == URLError.badServerResponse.rawValue {
+            return "Servico de mapa indisponivel no momento. Tente novamente em instantes."
+        }
+
+        return "Nao foi possivel carregar o mapa agora. Tente novamente."
     }
 
     private func upsert(tile: Tile) {
