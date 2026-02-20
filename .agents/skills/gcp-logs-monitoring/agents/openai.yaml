@@ -1,0 +1,6 @@
+interface:
+  display_name: "GCP Logs & Monitoring"
+  short_description: "Consulta logs e metricas no Google Cloud."
+  default_prompt: "Use $gcp-logs-monitoring para investigar erros e sinais de monitoramento em um projeto GCP."
+dependencies:
+  tools: []
