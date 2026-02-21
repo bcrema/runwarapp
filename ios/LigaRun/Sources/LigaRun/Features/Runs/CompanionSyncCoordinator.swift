@@ -62,7 +62,8 @@ protocol RunSyncCoordinating: AnyObject {
         endedAt: Date,
         duration: TimeInterval,
         distanceMeters: Double,
-        locations: [CLLocation]
+        locations: [CLLocation],
+        modeContext: RunModeContext
     ) async
     func retry() async
     func cancel()
@@ -127,7 +128,8 @@ final class RunSyncCoordinator: RunSyncCoordinating {
         endedAt: Date,
         duration: TimeInterval,
         distanceMeters: Double,
-        locations: [CLLocation]
+        locations: [CLLocation],
+        modeContext: RunModeContext
     ) async {
         cancelCurrentTask()
         transition(.reset)

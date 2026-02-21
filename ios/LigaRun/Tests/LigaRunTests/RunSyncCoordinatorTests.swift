@@ -21,7 +21,8 @@ final class RunSyncCoordinatorTests: XCTestCase {
             endedAt: Date(),
             duration: 600,
             distanceMeters: 1500,
-            locations: makeLocations()
+            locations: makeLocations(),
+            modeContext: RunModeContext(mode: .treino, currentQuadraId: nil, ineligibilityReason: .missingQuadraOwnershipData)
         )
 
         XCTAssertTrue(containsState(transitions, matching: .waitingForSync))
@@ -52,7 +53,8 @@ final class RunSyncCoordinatorTests: XCTestCase {
             endedAt: Date(),
             duration: 300,
             distanceMeters: 1300,
-            locations: makeLocations()
+            locations: makeLocations(),
+            modeContext: RunModeContext(mode: .treino, currentQuadraId: nil, ineligibilityReason: .missingQuadraOwnershipData)
         )
 
         guard case .failed = coordinator.state else {
@@ -64,7 +66,8 @@ final class RunSyncCoordinatorTests: XCTestCase {
             endedAt: Date(),
             duration: 150,
             distanceMeters: 900,
-            locations: makeLocations()
+            locations: makeLocations(),
+            modeContext: RunModeContext(mode: .treino, currentQuadraId: nil, ineligibilityReason: .missingQuadraOwnershipData)
         )
 
         guard case .completed(let result) = coordinator.state else {
@@ -95,7 +98,8 @@ final class RunSyncCoordinatorTests: XCTestCase {
             endedAt: Date(),
             duration: 300,
             distanceMeters: 1300,
-            locations: makeLocations()
+            locations: makeLocations(),
+            modeContext: RunModeContext(mode: .treino, currentQuadraId: nil, ineligibilityReason: .missingQuadraOwnershipData)
         )
 
         guard case .failed(let message) = coordinator.state else {
@@ -128,7 +132,8 @@ final class RunSyncCoordinatorTests: XCTestCase {
             endedAt: Date(),
             duration: 200,
             distanceMeters: 1200,
-            locations: makeLocations()
+            locations: makeLocations(),
+            modeContext: RunModeContext(mode: .treino, currentQuadraId: nil, ineligibilityReason: .missingQuadraOwnershipData)
         )
 
         guard case .failed(let message) = coordinator.state else {
