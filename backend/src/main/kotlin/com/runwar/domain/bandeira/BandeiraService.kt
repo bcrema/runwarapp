@@ -8,6 +8,7 @@ import org.springframework.transaction.annotation.Transactional
 import java.util.*
 
 @Service
+@Transactional(readOnly = true)
 class BandeiraService(
     private val bandeiraRepository: BandeiraRepository,
     private val userRepository: UserRepository
