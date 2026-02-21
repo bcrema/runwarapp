@@ -30,6 +30,21 @@ final class CompanionRunManagerTests: XCTestCase {
         XCTAssertEqual(syncCoordinator.finishRunCalls, 1)
     }
 
+
+    @MainActor
+    func testStopAndSyncForwardsCompetitionContextToCoordinator() async {
+        let locationManager = LocationManagerSpy()
+        let syncCoordinator = RunSyncCoordinatorSpy()
+        let runManager = CompanionRunManager(locationManager: locationManager, syncCoordinator: syncCoordinator)
+
+        runManager.start()
+        runManager.stopAndSync(competitionMode: .competitive, targetQuadraId: "quadra-ctx", eligibilityReason: nil)
+        await Task.yield()
+
+        XCTAssertEqual(syncCoordinator.finishRunCalls, 1)
+        XCTAssertEqual(syncCoordinator.lastCompetitionMode, .competitive)
+    }
+
     @MainActor
     func testStartIfNeededDoesNotRestartWhenAlreadyRunning() {
         let locationManager = LocationManagerSpy()
@@ -121,6 +136,7 @@ private final class RunSyncCoordinatorSpy: RunSyncCoordinating {
     var onStateChange: ((CompanionSyncState) -> Void)?
 
     private(set) var finishRunCalls = 0
+    private(set) var lastCompetitionMode: RunCompetitionMode?
     private(set) var retryCalls = 0
     private(set) var resetCalls = 0
 
@@ -135,9 +151,13 @@ private final class RunSyncCoordinatorSpy: RunSyncCoordinating {
         endedAt: Date,
         duration: TimeInterval,
         distanceMeters: Double,
-        locations: [CLLocation]
+        locations: [CLLocation],
+        competitionMode: RunCompetitionMode,
+        targetQuadraId: String?,
+        eligibilityReason: String?
     ) async {
         finishRunCalls += 1
+        lastCompetitionMode = competitionMode
     }
 
     func retry() async {

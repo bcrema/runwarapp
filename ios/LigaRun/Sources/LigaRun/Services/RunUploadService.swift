@@ -93,8 +93,8 @@ final class RunUploadService: RunUploadServiceProtocol {
             let result = try await api.submitRunCoordinates(
                 coordinates: payload.coordinates,
                 timestamps: payload.timestamps,
-                mode: "COMPETITIVE",
-                targetQuadraId: nil
+                mode: session.competitionMode.rawValue,
+                targetQuadraId: session.targetQuadraId
             )
             updatedSession.status = .uploaded
             updatedSession.lastError = nil
@@ -166,6 +166,7 @@ final class RunUploadService: RunUploadServiceProtocol {
             distanceMeters: totalDistance(for: recoveredTrackPoints),
             points: recoveredTrackPoints,
             source: .healthKit,
+            competitionMode: .training,
             status: .pending,
             lastUploadAttempt: nil,
             lastError: nil
