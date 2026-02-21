@@ -114,7 +114,11 @@ struct RunSessionRecord: Codable, Identifiable, Equatable {
         distanceMeters = try container.decode(Double.self, forKey: .distanceMeters)
         points = try container.decode([RunTrackPoint].self, forKey: .points)
         source = try container.decodeIfPresent(RunSessionSource.self, forKey: .source) ?? .localTracking
-        competitionMode = try container.decodeIfPresent(RunCompetitionMode.self, forKey: .competitionMode) ?? .training
+        if let modeString = try container.decodeIfPresent(String.self, forKey: .competitionMode) {
+            competitionMode = RunCompetitionMode(rawValue: modeString) ?? .training
+        } else {
+            competitionMode = .training
+        }
         targetQuadraId = try container.decodeIfPresent(String.self, forKey: .targetQuadraId)
         eligibilityReason = try container.decodeIfPresent(String.self, forKey: .eligibilityReason)
         status = try container.decode(RunSessionStatus.self, forKey: .status)
