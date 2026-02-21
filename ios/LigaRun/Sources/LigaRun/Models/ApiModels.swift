@@ -68,6 +68,9 @@ struct Tile: Codable, Identifiable {
     }
 }
 
+
+typealias Quadra = Tile
+
 struct TileStats: Codable {
     let totalTiles: Int
     let ownedTiles: Int
