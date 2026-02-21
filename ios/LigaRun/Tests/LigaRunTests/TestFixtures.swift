@@ -118,7 +118,7 @@ func makeRunSubmissionResultFixture(
 }
 
 func makeQuadraFixture(
-    id: String = "tile-1",
+    id: String = "quadra-1",
     lat: Double = -25.429,
     lng: Double = -49.271,
     ownerType: OwnerType? = .solo,

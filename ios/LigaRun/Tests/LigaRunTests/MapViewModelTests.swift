@@ -3,12 +3,12 @@ import XCTest
 
 final class MapViewModelTests: XCTestCase {
     @MainActor
-    func testLoadTilesRefreshesTileList() async {
+    func testLoadQuadrasRefreshesQuadraList() async {
         let tiles = [makeQuadraFixture(id: "tile-a"), makeQuadraFixture(id: "tile-b", isInDispute: true)]
         let api = MapAPISpy(
-            tilesResult: .success(tiles),
-            disputedResult: .success([]),
-            tileResult: .success(makeQuadraFixture())
+            quadrasResult: .success(tiles),
+            disputedQuadrasResult: .success([]),
+            quadraResult: .success(makeQuadraFixture())
         )
         let viewModel = MapViewModel(session: SessionStore(), api: api)
 
@@ -23,9 +23,9 @@ final class MapViewModelTests: XCTestCase {
     func testRefreshDisputedUpdatesTiles() async {
         let disputed = [makeQuadraFixture(id: "tile-dispute", isInDispute: true)]
         let api = MapAPISpy(
-            tilesResult: .success([]),
-            disputedResult: .success(disputed),
-            tileResult: .success(makeQuadraFixture())
+            quadrasResult: .success([]),
+            disputedQuadrasResult: .success(disputed),
+            quadraResult: .success(makeQuadraFixture())
         )
         let viewModel = MapViewModel(session: SessionStore(), api: api)
 
@@ -36,12 +36,12 @@ final class MapViewModelTests: XCTestCase {
     }
 
     @MainActor
-    func testFocusOnTileSetsFocusCoordinate() async {
+    func testFocusOnQuadraSetsFocusCoordinate() async {
         let tile = makeQuadraFixture(id: "tile-focus", lat: -25.4, lng: -49.3)
         let api = MapAPISpy(
-            tilesResult: .success([]),
-            disputedResult: .success([]),
-            tileResult: .success(tile)
+            quadrasResult: .success([]),
+            disputedQuadrasResult: .success([]),
+            quadraResult: .success(tile)
         )
         let viewModel = MapViewModel(session: SessionStore(), api: api)
 
@@ -53,13 +53,13 @@ final class MapViewModelTests: XCTestCase {
     }
 
     @MainActor
-    func testFocusOnTileUpsertsLatestTileState() async {
+    func testFocusOnQuadraUpsertsLatestQuadraState() async {
         let staleTile = makeQuadraFixture(id: "tile-focus", shield: 10)
         let refreshedTile = makeQuadraFixture(id: "tile-focus", shield: 88, isInDispute: true)
         let api = MapAPISpy(
-            tilesResult: .success([staleTile]),
-            disputedResult: .success([]),
-            tileResult: .success(refreshedTile)
+            quadrasResult: .success([staleTile]),
+            disputedQuadrasResult: .success([]),
+            quadraResult: .success(refreshedTile)
         )
         let viewModel = MapViewModel(session: SessionStore(), api: api)
 
@@ -72,12 +72,12 @@ final class MapViewModelTests: XCTestCase {
     }
 
     @MainActor
-    func testRefreshVisibleTilesUsesLastBounds() async {
+    func testRefreshVisibleQuadrasUsesLastBounds() async {
         let tiles = [makeQuadraFixture(id: "tile-a"), makeQuadraFixture(id: "tile-b")]
         let api = MapAPISpy(
-            tilesResult: .success(tiles),
-            disputedResult: .success([]),
-            tileResult: .success(makeQuadraFixture())
+            quadrasResult: .success(tiles),
+            disputedQuadrasResult: .success([]),
+            quadraResult: .success(makeQuadraFixture())
         )
         let viewModel = MapViewModel(session: SessionStore(), api: api)
         let bounds = (minLat: -26.5, minLng: -50.5, maxLat: -25.5, maxLng: -49.5)
@@ -98,9 +98,9 @@ final class MapViewModelTests: XCTestCase {
             makeQuadraFixture(id: "disputed", ownerType: .bandeira, isInDispute: true)
         ]
         let api = MapAPISpy(
-            tilesResult: .success(tiles),
-            disputedResult: .success([]),
-            tileResult: .success(makeQuadraFixture())
+            quadrasResult: .success(tiles),
+            disputedQuadrasResult: .success([]),
+            quadraResult: .success(makeQuadraFixture())
         )
         let viewModel = MapViewModel(session: SessionStore(), api: api)
 
@@ -110,11 +110,11 @@ final class MapViewModelTests: XCTestCase {
     }
 
     @MainActor
-    func testLoadTilesErrorSetsMessage() async {
+    func testLoadQuadrasErrorSetsMessage() async {
         let api = MapAPISpy(
-            tilesResult: .failure(APIError(error: "MAP_ERROR", message: "Falha no mapa", details: nil)),
-            disputedResult: .success([]),
-            tileResult: .success(makeQuadraFixture())
+            quadrasResult: .failure(APIError(error: "MAP_ERROR", message: "Falha no mapa", details: nil)),
+            disputedQuadrasResult: .success([]),
+            quadraResult: .success(makeQuadraFixture())
         )
         let viewModel = MapViewModel(session: SessionStore(), api: api)
 
@@ -124,11 +124,11 @@ final class MapViewModelTests: XCTestCase {
     }
 
     @MainActor
-    func testLoadTilesBadServerResponseSetsFriendlyMessage() async {
+    func testLoadQuadrasBadServerResponseSetsFriendlyMessage() async {
         let api = MapAPISpy(
-            tilesResult: .failure(URLError(.badServerResponse)),
-            disputedResult: .success([]),
-            tileResult: .success(makeQuadraFixture())
+            quadrasResult: .failure(URLError(.badServerResponse)),
+            disputedQuadrasResult: .success([]),
+            quadraResult: .success(makeQuadraFixture())
         )
         let viewModel = MapViewModel(session: SessionStore(), api: api)
 
@@ -140,9 +140,9 @@ final class MapViewModelTests: XCTestCase {
     @MainActor
     func testRefreshDisputedTimedOutSetsFriendlyMessage() async {
         let api = MapAPISpy(
-            tilesResult: .success([]),
-            disputedResult: .failure(URLError(.timedOut)),
-            tileResult: .success(makeQuadraFixture())
+            quadrasResult: .success([]),
+            disputedQuadrasResult: .failure(URLError(.timedOut)),
+            quadraResult: .success(makeQuadraFixture())
         )
         let viewModel = MapViewModel(session: SessionStore(), api: api)
 
@@ -154,33 +154,33 @@ final class MapViewModelTests: XCTestCase {
 
 @MainActor
 private final class MapAPISpy: MapAPIProviding {
-    let tilesResult: Result<[Tile], Error>
-    let disputedResult: Result<[Tile], Error>
-    let tileResult: Result<Tile, Error>
+    let quadrasResult: Result<[Tile], Error>
+    let disputedQuadrasResult: Result<[Tile], Error>
+    let quadraResult: Result<Tile, Error>
     private(set) var getQuadrasCallCount = 0
     private(set) var lastBounds: (minLat: Double, minLng: Double, maxLat: Double, maxLng: Double)?
 
     init(
-        tilesResult: Result<[Tile], Error>,
-        disputedResult: Result<[Tile], Error>,
-        tileResult: Result<Tile, Error>
+        quadrasResult: Result<[Tile], Error>,
+        disputedQuadrasResult: Result<[Tile], Error>,
+        quadraResult: Result<Tile, Error>
     ) {
-        self.tilesResult = tilesResult
-        self.disputedResult = disputedResult
-        self.tileResult = tileResult
+        self.quadrasResult = quadrasResult
+        self.disputedQuadrasResult = disputedQuadrasResult
+        self.quadraResult = quadraResult
     }
 
     func getQuadras(bounds: (minLat: Double, minLng: Double, maxLat: Double, maxLng: Double)) async throws -> [Tile] {
         getQuadrasCallCount += 1
         lastBounds = bounds
-        return try tilesResult.get()
+        return try quadrasResult.get()
     }
 
     func getDisputedQuadras() async throws -> [Tile] {
-        try disputedResult.get()
+        try disputedQuadrasResult.get()
     }
 
     func getQuadra(id: String) async throws -> Tile {
-        try tileResult.get()
+        try quadraResult.get()
     }
 }
