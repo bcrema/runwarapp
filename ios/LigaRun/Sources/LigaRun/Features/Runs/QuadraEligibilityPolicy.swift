@@ -34,10 +34,7 @@ struct QuadraEligibilityPolicy {
         let isChampion = isChampion(currentUser: currentUser, quadra: quadra)
 
         guard isOwner || isChampion else {
-            let hasOnlyBandeiraMatchingData = (quadra.ownerType == .bandeira && quadra.ownerId != nil && quadra.championUserId == nil && quadra.championBandeiraId == nil)
-                || (quadra.ownerType == nil && quadra.ownerId == nil && quadra.championUserId == nil && quadra.championBandeiraId != nil)
-
-            if hasOnlyBandeiraMatchingData && currentUser.bandeiraId == nil {
+            if isBandeiraOnlyEligibility(quadra) && currentUser.bandeiraId == nil {
                 return QuadraEligibilityResult(status: .trainingOnly(reason: .missingUserContext))
             }
 
@@ -76,5 +73,21 @@ struct QuadraEligibilityPolicy {
 
         guard let bandeiraId = currentUser.bandeiraId else { return false }
         return quadra.championBandeiraId == bandeiraId
+    }
+
+    private func isBandeiraOnlyEligibility(_ quadra: Tile) -> Bool {
+        let isBandeiraOwnedWithoutChampionData =
+            quadra.ownerType == .bandeira &&
+            quadra.ownerId != nil &&
+            quadra.championUserId == nil &&
+            quadra.championBandeiraId == nil
+
+        let isBandeiraChampionWithoutOwnerData =
+            quadra.ownerType == nil &&
+            quadra.ownerId == nil &&
+            quadra.championUserId == nil &&
+            quadra.championBandeiraId != nil
+
+        return isBandeiraOwnedWithoutChampionData || isBandeiraChampionWithoutOwnerData
     }
 }

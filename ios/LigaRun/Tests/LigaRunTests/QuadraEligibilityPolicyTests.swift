@@ -65,6 +65,20 @@ final class QuadraEligibilityPolicyTests: XCTestCase {
         let resultWithoutBandeiraContext = policy.evaluate(currentUser: userWithoutBandeira, quadra: bandeiraOwnedQuadra)
 
         XCTAssertEqual(resultWithoutBandeiraContext.status, .trainingOnly(reason: .missingUserContext))
+
+        let quadraWithOnlyBandeiraChampion = makeTileFixture(
+            ownerType: nil,
+            ownerId: nil,
+            championUserId: nil,
+            championBandeiraId: "band-1"
+        )
+
+        let resultWithOnlyBandeiraChampion = policy.evaluate(
+            currentUser: userWithoutBandeira,
+            quadra: quadraWithOnlyBandeiraChampion
+        )
+
+        XCTAssertEqual(resultWithOnlyBandeiraChampion.status, .trainingOnly(reason: .missingUserContext))
     }
 
     func testEvaluateTrainingOnlyWhenUserIsNotOwnerNorChampion() {
@@ -74,7 +88,7 @@ final class QuadraEligibilityPolicyTests: XCTestCase {
         let result = policy.evaluate(currentUser: user, quadra: quadra)
 
         XCTAssertEqual(result.status, .trainingOnly(reason: .userNotOwnerNorChampion))
-        XCTAssertTrue(policy.canCompete(currentUser: user, quadra: quadra) == false)
+        XCTAssertFalse(policy.canCompete(currentUser: user, quadra: quadra))
     }
 
     func testCanCompeteTrueWhenEligible() {
