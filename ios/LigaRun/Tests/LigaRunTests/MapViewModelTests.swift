@@ -134,7 +134,7 @@ final class MapViewModelTests: XCTestCase {
 
         await viewModel.loadTiles(bounds: (minLat: -26, minLng: -50, maxLat: -25, maxLng: -49))
 
-        XCTAssertEqual(viewModel.errorMessage, "Serviço de mapa indisponivel no momento. Tente novamente em instantes.")
+        XCTAssertEqual(viewModel.errorMessage, "Serviço de mapa indisponível no momento. Tente novamente em instantes.")
     }
 
     @MainActor
