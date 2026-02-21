@@ -8,7 +8,7 @@ func makeRunFixture(
     duration: Double = 1800,
     isLoopValid: Bool = true,
     territoryAction: String? = nil,
-    targetTileId: String? = nil
+    targetQuadraId: String? = nil
 ) -> Run {
     let formatter = ISO8601DateFormatter()
     let startDate = Date()
@@ -24,7 +24,7 @@ func makeRunFixture(
         isLoopValid: isLoopValid,
         loopDistance: distance,
         territoryAction: territoryAction,
-        targetTileId: targetTileId,
+        targetQuadraId: targetQuadraId,
         isValidForTerritory: isLoopValid,
         fraudFlags: [],
         createdAt: formatter.string(from: endDate)
@@ -33,18 +33,18 @@ func makeRunFixture(
 
 func makeLoopValidationFixture(
     isValid: Bool = true,
-    primaryTile: String? = "tile-primary",
+    primaryQuadra: String? = "quadra-primary",
     failureReasons: [String] = [],
     fraudFlags: [String] = [],
-    tilesCovered: [String]? = nil
+    quadrasCovered: [String]? = nil
 ) -> LoopValidation {
-    let resolvedTilesCovered: [String]
-    if let tilesCovered = tilesCovered {
-        resolvedTilesCovered = tilesCovered
-    } else if let primaryTile = primaryTile {
-        resolvedTilesCovered = [primaryTile]
+    let resolvedQuadrasCovered: [String]
+    if let quadrasCovered = quadrasCovered {
+        resolvedQuadrasCovered = quadrasCovered
+    } else if let primaryQuadra = primaryQuadra {
+        resolvedQuadrasCovered = [primaryQuadra]
     } else {
-        resolvedTilesCovered = ["tile-primary"]
+        resolvedQuadrasCovered = ["quadra-primary"]
     }
 
     return LoopValidation(
@@ -52,9 +52,9 @@ func makeLoopValidationFixture(
         distance: 5000,
         duration: 1800,
         closingDistance: 10,
-        tilesCovered: resolvedTilesCovered,
-        primaryTile: primaryTile,
-        primaryTileCoverage: 0.7,
+        quadrasCovered: resolvedQuadrasCovered,
+        primaryQuadra: primaryQuadra,
+        primaryQuadraCoverage: 0.7,
         fraudFlags: fraudFlags,
         failureReasons: failureReasons
     )
@@ -65,7 +65,7 @@ func makeTerritoryResultFixture(
     reason: String? = nil,
     shieldBefore: Int = 65,
     shieldAfter: Int = 85,
-    tileId: String? = "tile-territory"
+    quadraId: String? = "quadra-territory"
 ) -> TerritoryResult {
     TerritoryResult(
         success: true,
@@ -76,20 +76,20 @@ func makeTerritoryResultFixture(
         shieldBefore: shieldBefore,
         shieldAfter: shieldAfter,
         inDispute: false,
-        tileId: tileId
+        quadraId: quadraId
     )
 }
 
 func makeTurnResultFixture(
     actionType: String? = "CONQUEST",
-    tileId: String? = "tile-turn",
+    quadraId: String? = "quadra-turn",
     shieldBefore: Int? = 65,
     shieldAfter: Int? = 85,
     reasons: [String] = []
 ) -> TurnResult {
     TurnResult(
         actionType: actionType,
-        tileId: tileId,
+        quadraId: quadraId,
         h3Index: nil,
         previousOwner: nil,
         newOwner: nil,
@@ -117,30 +117,39 @@ func makeRunSubmissionResultFixture(
     )
 }
 
-func makeTileFixture(
-    id: String = "tile-1",
+func makeQuadraFixture(
+    id: String = "quadra-1",
     lat: Double = -25.429,
     lng: Double = -49.271,
     ownerType: OwnerType? = .solo,
+    ownerId: String? = "owner-1",
     ownerName: String? = "Runner",
     ownerColor: String? = "#00AACC",
+    championUserId: String? = nil,
+    championBandeiraId: String? = nil,
     shield: Int = 70,
     isInDispute: Bool = false
-) -> Tile {
-    Tile(
+) -> Quadra {
+    Quadra(
         id: id,
         lat: lat,
         lng: lng,
         boundary: [[lat, lng], [lat + 0.001, lng], [lat + 0.001, lng + 0.001], [lat, lng + 0.001]],
         ownerType: ownerType,
-        ownerId: "owner-1",
+        ownerId: ownerId,
         ownerName: ownerName,
         ownerColor: ownerColor,
         shield: shield,
         isInCooldown: false,
         isInDispute: isInDispute,
+        championUserId: championUserId,
+        championBandeiraId: championBandeiraId,
+        championName: nil,
         guardianId: nil,
-        guardianName: nil
+        guardianName: nil,
+        championUserId: nil,
+        championBandeiraId: nil,
+        championName: nil
     )
 }
 

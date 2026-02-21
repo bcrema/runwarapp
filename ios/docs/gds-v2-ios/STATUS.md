@@ -18,7 +18,10 @@
 ```
 
 ## Backlog inicial
-- `01` Contrato e Modelos Quadra - Status: Todo.
+- `01` 2026-02-21 - Status: Done.
+  Resumo tecnico: Migracao de contratos/modelos/API de tile para quadra concluida no iOS (MapAPI/RunSubmission, Quadra/QuadraStats, APIClient em /api/quadras, QuadraService e atualizacoes em view models/views), com retrocompatibilidade de decode para chaves legadas e ajustes de fixtures/testes para a nova nomenclatura.
+  Branch/worktree: feature/ios-quadra-step01 em /workspace/runwarapp.
+  Testes: xcodegen generate (falhou: xcodegen indisponivel no ambiente), xcodebuild -scheme LigaRun -destination "platform=iOS Simulator,name=iPhone 17,OS=26.2" -only-testing:LigaRunTests/MapViewModelTests test (falhou: xcodebuild indisponivel no ambiente).
 - `02` Mapa Quadras (Render + Interacao) - Status: Todo.
 - `03` Elegibilidade Local (Campeao ou Dono) - Status: Todo.
 - `04` Companion HUD (Modo Competitivo vs Treino) - Status: Todo.

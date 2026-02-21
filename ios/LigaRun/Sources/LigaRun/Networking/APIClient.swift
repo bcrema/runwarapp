@@ -2,14 +2,14 @@ import Foundation
 
 @MainActor
 protocol RunSubmissionAPIProviding: Sendable {
-    func submitRunCoordinates(coordinates: [[String: Double]], timestamps: [Int]) async throws -> RunSubmissionResult
+    func submitRunCoordinates(coordinates: [[String: Double]], timestamps: [Int], mode: String, targetQuadraId: String?) async throws -> RunSubmissionResult
 }
 
 @MainActor
 protocol MapAPIProviding: Sendable {
-    func getTiles(bounds: (minLat: Double, minLng: Double, maxLat: Double, maxLng: Double)) async throws -> [Tile]
-    func getDisputedTiles() async throws -> [Tile]
-    func getTile(id: String) async throws -> Tile
+    func getQuadras(bounds: (minLat: Double, minLng: Double, maxLat: Double, maxLng: Double)) async throws -> [Quadra]
+    func getDisputedQuadras() async throws -> [Quadra]
+    func getQuadra(id: String) async throws -> Quadra
 }
 
 @MainActor
@@ -36,6 +36,8 @@ private struct EmptyBody: Encodable {}
 private struct RunCoordinatesRequest: Encodable {
     let coordinates: [[String: Double]]
     let timestamps: [Int]
+    let mode: String
+    let targetQuadraId: String?
 }
 
 private struct RefreshTokenRequest: Encodable {
@@ -108,26 +110,26 @@ final class APIClient {
         try await self.request("/api/users/me", method: "PUT", body: request)
     }
 
-    func getTiles(bounds: (minLat: Double, minLng: Double, maxLat: Double, maxLng: Double)) async throws -> [Tile] {
+    func getQuadras(bounds: (minLat: Double, minLng: Double, maxLat: Double, maxLng: Double)) async throws -> [Quadra] {
         let query = [
             URLQueryItem(name: "minLat", value: "\(bounds.minLat)"),
             URLQueryItem(name: "minLng", value: "\(bounds.minLng)"),
             URLQueryItem(name: "maxLat", value: "\(bounds.maxLat)"),
             URLQueryItem(name: "maxLng", value: "\(bounds.maxLng)")
         ]
-        return try await request("/api/tiles", query: query)
+        return try await request("/api/quadras", query: query)
     }
 
-    func getTile(id: String) async throws -> Tile {
-        try await request("/api/tiles/\(id)")
+    func getQuadra(id: String) async throws -> Quadra {
+        try await request("/api/quadras/\(id)")
     }
 
-    func getTileStats() async throws -> TileStats {
-        try await request("/api/tiles/stats")
+    func getQuadraStats() async throws -> QuadraStats {
+        try await request("/api/quadras/stats")
     }
 
-    func getDisputedTiles() async throws -> [Tile] {
-        try await request("/api/tiles/disputed")
+    func getDisputedQuadras() async throws -> [Quadra] {
+        try await request("/api/quadras/disputed")
     }
 
     func submitRunGpx(fileURL: URL) async throws -> RunSubmissionResult {
@@ -140,8 +142,8 @@ final class APIClient {
         )
     }
 
-    func submitRunCoordinates(coordinates: [[String: Double]], timestamps: [Int]) async throws -> RunSubmissionResult {
-        let payload = RunCoordinatesRequest(coordinates: coordinates, timestamps: timestamps)
+    func submitRunCoordinates(coordinates: [[String: Double]], timestamps: [Int], mode: String, targetQuadraId: String?) async throws -> RunSubmissionResult {
+        let payload = RunCoordinatesRequest(coordinates: coordinates, timestamps: timestamps, mode: mode, targetQuadraId: targetQuadraId)
         return try await self.request("/api/runs/coordinates", method: "POST", body: payload)
     }
 

@@ -52,7 +52,7 @@ final class RunsViewModelTests: XCTestCase {
             isLoopValid: true,
             loopDistance: 5000,
             territoryAction: nil,
-            targetTileId: nil,
+            targetQuadraId: nil,
             isValidForTerritory: true,
             fraudFlags: [],
             createdAt: endTime
