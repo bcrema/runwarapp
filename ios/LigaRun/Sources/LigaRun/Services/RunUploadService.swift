@@ -92,7 +92,9 @@ final class RunUploadService: RunUploadServiceProtocol {
 
             let result = try await api.submitRunCoordinates(
                 coordinates: payload.coordinates,
-                timestamps: payload.timestamps
+                timestamps: payload.timestamps,
+                mode: "COMPETITIVE",
+                targetQuadraId: nil
             )
             updatedSession.status = .uploaded
             updatedSession.lastError = nil

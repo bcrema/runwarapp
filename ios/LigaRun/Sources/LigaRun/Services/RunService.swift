@@ -21,7 +21,7 @@ final class RunService: RunServiceProtocol {
 
     func submitRunCoordinates(coordinates: [CLLocationCoordinate2D], timestamps: [Int]) async throws -> RunSubmissionResult {
         let coordsArray = coordinates.map { ["lat": $0.latitude, "lng": $0.longitude] }
-        return try await apiClient.submitRunCoordinates(coordinates: coordsArray, timestamps: timestamps)
+        return try await apiClient.submitRunCoordinates(coordinates: coordsArray, timestamps: timestamps, mode: "COMPETITIVE", targetQuadraId: nil)
     }
     
     func getMyRuns() async throws -> [Run] {

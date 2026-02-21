@@ -35,35 +35,35 @@ final class MapViewModel: ObservableObject {
         return TileStateSummary(neutral: counts.neutral, owned: counts.owned, disputed: counts.disputed)
     }
 
-    func loadTiles(bounds: (minLat: Double, minLng: Double, maxLat: Double, maxLng: Double)) async {
+    func loadQuadras(bounds: (minLat: Double, minLng: Double, maxLat: Double, maxLng: Double)) async {
         isLoading = true
         errorMessage = nil
         defer { isLoading = false }
 
         do {
-            tiles = try await api.getTiles(bounds: bounds)
+            tiles = try await api.getQuadras(bounds: bounds)
             lastVisibleBounds = bounds
         } catch {
             errorMessage = mapErrorMessage(for: error)
         }
     }
 
-    func refreshVisibleTiles() async {
+    func refreshVisibleQuadras() async {
         guard let lastVisibleBounds else { return }
-        await loadTiles(bounds: lastVisibleBounds)
+        await loadQuadras(bounds: lastVisibleBounds)
     }
 
     func refreshDisputed() async {
         do {
-            tiles = try await api.getDisputedTiles()
+            tiles = try await api.getDisputedQuadras()
         } catch {
             errorMessage = mapErrorMessage(for: error)
         }
     }
 
-    func focusOnTile(id: String) async {
+    func focusOnQuadra(id: String) async {
         do {
-            let tile = try await api.getTile(id: id)
+            let tile = try await api.getQuadra(id: id)
             focusCoordinate = CLLocationCoordinate2D(latitude: tile.lat, longitude: tile.lng)
             upsert(tile: tile)
         } catch {

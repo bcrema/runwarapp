@@ -18,7 +18,7 @@ struct MapScreen: View {
                 tiles: viewModel.tiles,
                 focusCoordinate: viewModel.focusCoordinate,
                 onVisibleRegionChanged: { bounds in
-                    Task { await viewModel.loadTiles(bounds: bounds.toTuple) }
+                    Task { await viewModel.loadQuadras(bounds: bounds.toTuple) }
                 },
                 onTileTapped: { tile in
                     viewModel.selectedTile = tile
@@ -94,15 +94,15 @@ struct MapScreen: View {
         .onChange(of: session.mapFocusTileId) { newValue in
             guard let tileId = newValue else { return }
             Task {
-                await viewModel.refreshVisibleTiles()
-                await viewModel.focusOnTile(id: tileId)
+                await viewModel.refreshVisibleQuadras()
+                await viewModel.focusOnQuadra(id: tileId)
                 session.mapFocusTileId = nil
             }
         }
         .onChange(of: session.selectedTabIndex) { newValue in
             guard newValue == 0 else { return }
             Task {
-                await viewModel.refreshVisibleTiles()
+                await viewModel.refreshVisibleQuadras()
             }
         }
         .fullScreenCover(isPresented: $showingActiveRun) {
