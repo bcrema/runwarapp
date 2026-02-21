@@ -224,7 +224,7 @@ struct ActiveRunHUD: View {
 
         switch reason {
         case .missingUserContext:
-            return "Bloqueio competitivo: sem usuario elegivel"
+            return "Bloqueio competitivo: sem usuário elegível"
         case .missingQuadraOwnershipData:
             return "Bloqueio competitivo: sem dados de posse"
         case .userNotOwnerNorChampion:
