@@ -11,6 +11,29 @@
   - Checklist de smoke manual para mapa/corrida/resultado.
   - Gate final unico para merge.
 
+## Matriz de QA por passo (cobertura minima obrigatoria)
+| Passo | Objetivo funcional | Suites obrigatorias | Cenarios minimos a validar |
+|---|---|---|---|
+| `02` Mapa quadras | Renderizacao, foco e interacao por quadra | `MapViewModelTests` | carga de quadras no mapa, selecao de `quadraId`, fallback de erro amigavel |
+| `03` Elegibilidade local | Regra campeao/dono e pre-validacao | `QuadraEligibilityPolicyTests` | campeao elegivel, dono elegivel, inelegivel vira treino |
+| `04` Companion HUD | Alternancia competitivo/treino | `CompanionRunManagerTests` | mudanca de modo por quadra corrente, consistencia visual/estado |
+| `05` Sync/upload | Persistencia e envio com modo correto | `RunSyncCoordinatorTests`, `RunUploadServiceTests`, `RunSessionStoreTests` | roteamento por `quadraId`, payload competitivo/treino, decode legado |
+| `06` Resultado | Pos-corrida com foco em quadra | `SubmissionResultPresentationTests` | exibicao de `Quadra foco`, CTA de retorno ao mapa |
+
+## Sequencia oficial por rodada (execucao incremental)
+1. **Rodada 1 (imediata, em paralelo)**
+   - `MapViewModelTests`
+   - `QuadraEligibilityPolicyTests`
+2. **Rodada 2 (apos 01+03)**
+   - `CompanionRunManagerTests`
+   - `RunSyncCoordinatorTests`
+   - `RunUploadServiceTests`
+3. **Rodada 3 (apos 02+05)**
+   - `SubmissionResultPresentationTests`
+   - `RunSessionStoreTests`
+4. **Gate final de merge (unico)**
+   - comando completo `xcodebuild ... test` sem `-only-testing`.
+
 ## Suites obrigatorias (minimo)
 1. `MapViewModelTests`
 2. `QuadraEligibilityPolicyTests` (novo)
@@ -47,6 +70,13 @@
 2. Gate final verde no comando completo.
 3. Smoke manual registrado no `STATUS.md`.
 
+## Gate de merge (checklist unico)
+Para liberar merge do pacote v2:
+1. Suites obrigatorias executadas e verdes na branch.
+2. `STATUS.md` atualizado com inicio/fim do passo e comandos reais executados.
+3. Smoke manual registrado (5 itens) com resultado.
+4. Sem regressao aberta para mapa, companion, upload ou resultado.
+5. Gate final `xcodebuild ... test` verde na mesma revisao que sera mergeada.
+
 ## Dependencias
 - Pode iniciar imediato e rodar continuamente.
-

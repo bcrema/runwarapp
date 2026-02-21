@@ -31,12 +31,12 @@
 - `08` Testes, QA e Gates de Merge (V2 Quadras) - Status: Todo.
 - `09` Hardening e Release Readiness (V2 Quadras) - Status: Todo.
 
-- `03` 2026-02-21 - Status: In Progress.
-  Resumo tecnico: inicio da implementacao da politica local de elegibilidade campeao/dono com status competitivo vs treino e razoes padronizadas.
-  Branch/worktree: `work` em `/workspace/runwarapp`.
-  Testes: pendente.
-
-- `03` 2026-02-21 - Status: Blocked.
-  Resumo tecnico: politica `QuadraEligibilityPolicy` implementada com reasons padronizadas, helper de consulta (`canCompete`) e suite dedicada de testes unitarios cobrindo cenarios de dono, campeao e inelegibilidade.
-  Branch/worktree: `work` em `/workspace/runwarapp`.
-  Testes: `cd ios/LigaRun && xcodegen generate` (falhou: `xcodegen` indisponivel no ambiente), `cd ios/LigaRun && xcodebuild -scheme LigaRun -destination "platform=iOS Simulator,name=iPhone 15" -only-testing:LigaRunTests/QuadraEligibilityPolicyTests test` (falhou: `xcodebuild` indisponivel no ambiente).
+## Atualizacoes
+- `08` 2026-02-21 - Status: In Progress.
+  Resumo tecnico: Inicio do passo de QA v2 com consolidacao da matriz de suites obrigatorias, sequencia por rodadas e definicao de gate unico de merge.
+  Branch/worktree: feature/ios-qa-gates-v2-step08 em /workspace/runwarapp.
+  Testes: aguardando execucao das suites obrigatorias e gate final.
+- `08` 2026-02-21 - Status: Blocked.
+  Resumo tecnico: Matriz QA por passo, sequencia oficial por rodada e checklist de gate de merge foram definidos no documento do passo 08; execucao local das suites ficou bloqueada por ausencia de toolchain Apple (xcodegen/xcodebuild) no ambiente Linux atual.
+  Branch/worktree: feature/ios-qa-gates-v2-step08 em /workspace/runwarapp.
+  Testes: `cd ios/LigaRun && xcodegen generate` (falhou: command not found), `cd ios/LigaRun && xcodebuild -scheme LigaRun -destination "platform=iOS Simulator,name=iPhone 17,OS=26.2" -only-testing:LigaRunTests/<SUITE> test` para 7 suites obrigatorias (falhou: command not found), `cd ios/LigaRun && xcodebuild -scheme LigaRun -destination "platform=iOS Simulator,name=iPhone 17,OS=26.2" test` (falhou: command not found).
