@@ -35,6 +35,8 @@ export RUNWAR_SEED_ENABLED=true # opcional: insere dados mock para testes
 
 ### 3. Build e Run
 
+O Gradle está configurado com configuration cache habilitado por padrão para acelerar execuções repetidas.
+
 ```bash
 # Build
 ./gradlew build

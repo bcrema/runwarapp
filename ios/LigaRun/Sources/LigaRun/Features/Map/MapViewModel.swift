@@ -89,10 +89,6 @@ final class MapViewModel: ObservableObject {
             }
         }
 
-<<<<<<< HEAD
-=======
-
->>>>>>> origin/master
         return "Não foi possível carregar o mapa agora. Tente novamente."
     }
 
