@@ -228,7 +228,7 @@ struct ActiveRunHUD: View {
         case .missingQuadraOwnershipData:
             return "Bloqueio competitivo: sem dados de posse"
         case .userNotOwnerNorChampion:
-            return "Bloqueio competitivo: voce nao e dono/campeao"
+            return "Bloqueio competitivo: você não é dono/campeão"
         }
     }
 
