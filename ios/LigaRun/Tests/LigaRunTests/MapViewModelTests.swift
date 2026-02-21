@@ -14,7 +14,7 @@ final class MapViewModelTests: XCTestCase {
 
         await viewModel.loadQuadras(bounds: (minLat: -26, minLng: -50, maxLat: -25, maxLng: -49))
 
-        XCTAssertEqual(viewModel.tiles.map(\.id), ["tile-a", "tile-b"])
+        XCTAssertEqual(viewModel.quadras.map(\.id), ["tile-a", "tile-b"])
         XCTAssertNil(viewModel.errorMessage)
         XCTAssertFalse(viewModel.isLoading)
     }
@@ -29,10 +29,10 @@ final class MapViewModelTests: XCTestCase {
         )
         let viewModel = MapViewModel(session: SessionStore(), api: api)
 
-        await viewModel.refreshDisputed()
+        await viewModel.refreshDisputedQuadras()
 
-        XCTAssertEqual(viewModel.tiles.first?.id, "tile-dispute")
-        XCTAssertTrue(viewModel.tiles.first?.isInDispute ?? false)
+        XCTAssertEqual(viewModel.quadras.first?.id, "tile-dispute")
+        XCTAssertTrue(viewModel.quadras.first?.isInDispute ?? false)
     }
 
     @MainActor
@@ -66,9 +66,9 @@ final class MapViewModelTests: XCTestCase {
         await viewModel.loadQuadras(bounds: (minLat: -26, minLng: -50, maxLat: -25, maxLng: -49))
         await viewModel.focusOnQuadra(id: "tile-focus")
 
-        XCTAssertEqual(viewModel.tiles.count, 1)
-        XCTAssertEqual(viewModel.tiles.first?.shield, 88)
-        XCTAssertTrue(viewModel.tiles.first?.isInDispute ?? false)
+        XCTAssertEqual(viewModel.quadras.count, 1)
+        XCTAssertEqual(viewModel.quadras.first?.shield, 88)
+        XCTAssertTrue(viewModel.quadras.first?.isInDispute ?? false)
     }
 
     @MainActor
@@ -91,7 +91,7 @@ final class MapViewModelTests: XCTestCase {
     }
 
     @MainActor
-    func testTileStateSummaryCountsNeutralOwnedAndDisputed() async {
+    func testQuadraStateSummaryCountsNeutralOwnedAndDisputed() async {
         let tiles = [
             makeQuadraFixture(id: "neutral", ownerType: nil, ownerName: nil, ownerColor: nil),
             makeQuadraFixture(id: "owned", ownerType: .solo),
@@ -106,7 +106,7 @@ final class MapViewModelTests: XCTestCase {
 
         await viewModel.loadQuadras(bounds: (minLat: -26, minLng: -50, maxLat: -25, maxLng: -49))
 
-        XCTAssertEqual(viewModel.tileStateSummary, TileStateSummary(neutral: 1, owned: 1, disputed: 1))
+        XCTAssertEqual(viewModel.quadraStateSummary, QuadraStateSummary(neutral: 1, owned: 1, disputed: 1))
     }
 
     @MainActor
@@ -138,7 +138,7 @@ final class MapViewModelTests: XCTestCase {
     }
 
     @MainActor
-    func testRefreshDisputedTimedOutSetsFriendlyMessage() async {
+    func testRefreshDisputedQuadrasTimedOutSetsFriendlyMessage() async {
         let api = MapAPISpy(
             quadrasResult: .success([]),
             disputedQuadrasResult: .failure(URLError(.timedOut)),
@@ -146,7 +146,7 @@ final class MapViewModelTests: XCTestCase {
         )
         let viewModel = MapViewModel(session: SessionStore(), api: api)
 
-        await viewModel.refreshDisputed()
+        await viewModel.refreshDisputedQuadras()
 
         XCTAssertEqual(viewModel.errorMessage, "A requisição demorou demais. Tente novamente em instantes.")
     }

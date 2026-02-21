@@ -31,3 +31,12 @@
 - `08` Testes, QA e Gates de Merge (V2 Quadras) - Status: Todo.
 - `09` Hardening e Release Readiness (V2 Quadras) - Status: Todo.
 
+- `03` 2026-02-21 - Status: In Progress.
+  Resumo tecnico: inicio da implementacao da politica local de elegibilidade campeao/dono com status competitivo vs treino e razoes padronizadas.
+  Branch/worktree: `work` em `/workspace/runwarapp`.
+  Testes: pendente.
+
+- `03` 2026-02-21 - Status: Blocked.
+  Resumo tecnico: politica `QuadraEligibilityPolicy` implementada com reasons padronizadas, helper de consulta (`canCompete`) e suite dedicada de testes unitarios cobrindo cenarios de dono, campeao e inelegibilidade.
+  Branch/worktree: `work` em `/workspace/runwarapp`.
+  Testes: `cd ios/LigaRun && xcodegen generate` (falhou: `xcodegen` indisponivel no ambiente), `cd ios/LigaRun && xcodebuild -scheme LigaRun -destination "platform=iOS Simulator,name=iPhone 15" -only-testing:LigaRunTests/QuadraEligibilityPolicyTests test` (falhou: `xcodebuild` indisponivel no ambiente).

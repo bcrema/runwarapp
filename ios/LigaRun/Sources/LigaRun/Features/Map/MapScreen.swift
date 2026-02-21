@@ -14,31 +14,31 @@ struct MapScreen: View {
     var body: some View {
         ZStack {
             HexMapView(
-                selectedTile: $viewModel.selectedTile,
-                tiles: viewModel.tiles,
+                selectedQuadra: $viewModel.selectedQuadra,
+                quadras: viewModel.quadras,
                 focusCoordinate: viewModel.focusCoordinate,
                 onVisibleRegionChanged: { bounds in
                     Task { await viewModel.loadQuadras(bounds: bounds.toTuple) }
                 },
-                onTileTapped: { tile in
-                    viewModel.selectedTile = tile
+                onQuadraTapped: { quadra in
+                    viewModel.selectedQuadra = quadra
                 }
             )
             .ignoresSafeArea()
 
             VStack(spacing: 16) {
                 HStack(alignment: .top) {
-                    tileStateLegend
+                    quadraStateLegend
                     Spacer()
                     VStack(alignment: .trailing, spacing: 8) {
                         if viewModel.isLoading {
-                            ProgressView("Carregando tiles...")
+                            ProgressView("Carregando quadras...")
                                 .padding(8)
                                 .background(.ultraThinMaterial, in: Capsule())
                         }
 
                         Button {
-                            Task { await viewModel.refreshDisputed() }
+                            Task { await viewModel.refreshDisputedQuadras() }
                         } label: {
                             Label("Ver disputas", systemImage: "flame")
                                 .font(.subheadline.weight(.semibold))
@@ -72,12 +72,12 @@ struct MapScreen: View {
                 .padding(.bottom, 20)
             }
         }
-        .sheet(item: $viewModel.selectedTile) { tile in
+        .sheet(item: $viewModel.selectedQuadra) { quadra in
             if #available(iOS 16, *) {
-                TileDetailView(tile: tile)
+                QuadraDetailView(quadra: quadra)
                     .presentationDetents([.fraction(0.4), .medium])
             } else {
-                TileDetailView(tile: tile)
+                QuadraDetailView(quadra: quadra)
             }
         }
         .alert("Erro", isPresented: Binding(get: {
@@ -92,10 +92,10 @@ struct MapScreen: View {
             Text(viewModel.errorMessage ?? "")
         }
         .onChange(of: session.mapFocusTileId) { newValue in
-            guard let tileId = newValue else { return }
+            guard let quadraId = newValue else { return }
             Task {
                 await viewModel.refreshVisibleQuadras()
-                await viewModel.focusOnQuadra(id: tileId)
+                await viewModel.focusOnQuadra(id: quadraId)
                 session.mapFocusTileId = nil
             }
         }
@@ -110,8 +110,8 @@ struct MapScreen: View {
         }
     }
 
-    private var tileStateLegend: some View {
-        let summary = viewModel.tileStateSummary
+    private var quadraStateLegend: some View {
+        let summary = viewModel.quadraStateSummary
         return VStack(alignment: .leading, spacing: 6) {
             Label("\(summary.neutral) \(summary.neutral == 1 ? "neutro" : "neutros")", systemImage: "circle.fill")
                 .foregroundColor(.gray)
@@ -138,16 +138,16 @@ private extension CoordinateBounds {
     }
 }
 
-struct TileDetailView: View {
-    let tile: Tile
+struct QuadraDetailView: View {
+    let quadra: Quadra
 
     var body: some View {
         VStack(alignment: .leading, spacing: 12) {
             HStack {
                 VStack(alignment: .leading, spacing: 4) {
-                    Text(tile.ownerName ?? "Território neutro")
+                    Text(quadra.ownerName ?? "Quadra neutra")
                         .font(.headline)
-                    if let type = tile.ownerType {
+                    if let type = quadra.ownerType {
                         Text(type == .bandeira ? "Bandeira" : "Solo")
                             .font(.caption)
                             .padding(.horizontal, 8)
@@ -156,7 +156,7 @@ struct TileDetailView: View {
                     }
                 }
                 Spacer()
-                if let ownerColor = tile.ownerColor {
+                if let ownerColor = quadra.ownerColor {
                     Circle()
                         .fill(Color(hex: ownerColor))
                         .frame(width: 18, height: 18)
@@ -167,24 +167,24 @@ struct TileDetailView: View {
                 HStack {
                     Text("Escudo")
                     Spacer()
-                    Text("\(tile.shield)/100")
+                    Text("\(quadra.shield)/100")
                         .bold()
                 }
-                ProgressView(value: Double(tile.shield), total: 100)
-                    .tint(shieldColor(for: tile.shield))
+                ProgressView(value: Double(quadra.shield), total: 100)
+                    .tint(shieldColor(for: quadra.shield))
             }
 
-            if tile.isInDispute {
-                Label("Tile em disputa", systemImage: "flame.fill")
+            if quadra.isInDispute {
+                Label("Quadra em disputa", systemImage: "flame.fill")
                     .foregroundColor(.orange)
             }
 
-            if tile.isInCooldown {
+            if quadra.isInCooldown {
                 Label("Em cooldown", systemImage: "lock.fill")
                     .foregroundColor(.blue)
             }
 
-            if let guardian = tile.guardianName {
+            if let guardian = quadra.guardianName {
                 Label("Guardião: \(guardian)", systemImage: "shield.lefthalf.fill")
             }
 

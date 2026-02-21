@@ -1,7 +1,7 @@
 import Foundation
 import CoreLocation
 
-struct TileStateSummary: Equatable {
+struct QuadraStateSummary: Equatable {
     let neutral: Int
     let owned: Int
     let disputed: Int
@@ -9,8 +9,8 @@ struct TileStateSummary: Equatable {
 
 @MainActor
 final class MapViewModel: ObservableObject {
-    @Published var tiles: [Tile] = []
-    @Published var selectedTile: Tile?
+    @Published var quadras: [Quadra] = []
+    @Published var selectedQuadra: Quadra?
     @Published var focusCoordinate: CLLocationCoordinate2D?
     @Published var isLoading = false
     @Published var errorMessage: String?
@@ -22,17 +22,17 @@ final class MapViewModel: ObservableObject {
         self.api = api ?? session.api
     }
 
-    var tileStateSummary: TileStateSummary {
-        let counts = tiles.reduce(into: (neutral: 0, owned: 0, disputed: 0)) { result, tile in
-            if tile.isInDispute {
+    var quadraStateSummary: QuadraStateSummary {
+        let counts = quadras.reduce(into: (neutral: 0, owned: 0, disputed: 0)) { result, quadra in
+            if quadra.isInDispute {
                 result.disputed += 1
-            } else if tile.ownerType != nil {
+            } else if quadra.ownerType != nil {
                 result.owned += 1
             } else {
                 result.neutral += 1
             }
         }
-        return TileStateSummary(neutral: counts.neutral, owned: counts.owned, disputed: counts.disputed)
+        return QuadraStateSummary(neutral: counts.neutral, owned: counts.owned, disputed: counts.disputed)
     }
 
     func loadQuadras(bounds: (minLat: Double, minLng: Double, maxLat: Double, maxLng: Double)) async {
@@ -53,7 +53,7 @@ final class MapViewModel: ObservableObject {
         await loadQuadras(bounds: lastVisibleBounds)
     }
 
-    func refreshDisputed() async {
+    func refreshDisputedQuadras() async {
         do {
             tiles = try await api.getDisputedQuadras()
         } catch {
@@ -92,11 +92,11 @@ final class MapViewModel: ObservableObject {
         return "Não foi possível carregar o mapa agora. Tente novamente."
     }
 
-    private func upsert(tile: Tile) {
-        if let existingIndex = tiles.firstIndex(where: { $0.id == tile.id }) {
-            tiles[existingIndex] = tile
+    private func upsert(quadra: Quadra) {
+        if let existingIndex = quadras.firstIndex(where: { $0.id == quadra.id }) {
+            quadras[existingIndex] = quadra
             return
         }
-        tiles.insert(tile, at: 0)
+        quadras.insert(quadra, at: 0)
     }
 }
