@@ -9,17 +9,17 @@ final class StrategicMapViewModel: ObservableObject {
     @Published var isLoading = false
     @Published var errorMessage: String?
     
-    private let tileService: TileService
+    private let tileService: QuadraService
     private var cancellables = Set<AnyCancellable>()
     
     // Cache to prevent re-fetching the same area too often if needed, 
     // but for now we'll just fetch on camera idle.
     
     init(session: SessionStore) {
-        self.tileService = TileService(api: session.api)
+        self.tileService = QuadraService(api: session.api)
     }
     
-    func loadTiles(for bounds: CoordinateBounds) async {
+    func loadQuadras(for bounds: CoordinateBounds) async {
         isLoading = true
         defer { isLoading = false }
         
@@ -30,7 +30,7 @@ final class StrategicMapViewModel: ObservableObject {
         let maxLng = bounds.northeast.longitude
         
         do {
-            let fetchedTiles = try await tileService.fetchTiles(in: (minLat, minLng, maxLat, maxLng))
+            let fetchedTiles = try await tileService.fetchQuadras(in: (minLat, minLng, maxLat, maxLng))
             self.tiles = fetchedTiles
         } catch {
             print("Error fetching tiles: \(error)")
@@ -40,7 +40,7 @@ final class StrategicMapViewModel: ObservableObject {
     
     func selectTile(id: String) async {
         do {
-            selectedTile = try await tileService.getTileDetails(id: id)
+            selectedTile = try await tileService.getQuadraDetails(id: id)
         } catch {
             print("Error fetching tile details: \(error)")
         }

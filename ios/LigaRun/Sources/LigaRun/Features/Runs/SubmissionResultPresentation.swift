@@ -8,7 +8,7 @@ enum SubmissionTerritoryImpact: Equatable {
 }
 
 func submissionTileFocusId(for result: RunSubmissionResult) -> String? {
-    result.turnResult?.tileId ?? result.territoryResult?.tileId ?? result.loopValidation.primaryTile
+    result.turnResult?.quadraId ?? result.territoryResult?.quadraId ?? result.loopValidation.primaryQuadra
 }
 
 func submissionTerritoryImpact(for result: RunSubmissionResult) -> SubmissionTerritoryImpact {

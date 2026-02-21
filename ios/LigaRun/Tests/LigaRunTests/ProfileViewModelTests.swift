@@ -109,7 +109,7 @@ final class ProfileViewModelTests: XCTestCase {
             isLoopValid: true,
             loopDistance: 5400,
             territoryAction: "CONQUEST",
-            targetTileId: "tile-1",
+            targetQuadraId: "quadra-1",
             isValidForTerritory: true,
             fraudFlags: [],
             createdAt: dateString

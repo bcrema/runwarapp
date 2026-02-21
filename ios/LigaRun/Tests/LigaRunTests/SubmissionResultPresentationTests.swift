@@ -22,25 +22,25 @@ final class SubmissionResultPresentationTests: XCTestCase {
 
     func testSubmissionTileFocusPriority() {
         let withTurn = makeRunSubmissionResultFixture(
-            loopValidation: makeLoopValidationFixture(primaryTile: "tile-loop"),
-            territoryResult: makeTerritoryResultFixture(tileId: "tile-territory"),
-            turnResult: makeTurnResultFixture(tileId: "tile-turn")
+            loopValidation: makeLoopValidationFixture(primaryQuadra: "quadra-loop"),
+            territoryResult: makeTerritoryResultFixture(quadraId: "quadra-territory"),
+            turnResult: makeTurnResultFixture(quadraId: "quadra-turn")
         )
-        XCTAssertEqual(submissionTileFocusId(for: withTurn), "tile-turn")
+        XCTAssertEqual(submissionTileFocusId(for: withTurn), "quadra-turn")
 
         let withTerritoryOnly = makeRunSubmissionResultFixture(
-            loopValidation: makeLoopValidationFixture(primaryTile: "tile-loop"),
-            territoryResult: makeTerritoryResultFixture(tileId: "tile-territory"),
+            loopValidation: makeLoopValidationFixture(primaryQuadra: "quadra-loop"),
+            territoryResult: makeTerritoryResultFixture(quadraId: "quadra-territory"),
             turnResult: nil
         )
-        XCTAssertEqual(submissionTileFocusId(for: withTerritoryOnly), "tile-territory")
+        XCTAssertEqual(submissionTileFocusId(for: withTerritoryOnly), "quadra-territory")
 
         let withLoopOnly = makeRunSubmissionResultFixture(
-            loopValidation: makeLoopValidationFixture(primaryTile: "tile-loop"),
+            loopValidation: makeLoopValidationFixture(primaryQuadra: "quadra-loop"),
             territoryResult: nil,
             turnResult: nil
         )
-        XCTAssertEqual(submissionTileFocusId(for: withLoopOnly), "tile-loop")
+        XCTAssertEqual(submissionTileFocusId(for: withLoopOnly), "quadra-loop")
     }
 
     func testTerritoryImpactMappingByActionType() {

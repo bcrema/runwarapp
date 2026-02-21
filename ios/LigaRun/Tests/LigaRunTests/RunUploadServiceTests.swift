@@ -222,15 +222,15 @@ final class RunUploadServiceTests: XCTestCase {
 private final class RunSubmissionAPISpy: RunSubmissionAPIProviding {
     private let result: Result<RunSubmissionResult, Error>
     private(set) var submitCoordinatesCalls = 0
-    private(set) var lastPayload: (coordinates: [[String: Double]], timestamps: [Int])?
+    private(set) var lastPayload: (coordinates: [[String: Double]], timestamps: [Int], mode: String, targetQuadraId: String?)?
 
     init(result: Result<RunSubmissionResult, Error>) {
         self.result = result
     }
 
-    func submitRunCoordinates(coordinates: [[String: Double]], timestamps: [Int]) async throws -> RunSubmissionResult {
+    func submitRunCoordinates(coordinates: [[String: Double]], timestamps: [Int], mode: String, targetQuadraId: String?) async throws -> RunSubmissionResult {
         submitCoordinatesCalls += 1
-        lastPayload = (coordinates, timestamps)
+        lastPayload = (coordinates, timestamps, mode, targetQuadraId)
         return try result.get()
     }
 }
