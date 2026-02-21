@@ -1,7 +1,7 @@
 import Foundation
 import CoreLocation
 
-struct TileStateSummary: Equatable {
+struct QuadraStateSummary: Equatable {
     let neutral: Int
     let owned: Int
     let disputed: Int
@@ -9,8 +9,8 @@ struct TileStateSummary: Equatable {
 
 @MainActor
 final class MapViewModel: ObservableObject {
-    @Published var tiles: [Tile] = []
-    @Published var selectedTile: Tile?
+    @Published var quadras: [Quadra] = []
+    @Published var selectedQuadra: Quadra?
     @Published var focusCoordinate: CLLocationCoordinate2D?
     @Published var isLoading = false
     @Published var errorMessage: String?
@@ -22,50 +22,50 @@ final class MapViewModel: ObservableObject {
         self.api = api ?? session.api
     }
 
-    var tileStateSummary: TileStateSummary {
-        let counts = tiles.reduce(into: (neutral: 0, owned: 0, disputed: 0)) { result, tile in
-            if tile.isInDispute {
+    var quadraStateSummary: QuadraStateSummary {
+        let counts = quadras.reduce(into: (neutral: 0, owned: 0, disputed: 0)) { result, quadra in
+            if quadra.isInDispute {
                 result.disputed += 1
-            } else if tile.ownerType != nil {
+            } else if quadra.ownerType != nil {
                 result.owned += 1
             } else {
                 result.neutral += 1
             }
         }
-        return TileStateSummary(neutral: counts.neutral, owned: counts.owned, disputed: counts.disputed)
+        return QuadraStateSummary(neutral: counts.neutral, owned: counts.owned, disputed: counts.disputed)
     }
 
-    func loadTiles(bounds: (minLat: Double, minLng: Double, maxLat: Double, maxLng: Double)) async {
+    func loadQuadras(bounds: (minLat: Double, minLng: Double, maxLat: Double, maxLng: Double)) async {
         isLoading = true
         errorMessage = nil
         defer { isLoading = false }
 
         do {
-            tiles = try await api.getTiles(bounds: bounds)
+            quadras = try await api.getTiles(bounds: bounds)
             lastVisibleBounds = bounds
         } catch {
             errorMessage = mapErrorMessage(for: error)
         }
     }
 
-    func refreshVisibleTiles() async {
+    func refreshVisibleQuadras() async {
         guard let lastVisibleBounds else { return }
-        await loadTiles(bounds: lastVisibleBounds)
+        await loadQuadras(bounds: lastVisibleBounds)
     }
 
-    func refreshDisputed() async {
+    func refreshDisputedQuadras() async {
         do {
-            tiles = try await api.getDisputedTiles()
+            quadras = try await api.getDisputedTiles()
         } catch {
             errorMessage = mapErrorMessage(for: error)
         }
     }
 
-    func focusOnTile(id: String) async {
+    func focusOnQuadra(id: String) async {
         do {
-            let tile = try await api.getTile(id: id)
-            focusCoordinate = CLLocationCoordinate2D(latitude: tile.lat, longitude: tile.lng)
-            upsert(tile: tile)
+            let quadra = try await api.getTile(id: id)
+            focusCoordinate = CLLocationCoordinate2D(latitude: quadra.lat, longitude: quadra.lng)
+            upsert(quadra: quadra)
         } catch {
             errorMessage = mapErrorMessage(for: error)
         }
@@ -92,11 +92,11 @@ final class MapViewModel: ObservableObject {
         return "Não foi possível carregar o mapa agora. Tente novamente."
     }
 
-    private func upsert(tile: Tile) {
-        if let existingIndex = tiles.firstIndex(where: { $0.id == tile.id }) {
-            tiles[existingIndex] = tile
+    private func upsert(quadra: Quadra) {
+        if let existingIndex = quadras.firstIndex(where: { $0.id == quadra.id }) {
+            quadras[existingIndex] = quadra
             return
         }
-        tiles.insert(tile, at: 0)
+        quadras.insert(quadra, at: 0)
     }
 }

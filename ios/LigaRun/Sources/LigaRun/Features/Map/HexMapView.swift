@@ -3,14 +3,14 @@ import MapboxMaps
 import Turf
 
 struct HexMapView: UIViewRepresentable {
-    @Binding var selectedTile: Tile?
-    var tiles: [Tile]
+    @Binding var selectedQuadra: Quadra?
+    var quadras: [Quadra]
     var focusCoordinate: CLLocationCoordinate2D?
     var routeCoordinates: [CLLocationCoordinate2D] = []
     var showsUserLocation: Bool = false
     var styleURI: StyleURI = .dark
     var onVisibleRegionChanged: ((CoordinateBounds) -> Void)?
-    var onTileTapped: ((Tile) -> Void)?
+    var onQuadraTapped: ((Quadra) -> Void)?
 
     func makeUIView(context: Context) -> MapView {
         MapboxOptions.accessToken = AppEnvironment.mapboxAccessToken
@@ -29,9 +29,9 @@ struct HexMapView: UIViewRepresentable {
     }
 
     func updateUIView(_ uiView: MapView, context: Context) {
-        context.coordinator.updateTiles(tiles)
-        context.coordinator.onTileTapped = onTileTapped
-        context.coordinator.selectedTile = selectedTile
+        context.coordinator.updateQuadras(quadras)
+        context.coordinator.onQuadraTapped = onQuadraTapped
+        context.coordinator.selectedQuadra = selectedQuadra
         context.coordinator.onVisibleRegionChanged = onVisibleRegionChanged
         context.coordinator.focusCoordinate = focusCoordinate
         context.coordinator.showsUserLocation = showsUserLocation
@@ -47,9 +47,9 @@ struct HexMapView: UIViewRepresentable {
     @MainActor
     final class Coordinator {
         private weak var mapView: MapView?
-        var onTileTapped: ((Tile) -> Void)?
+        var onQuadraTapped: ((Quadra) -> Void)?
         var onVisibleRegionChanged: ((CoordinateBounds) -> Void)?
-        var selectedTile: Tile?
+        var selectedQuadra: Quadra?
         var focusCoordinate: CLLocationCoordinate2D?
         var showsUserLocation: Bool = false
         private var addedTapHandler = false
@@ -65,16 +65,16 @@ struct HexMapView: UIViewRepresentable {
 
         func configureStyle() {
             guard let mapView else { return }
-            var source = GeoJSONSource(id: "hex-source")
+            var source = GeoJSONSource(id: "territory-source")
             source.data = .featureCollection(.init(features: []))
             try? mapView.mapboxMap.addSource(source)
 
-            var fillLayer = FillLayer(id: "hex-fill", source: "hex-source")
+            var fillLayer = FillLayer(id: "territory-fill", source: "territory-source")
             fillLayer.fillColor = .expression(Exp(.get) { "fillColor" })
             fillLayer.fillOpacity = .expression(Exp(.get) { "fillOpacity" })
             try? mapView.mapboxMap.addLayer(fillLayer)
 
-            var outline = LineLayer(id: "hex-outline", source: "hex-source")
+            var outline = LineLayer(id: "territory-outline", source: "territory-source")
             outline.lineColor = .expression(Exp(.get) { "strokeColor" })
             outline.lineWidth = .constant(1.0)
             outline.lineOpacity = .constant(0.6)
@@ -100,15 +100,15 @@ struct HexMapView: UIViewRepresentable {
             guard let mapView, !addedTapHandler else { return }
             addedTapHandler = true
 
-            let interaction = TapInteraction(.layer("hex-fill")) { [weak self] feature, _ in
+            let interaction = TapInteraction(.layer("territory-fill")) { [weak self] feature, _ in
                 guard
                     let self,
                     let id = feature.id?.id,
-                    let tile = self.currentTiles.first(where: { $0.id == id })
+                    let quadra = self.currentQuadras.first(where: { $0.id == id })
                 else { return false }
 
-                self.onTileTapped?(tile)
-                self.selectedTile = tile
+                self.onQuadraTapped?(quadra)
+                self.selectedQuadra = quadra
                 return true
             }
 
@@ -116,21 +116,21 @@ struct HexMapView: UIViewRepresentable {
             cancellables.append(tapCancelable)
         }
 
-        private var currentTiles: [Tile] = []
+        private var currentQuadras: [Quadra] = []
 
-        func updateTiles(_ tiles: [Tile]) {
-            currentTiles = tiles
+        func updateQuadras(_ quadras: [Quadra]) {
+            currentQuadras = quadras
             guard let mapView,
-                  mapView.mapboxMap.sourceExists(withId: "hex-source")
+                  mapView.mapboxMap.sourceExists(withId: "territory-source")
             else { return }
 
-            let features: [Feature] = tiles.compactMap { tile in
-                makePolygonFeature(for: tile)
+            let features: [Feature] = quadras.compactMap { quadra in
+                makePolygonFeature(for: quadra)
             }
 
             let collection = FeatureCollection(features: features)
             let data = GeoJSONSourceData.featureCollection(collection)
-            mapView.mapboxMap.updateGeoJSONSource(withId: "hex-source", data: data)
+            mapView.mapboxMap.updateGeoJSONSource(withId: "territory-source", data: data)
         }
 
         func updateRoute(_ coordinates: [CLLocationCoordinate2D]) {
@@ -203,8 +203,8 @@ struct HexMapView: UIViewRepresentable {
             mapView.camera.ease(to: camera, duration: 0.8, curve: .easeInOut)
         }
 
-        private func makePolygonFeature(for tile: Tile) -> Feature? {
-            let coords = tile.boundaryCoordinates.map {
+        private func makePolygonFeature(for quadra: Quadra) -> Feature? {
+            let coords = quadra.boundaryCoordinates.map {
                 LocationCoordinate2D(latitude: $0.latitude, longitude: $0.longitude)
             }
 
@@ -220,22 +220,22 @@ struct HexMapView: UIViewRepresentable {
 
             let polygon = Polygon([ring])
             var feature = Feature(geometry: .polygon(polygon))
-            feature.identifier = .string(tile.id)
+            feature.identifier = .string(quadra.id)
 
             let fillColor: String
             let strokeColor: String
             let fillOpacity: Double
 
-            if tile.isInDispute {
-                fillColor = tile.ownerColor ?? "#f59e0b"
+            if quadra.isInDispute {
+                fillColor = quadra.ownerColor ?? "#f59e0b"
                 strokeColor = "#f97316"
                 fillOpacity = 0.55
-            } else if tile.ownerType == nil {
+            } else if quadra.ownerType == nil {
                 fillColor = "#6b7280"
                 strokeColor = "#cbd5e1"
                 fillOpacity = 0.18
             } else {
-                fillColor = tile.ownerColor ?? "#22c55e"
+                fillColor = quadra.ownerColor ?? "#22c55e"
                 strokeColor = "#ffffff"
                 fillOpacity = 0.40
             }

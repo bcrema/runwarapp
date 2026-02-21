@@ -35,14 +35,14 @@ struct ActiveRunHUD: View {
     var body: some View {
         ZStack(alignment: .top) {
             HexMapView(
-                selectedTile: .constant(nil),
-                tiles: mapViewModel.tiles,
+                selectedQuadra: .constant(nil),
+                quadras: mapViewModel.quadras,
                 focusCoordinate: focusCoordinate,
                 routeCoordinates: runManager.routeCoordinates,
                 showsUserLocation: true,
                 styleURI: .standard,
                 onVisibleRegionChanged: { bounds in
-                    Task { await mapViewModel.loadTiles(bounds: bounds.toTuple) }
+                    Task { await mapViewModel.loadQuadras(bounds: bounds.toTuple) }
                 }
             )
             .ignoresSafeArea()
@@ -82,7 +82,7 @@ struct ActiveRunHUD: View {
             session.selectedTabIndex = 1
             dismiss()
         }
-        .onReceive(mapViewModel.$tiles) { _ in
+        .onReceive(mapViewModel.$quadras) { _ in
             updateCurrentTile()
         }
         .alert("Erro", isPresented: Binding(get: {
@@ -386,7 +386,7 @@ struct ActiveRunHUD: View {
             return
         }
 
-        currentTile = mapViewModel.tiles.first { tile in
+        currentTile = mapViewModel.quadras.first { tile in
             GeoUtils.isPoint(location.coordinate, inside: tile.boundaryCoordinates)
         }
     }
