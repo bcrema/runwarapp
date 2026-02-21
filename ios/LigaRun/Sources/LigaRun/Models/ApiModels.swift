@@ -60,6 +60,9 @@ struct Tile: Codable, Identifiable {
     let shield: Int
     let isInCooldown: Bool
     let isInDispute: Bool
+    let championUserId: String?
+    let championBandeiraId: String?
+    let championName: String?
     let guardianId: String?
     let guardianName: String?
 
