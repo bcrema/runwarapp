@@ -9,8 +9,8 @@ struct HexMapView: UIViewRepresentable {
     var routeCoordinates: [CLLocationCoordinate2D] = []
     var showsUserLocation: Bool = false
     var styleURI: StyleURI = .dark
-    var onVisibleRegionChanged: ((CoordinateBounds) -> Void)?
-    var onQuadraTapped: ((Quadra) -> Void)?
+    var onVisibleRegionChanged: ((CoordinateBounds) -> Void)? = nil
+    var onQuadraTapped: ((Quadra) -> Void)? = nil
 
     func makeUIView(context: Context) -> MapView {
         MapboxOptions.accessToken = AppEnvironment.mapboxAccessToken
