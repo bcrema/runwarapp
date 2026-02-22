@@ -362,7 +362,7 @@ struct SubmissionResultView: View {
         case .attack:
             return "A corrida causou impacto ofensivo na quadra alvo."
         case .defense:
-            return "A corrida reforcou a defesa da quadra alvo."
+            return "A corrida reforçou a defesa da quadra alvo."
         case .noEffect:
             return "A corrida foi salva, mas não alterou território."
         }
