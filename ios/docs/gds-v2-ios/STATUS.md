@@ -36,10 +36,6 @@
   Resumo tecnico: Fluxo pos-corrida migrado para semantica de quadra no iOS (`submissionQuadraFocusId`, labels/textos em RunsView, `mapFocusQuadraId` em SessionStore/MapScreen) e reason-map atualizado para chaves `quadra_*` com compatibilidade legada para `tile_*`; testes unitarios do presentation ajustados para foco/reasons de quadra.
   Branch/worktree: feature/ios-step06-resultado-quadras em /workspace/runwarapp.
   Testes: `cd ios/LigaRun && xcodegen generate` (falhou: command not found), `cd ios/LigaRun && xcodebuild -scheme LigaRun -destination "platform=iOS Simulator,name=iPhone 15" -only-testing:LigaRunTests/SubmissionResultPresentationTests test` (falhou: command not found).
-- `06` 2026-02-21 - Status: In Progress.
-  Resumo tecnico: Inicio da migracao do fluxo de resultado pos-corrida para semantica de quadra (`quadraId`) com ajuste planejado de foco no mapa e labels de UX.
-  Branch/worktree: feature/ios-step06-resultado-quadras em /workspace/runwarapp.
-  Testes: em execucao.
 - `08` 2026-02-21 - Status: In Progress.
   Resumo tecnico: Inicio do passo de QA v2 com consolidacao da matriz de suites obrigatorias, sequencia por rodadas e definicao de gate unico de merge.
   Branch/worktree: feature/ios-qa-gates-v2-step08 em /workspace/runwarapp.
