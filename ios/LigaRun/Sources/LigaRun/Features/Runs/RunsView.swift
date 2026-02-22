@@ -317,8 +317,8 @@ struct SubmissionResultView: View {
         submissionTerritoryImpact(for: result)
     }
 
-    private var tileFocusId: String? {
-        submissionTileFocusId(for: result)
+    private var quadraFocusId: String? {
+        submissionQuadraFocusId(for: result)
     }
 
     private var reasons: [String] {
@@ -358,11 +358,11 @@ struct SubmissionResultView: View {
 
         switch territoryImpact {
         case .conquest:
-            return "A corrida conquistou um tile para sua conta/bandeira."
+            return "A corrida conquistou uma quadra para sua conta/bandeira."
         case .attack:
-            return "A corrida causou impacto ofensivo no tile alvo."
+            return "A corrida causou impacto ofensivo na quadra alvo."
         case .defense:
-            return "A corrida reforçou a defesa do tile alvo."
+            return "A corrida reforcou a defesa da quadra alvo."
         case .noEffect:
             return "A corrida foi salva, mas não alterou território."
         }
@@ -421,7 +421,7 @@ struct SubmissionResultView: View {
         return LazyVGrid(columns: columns, spacing: 10) {
             metricCell(title: "Distância", value: String(format: "%.2f km", result.run.distance))
             metricCell(title: "Tempo", value: submissionRunDurationLabel(for: result))
-            metricCell(title: "Tile foco", value: tileFocusId ?? "—")
+            metricCell(title: "Quadra foco", value: quadraFocusId ?? "—")
             metricCell(title: "Escudo", value: submissionShieldDeltaLabel(for: result))
         }
     }
@@ -465,8 +465,8 @@ struct SubmissionResultView: View {
     private var actionButtons: some View {
         VStack(spacing: 10) {
             Button {
-                guard let tileId = tileFocusId else { return }
-                session.mapFocusTileId = tileId
+                guard let quadraId = quadraFocusId else { return }
+                session.mapFocusQuadraId = quadraId
                 session.selectedTabIndex = 0
                 dismiss()
             } label: {
@@ -476,7 +476,7 @@ struct SubmissionResultView: View {
                     .padding(.vertical, 12)
             }
             .buttonStyle(.borderedProminent)
-            .disabled(tileFocusId == nil)
+            .disabled(quadraFocusId == nil)
 
             Button("Fechar") {
                 dismiss()

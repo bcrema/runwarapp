@@ -7,7 +7,7 @@ final class SessionStore: ObservableObject {
     @Published private(set) var refreshToken: String?
     @Published var currentUser: User?
     @Published var selectedTabIndex: Int = 0
-    @Published var mapFocusTileId: String?
+    @Published var mapFocusQuadraId: String?
     @Published var pendingSubmissionResult: RunSubmissionResult?
 
     private let keychain = KeychainStore(service: AppEnvironment.keychainService)

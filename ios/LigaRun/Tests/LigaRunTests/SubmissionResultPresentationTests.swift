@@ -4,8 +4,8 @@ import XCTest
 final class SubmissionResultPresentationTests: XCTestCase {
     func testTranslateSubmissionReasonKnownMapping() {
         XCTAssertEqual(
-            translateSubmissionReason("tile_in_cooldown"),
-            "Tile em cooldown; ataque bloqueado no momento."
+            translateSubmissionReason("quadra_in_cooldown"),
+            "Quadra em cooldown; ataque bloqueado no momento."
         )
     }
 
@@ -20,27 +20,27 @@ final class SubmissionResultPresentationTests: XCTestCase {
         XCTAssertEqual(translateSubmissionReason("unexpected_reason"), "unexpected_reason")
     }
 
-    func testSubmissionTileFocusPriority() {
+    func testSubmissionQuadraFocusPriority() {
         let withTurn = makeRunSubmissionResultFixture(
             loopValidation: makeLoopValidationFixture(primaryQuadra: "quadra-loop"),
             territoryResult: makeTerritoryResultFixture(quadraId: "quadra-territory"),
             turnResult: makeTurnResultFixture(quadraId: "quadra-turn")
         )
-        XCTAssertEqual(submissionTileFocusId(for: withTurn), "quadra-turn")
+        XCTAssertEqual(submissionQuadraFocusId(for: withTurn), "quadra-turn")
 
         let withTerritoryOnly = makeRunSubmissionResultFixture(
             loopValidation: makeLoopValidationFixture(primaryQuadra: "quadra-loop"),
             territoryResult: makeTerritoryResultFixture(quadraId: "quadra-territory"),
             turnResult: nil
         )
-        XCTAssertEqual(submissionTileFocusId(for: withTerritoryOnly), "quadra-territory")
+        XCTAssertEqual(submissionQuadraFocusId(for: withTerritoryOnly), "quadra-territory")
 
         let withLoopOnly = makeRunSubmissionResultFixture(
             loopValidation: makeLoopValidationFixture(primaryQuadra: "quadra-loop"),
             territoryResult: nil,
             turnResult: nil
         )
-        XCTAssertEqual(submissionTileFocusId(for: withLoopOnly), "quadra-loop")
+        XCTAssertEqual(submissionQuadraFocusId(for: withLoopOnly), "quadra-loop")
     }
 
     func testTerritoryImpactMappingByActionType() {
@@ -70,7 +70,7 @@ final class SubmissionResultPresentationTests: XCTestCase {
                 fraudFlags: ["high_speed_spike"]
             ),
             territoryResult: makeTerritoryResultFixture(reason: "distance_too_short"),
-            turnResult: makeTurnResultFixture(reasons: ["tile_in_cooldown"])
+            turnResult: makeTurnResultFixture(reasons: ["quadra_in_cooldown"])
         )
 
         let reasons = submissionResultReasons(for: result)
@@ -78,7 +78,7 @@ final class SubmissionResultPresentationTests: XCTestCase {
         XCTAssertEqual(
             reasons,
             [
-                "Tile em cooldown; ataque bloqueado no momento.",
+                "Quadra em cooldown; ataque bloqueado no momento.",
                 "Distancia muito curta (minimo 1.2km)",
                 "Padrao suspeito detectado (high_speed_spike)"
             ]

@@ -7,7 +7,7 @@ enum SubmissionTerritoryImpact: Equatable {
     case noEffect
 }
 
-func submissionTileFocusId(for result: RunSubmissionResult) -> String? {
+func submissionQuadraFocusId(for result: RunSubmissionResult) -> String? {
     result.turnResult?.quadraId ?? result.territoryResult?.quadraId ?? result.loopValidation.primaryQuadra
 }
 
@@ -91,18 +91,25 @@ func translateSubmissionReason(_ reason: String) -> String {
         "distance_too_short": "Distancia muito curta (minimo 1.2km)",
         "duration_too_short": "Duracao muito curta (minimo 7 minutos)",
         "loop_not_closed": "Loop nao fechado (maximo 40m entre inicio e fim)",
-        "insufficient_tile_coverage": "Cobertura insuficiente do tile (minimo 60%)",
+        "insufficient_quadra_coverage": "Cobertura insuficiente da quadra (minimo 60%)",
+        "insufficient_tile_coverage": "Cobertura insuficiente da quadra (minimo 60%)",
         "fraud_detected": "Padrao suspeito detectado",
         "outside_game_area": "Fora da area do jogo (Curitiba)",
-        "no_primary_tile": "Nao foi possivel determinar um tile principal para essa corrida.",
+        "no_primary_quadra": "Nao foi possivel determinar uma quadra principal para essa corrida.",
+        "no_primary_tile": "Nao foi possivel determinar uma quadra principal para essa corrida.",
         "user_daily_cap_reached": "Limite diario de acoes atingido.",
         "bandeira_daily_cap_reached": "Limite diario de acoes da bandeira atingido.",
         "cannot_determine_action": "Nao foi possivel determinar a acao (conquista/ataque/defesa).",
-        "tile_already_owned": "Tile ja possui dono.",
-        "cannot_attack_neutral": "Nao e possivel atacar um tile neutro.",
-        "cannot_attack_own_tile": "Nao e possivel atacar o proprio tile.",
-        "tile_in_cooldown": "Tile em cooldown; ataque bloqueado no momento.",
-        "cannot_defend_rival_tile": "Nao e possivel defender um tile que nao e seu."
+        "quadra_already_owned": "Quadra ja possui dono.",
+        "tile_already_owned": "Quadra ja possui dono.",
+        "cannot_attack_neutral_quadra": "Nao e possivel atacar uma quadra neutra.",
+        "cannot_attack_neutral": "Nao e possivel atacar uma quadra neutra.",
+        "cannot_attack_own_quadra": "Nao e possivel atacar a propria quadra.",
+        "cannot_attack_own_tile": "Nao e possivel atacar a propria quadra.",
+        "quadra_in_cooldown": "Quadra em cooldown; ataque bloqueado no momento.",
+        "tile_in_cooldown": "Quadra em cooldown; ataque bloqueado no momento.",
+        "cannot_defend_rival_quadra": "Nao e possivel defender uma quadra que nao e sua.",
+        "cannot_defend_rival_tile": "Nao e possivel defender uma quadra que nao e sua."
     ]
     return translations[reason] ?? reason
 }
