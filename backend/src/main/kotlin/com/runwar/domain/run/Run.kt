@@ -34,7 +34,7 @@ class Run(
         @Column(name = "closing_distance") var closingDistance: BigDecimal? = null,
         @Enumerated(EnumType.STRING)
         @Column(name = "competition_mode", nullable = false)
-        var competitionMode: RunCompetitionMode = RunCompetitionMode.COMPETITIVE,
+        var competitionMode: RunCompetitionMode = RunCompetitionMode.TRAINING,
         @Enumerated(EnumType.STRING)
         @Column(name = "territory_action")
         var territoryAction: TerritoryActionType? = null,

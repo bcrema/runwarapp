@@ -64,8 +64,8 @@ class TileControllerTest {
             championUserId = java.util.UUID.fromString("11111111-1111-1111-1111-111111111111"),
             championBandeiraId = null,
             championName = "runner",
-            guardianId = null,
-            guardianName = null
+            guardianId = java.util.UUID.fromString("11111111-1111-1111-1111-111111111111"),
+            guardianName = "runner"
         )
     }
 }

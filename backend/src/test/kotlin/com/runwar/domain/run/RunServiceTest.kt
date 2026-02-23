@@ -25,7 +25,6 @@ import org.junit.jupiter.api.Assertions.assertNull
 import org.junit.jupiter.api.Assertions.assertThrows
 import org.junit.jupiter.api.Test
 import java.util.UUID
-import java.util.Optional
 
 class RunServiceTest {
 
@@ -265,7 +264,7 @@ class RunServiceTest {
             primaryTile = "8928308280fffff",
             fraudFlags = emptyList()
         )
-        every { tileRepository.findById(any()) } returns Optional.empty()
+        every { tileRepository.findById(any()) } returns java.util.Optional.empty()
         every { runRepository.save(any()) } answers { firstArg() }
 
         val service = RunService(

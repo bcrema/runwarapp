@@ -31,7 +31,8 @@ class RunIngestionController(private val runService: RunService) {
             @JsonAlias("points")
             val coordinates: List<CoordinatePoint>,
             val timestamps: List<Long>,
-            val origin: RunOrigin? = null
+            val origin: RunOrigin? = null,
+            val competitionMode: RunCompetitionMode? = null
     )
 
     data class CoordinatePoint(
@@ -92,6 +93,7 @@ class RunIngestionController(private val runService: RunService) {
         val coordinates = request.coordinates.map { LatLngPoint(it.lat, it.lng) }
         val timestamps = normalizedTimestamps.instants
         val origin = request.origin ?: RunOrigin.IMPORT
+        val competitionMode = request.competitionMode ?: RunCompetitionMode.COMPETITIVE
 
         val result =
             runService.submitRunFromCoordinates(
@@ -99,7 +101,7 @@ class RunIngestionController(private val runService: RunService) {
                 coordinates,
                 timestamps,
                 origin,
-                RunCompetitionMode.COMPETITIVE,
+                competitionMode,
                 null
             )
         return ResponseEntity.ok(RunIngestionResponse(result.run.id, result.run.status))
