@@ -95,7 +95,7 @@ class RunTelemetryServiceTest {
 
         val payloadNode = objectMapper.readTree(saved.captured.payloadJson)
         assertEquals(run.id.toString(), payloadNode["runId"].asText())
-        assertEquals("COMPETITIVE", payloadNode["competitionMode"].asText())
+        assertEquals(run.competitionMode.name, payloadNode["competitionMode"].asText())
         assertTrue(payloadNode["loop"]["isLoopValid"].asBoolean())
     }
 

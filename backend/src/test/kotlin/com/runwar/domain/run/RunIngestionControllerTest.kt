@@ -115,7 +115,20 @@ class RunIngestionControllerTest {
             run = runDto,
             loopValidation = loopValidation,
             territoryResult = null,
-            turnResult = null
+            turnResult =
+                TurnResult(
+                    actionType = null,
+                    quadraId = "8928308280fffff",
+                    h3Index = "8928308280fffff",
+                    previousOwner = null,
+                    newOwner = null,
+                    shieldBefore = null,
+                    shieldAfter = null,
+                    cooldownUntil = null,
+                    disputeState = DisputeState.NONE,
+                    capsRemaining = CapsRemaining(userActionsRemaining = 3, bandeiraActionsRemaining = null),
+                    reasons = emptyList()
+                )
         )
     }
 }
