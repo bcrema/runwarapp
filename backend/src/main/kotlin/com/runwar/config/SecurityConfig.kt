@@ -30,7 +30,7 @@ class SecurityConfig(
                             .permitAll()
                             .requestMatchers("/api-docs/**", "/swagger-ui/**", "/swagger-ui.html")
                             .permitAll()
-                            .requestMatchers("/api/tiles/**")
+                            .requestMatchers("/api/quadras/**")
                             .permitAll() // Public map data
                             .requestMatchers("/api/rankings/**")
                             .permitAll() // Public rankings

@@ -33,6 +33,9 @@ class Run(
         @Column(name = "loop_distance") var loopDistance: BigDecimal? = null,
         @Column(name = "closing_distance") var closingDistance: BigDecimal? = null,
         @Enumerated(EnumType.STRING)
+        @Column(name = "competition_mode", nullable = false)
+        var competitionMode: RunCompetitionMode = RunCompetitionMode.TRAINING,
+        @Enumerated(EnumType.STRING)
         @Column(name = "territory_action")
         var territoryAction: TerritoryActionType? = null,
         @ManyToOne(fetch = FetchType.LAZY)
@@ -70,4 +73,9 @@ enum class RunStatus {
     RECEIVED,
     VALIDATED,
     REJECTED
+}
+
+enum class RunCompetitionMode {
+    COMPETITIVE,
+    TRAINING
 }

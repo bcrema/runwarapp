@@ -223,6 +223,82 @@ class RunServiceTest {
     }
 
     @Test
+    fun `submitRunFromCoordinates in TRAINING mode skips territory action and does not consume caps`() {
+        val runRepository = mockk<RunRepository>()
+        val gpxParser = mockk<GpxParser>(relaxed = true)
+        val loopValidator = mockk<LoopValidator>()
+        val loopValidationFlagService = mockk<LoopValidationFlagService>()
+        val shieldMechanics = mockk<ShieldMechanics>(relaxed = true)
+        val tileRepository = mockk<TileRepository>()
+        val capsService = mockk<CapsService>()
+        val runTelemetryService = mockk<RunTelemetryService>(relaxed = true)
+        val userRepository = mockk<UserRepository>()
+
+        val user = User(
+            id = UUID.randomUUID(),
+            email = "runner@example.com",
+            username = "runner",
+            passwordHash = "hash",
+            totalRuns = 0,
+            totalDistance = BigDecimal.ZERO
+        )
+
+        every { userRepository.findByIdWithBandeira(user.id) } returns user
+        every { capsService.checkCaps(user) } returns CapsService.CapsCheck(
+            actionsToday = 1,
+            bandeiraActionsToday = null,
+            userCapReached = false,
+            bandeiraCapReached = false
+        )
+        every { loopValidationFlagService.resolveFlags(null) } returns LoopValidationFlags()
+        every { loopValidator.validate(any(), any()) } returns LoopValidator.ValidationResult(
+            isLoopValid = true,
+            reasons = emptyList(),
+            metrics = LoopValidationMetrics(
+                loopDistanceMeters = 1500.0,
+                loopDurationSeconds = 600,
+                closureMeters = 10.0,
+                coveragePct = 0.8
+            ),
+            tilesCovered = listOf("8928308280fffff"),
+            primaryTile = "8928308280fffff",
+            fraudFlags = emptyList()
+        )
+        every { tileRepository.findById(any()) } returns java.util.Optional.empty()
+        every { runRepository.save(any()) } answers { firstArg() }
+
+        val service = RunService(
+            runRepository = runRepository,
+            gpxParser = gpxParser,
+            loopValidator = loopValidator,
+            loopValidationFlagService = loopValidationFlagService,
+            shieldMechanics = shieldMechanics,
+            gameProperties = GameProperties(userDailyActionCap = 3),
+            tileRepository = tileRepository,
+            capsService = capsService,
+            runTelemetryService = runTelemetryService,
+            userRepository = userRepository
+        )
+
+        val result = service.submitRunFromCoordinates(
+            user = user,
+            coordinates = listOf(
+                LatLngPoint(-25.43, -49.27),
+                LatLngPoint(-25.431, -49.271)
+            ),
+            timestamps = listOf(Instant.now().minusSeconds(600), Instant.now()),
+            origin = RunOrigin.IOS,
+            competitionMode = RunCompetitionMode.TRAINING,
+            targetQuadraId = "8928308280fffff"
+        )
+
+        assertNull(result.territoryResult)
+        assertNull(result.turnResult.actionType)
+        assertEquals(2, result.turnResult.capsRemaining.userActionsRemaining)
+        verify(exactly = 0) { shieldMechanics.processAction(any(), any()) }
+    }
+
+    @Test
     fun `run dto exposes kilometer and meter distance fields`() {
         val user = User(
             id = UUID.randomUUID(),

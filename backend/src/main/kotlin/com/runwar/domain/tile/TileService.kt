@@ -21,7 +21,7 @@ class TileService(
     private val gameProperties: GameProperties
 ) {
     
-    data class TileDto(
+    data class QuadraDto(
         val id: String,
         val lat: Double,
         val lng: Double,
@@ -33,11 +33,14 @@ class TileService(
         val shield: Int,
         val isInCooldown: Boolean,
         val isInDispute: Boolean,
+        val championUserId: UUID?,
+        val championBandeiraId: UUID?,
+        val championName: String?,
         val guardianId: UUID?,
         val guardianName: String?
     )
 
-    data class ViewportTileDto(
+    data class ViewportQuadraDto(
         val h3Index: String,
         val ownerType: String?,
         val ownerId: UUID?,
@@ -56,7 +59,7 @@ class TileService(
 
     private data class CachedViewportTiles(
         val createdAt: Instant,
-        val tiles: List<ViewportTileDto>
+        val tiles: List<ViewportQuadraDto>
     )
 
     private val viewportCache = ConcurrentHashMap<String, CachedViewportTiles>()
@@ -70,7 +73,7 @@ class TileService(
         minLng: Double,
         maxLat: Double,
         maxLng: Double
-    ): List<TileDto> {
+    ): List<QuadraDto> {
         val tiles = tileRepository.findTilesInBoundingBox(minLat, minLng, maxLat, maxLng)
         return tiles.map { toDto(it) }
     }
@@ -78,7 +81,7 @@ class TileService(
     /**
      * Get tiles within a bounding box with lightweight fields for map viewport rendering.
      */
-    fun getViewportTiles(bounds: BoundingBox): List<ViewportTileDto> {
+    fun getViewportTiles(bounds: BoundingBox): List<ViewportQuadraDto> {
         val cacheKey = buildCacheKey(bounds)
         return viewportCache.compute(cacheKey) { _, cached ->
             if (cached != null && !isCacheExpired(cached)) {
@@ -120,35 +123,35 @@ class TileService(
     /**
      * Get a single tile by ID with full details
      */
-    fun getTileById(tileId: String): TileDto? {
+    fun getTileById(tileId: String): QuadraDto? {
         return tileRepository.findById(tileId).map { toDto(it) }.orElse(null)
     }
     
     /**
      * Get all tiles owned by a user (solo)
      */
-    fun getTilesByUser(userId: UUID): List<TileDto> {
+    fun getTilesByUser(userId: UUID): List<QuadraDto> {
         return tileRepository.findByOwner(userId, OwnerType.SOLO).map { toDto(it) }
     }
     
     /**
      * Get all tiles owned by a bandeira
      */
-    fun getTilesByBandeira(bandeiraId: UUID): List<TileDto> {
+    fun getTilesByBandeira(bandeiraId: UUID): List<QuadraDto> {
         return tileRepository.findByOwner(bandeiraId, OwnerType.BANDEIRA).map { toDto(it) }
     }
     
     /**
      * Get tiles currently in dispute
      */
-    fun getTilesInDispute(): List<TileDto> {
+    fun getTilesInDispute(): List<QuadraDto> {
         return tileRepository.findTilesInDispute(gameProperties.disputeThreshold).map { toDto(it) }
     }
     
     /**
      * Get info about a tile for a specific coordinate
      */
-    fun getTileForCoordinate(lat: Double, lng: Double): TileDto {
+    fun getTileForCoordinate(lat: Double, lng: Double): QuadraDto {
         val tileId = h3GridService.getTileId(lat, lng)
         val tile = tileRepository.findById(tileId).orElse(null)
         
@@ -159,7 +162,7 @@ class TileService(
             val center = h3GridService.getTileCenter(tileId)
             val boundary = h3GridService.getTileBoundary(tileId)
             
-            TileDto(
+            QuadraDto(
                 id = tileId,
                 lat = center.lat,
                 lng = center.lng,
@@ -171,6 +174,9 @@ class TileService(
                 shield = 0,
                 isInCooldown = false,
                 isInDispute = false,
+                championUserId = null,
+                championBandeiraId = null,
+                championName = null,
                 guardianId = null,
                 guardianName = null
             )
@@ -180,12 +186,12 @@ class TileService(
     /**
      * Get game statistics
      */
-    fun getStats(): GameStats {
+    fun getStats(): QuadraStats {
         val allTilesInCuritiba = h3GridService.getAllTilesInCuritiba()
         val ownedTiles = tileRepository.findAll()
         val tilesInDispute = ownedTiles.filter { it.isInDispute(gameProperties.disputeThreshold) }
         
-        return GameStats(
+        return QuadraStats(
             totalTiles = allTilesInCuritiba.size,
             ownedTiles = ownedTiles.size,
             neutralTiles = allTilesInCuritiba.size - ownedTiles.size,
@@ -196,15 +202,15 @@ class TileService(
         )
     }
     
-    data class GameStats(
+    data class QuadraStats(
         val totalTiles: Int,
         val ownedTiles: Int,
         val neutralTiles: Int,
         val tilesInDispute: Int,
         val disputePercentage: Int
     )
-    
-    private fun toDto(tile: Tile): TileDto {
+
+    private fun toDto(tile: Tile): QuadraDto {
         val center = h3GridService.getTileCenter(tile.id)
         val boundary = h3GridService.getTileBoundary(tile.id)
         
@@ -230,7 +236,7 @@ class TileService(
             null -> {}
         }
         
-        return TileDto(
+        return QuadraDto(
             id = tile.id,
             lat = center.lat,
             lng = center.lng,
@@ -242,13 +248,16 @@ class TileService(
             shield = tile.shield,
             isInCooldown = tile.isInCooldown(),
             isInDispute = tile.isInDispute(gameProperties.disputeThreshold),
+            championUserId = tile.guardian?.id,
+            championBandeiraId = tile.guardian?.bandeira?.id,
+            championName = tile.guardian?.username,
             guardianId = tile.guardian?.id,
             guardianName = tile.guardian?.username
         )
     }
 
-    private fun toViewportDto(tile: Tile, bandeiraColors: Map<UUID, String>): ViewportTileDto {
-        return ViewportTileDto(
+    private fun toViewportDto(tile: Tile, bandeiraColors: Map<UUID, String>): ViewportQuadraDto {
+        return ViewportQuadraDto(
             h3Index = tile.id,
             ownerType = tile.ownerType?.name,
             ownerId = tile.ownerId,

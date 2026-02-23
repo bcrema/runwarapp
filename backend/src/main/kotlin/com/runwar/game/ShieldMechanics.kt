@@ -221,19 +221,19 @@ class ShieldMechanics(
     private fun validateAction(tile: Tile, user: User, actionType: TerritoryActionType): String? {
         return when (actionType) {
             TerritoryActionType.CONQUEST -> {
-                if (!tile.isNeutral()) "tile_already_owned"
+                if (!tile.isNeutral()) "quadra_already_owned"
                 else null
             }
             TerritoryActionType.ATTACK -> {
                 when {
                     tile.isNeutral() -> "cannot_attack_neutral"
-                    isOwner(tile, user) -> "cannot_attack_own_tile"
-                    tile.isInCooldown() && tile.shield <= gameProperties.transferShield -> "tile_in_cooldown"
+                    isOwner(tile, user) -> "cannot_attack_own_quadra"
+                    tile.isInCooldown() && tile.shield <= gameProperties.transferShield -> "quadra_in_cooldown"
                     else -> null
                 }
             }
             TerritoryActionType.DEFENSE -> {
-                if (!isOwner(tile, user)) "cannot_defend_rival_tile"
+                if (!isOwner(tile, user)) "cannot_defend_rival_quadra"
                 else null
             }
         }

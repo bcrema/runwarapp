@@ -92,7 +92,7 @@ class LoopValidator(
         }
         
         if (primaryCoverage < flags.minCoveragePct) {
-            failureReasons.add("insufficient_tile_coverage")
+            failureReasons.add("insufficient_quadra_coverage")
         }
         
         if (fraudFlags.isNotEmpty()) {

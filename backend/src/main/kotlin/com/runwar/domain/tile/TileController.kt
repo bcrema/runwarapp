@@ -1,39 +1,36 @@
 package com.runwar.domain.tile
 
-import org.springframework.http.ResponseEntity
-import org.springframework.web.bind.annotation.*
-import org.springframework.web.server.ResponseStatusException
+import java.util.UUID
 import org.springframework.http.HttpStatus
-import java.util.*
+import org.springframework.http.ResponseEntity
+import org.springframework.web.bind.annotation.GetMapping
+import org.springframework.web.bind.annotation.PathVariable
+import org.springframework.web.bind.annotation.RequestMapping
+import org.springframework.web.bind.annotation.RequestParam
+import org.springframework.web.bind.annotation.RestController
+import org.springframework.web.server.ResponseStatusException
 
 @RestController
-@RequestMapping("/api/tiles")
-class TileController(private val tileService: TileService) {
+@RequestMapping("/api/quadras")
+class QuadraController(private val tileService: TileService) {
 
     companion object {
         private const val MAX_RADIUS_METERS = 50_000.0
     }
-    
-    /**
-     * Get tiles within a bounding box (for map display)
-     */
+
     @GetMapping(params = ["minLat", "minLng", "maxLat", "maxLng"])
-    fun getTiles(
+    fun getQuadras(
         @RequestParam minLat: Double,
         @RequestParam minLng: Double,
         @RequestParam maxLat: Double,
         @RequestParam maxLng: Double
-    ): ResponseEntity<List<TileService.TileDto>> {
-        val tiles = tileService.getTilesInBounds(minLat, minLng, maxLat, maxLng)
-        return ResponseEntity.ok(tiles)
+    ): ResponseEntity<List<TileService.QuadraDto>> {
+        val quadras = tileService.getTilesInBounds(minLat, minLng, maxLat, maxLng)
+        return ResponseEntity.ok(quadras)
     }
 
-    /**
-     * Get tiles within a viewport bounding box (for map rendering)
-     * bbox format: minLng,minLat,maxLng,maxLat
-     */
     @GetMapping(params = ["bbox"])
-    fun getViewportTiles(@RequestParam bbox: String): ResponseEntity<List<TileService.ViewportTileDto>> {
+    fun getViewportQuadras(@RequestParam bbox: String): ResponseEntity<List<TileService.ViewportQuadraDto>> {
         val bounds = parseBbox(bbox)
             ?: return ResponseEntity.badRequest().build()
         if (!isValidBounds(bounds)) {
@@ -42,15 +39,12 @@ class TileController(private val tileService: TileService) {
         return ResponseEntity.ok(tileService.getViewportTiles(bounds))
     }
 
-    /**
-     * Get tiles within a viewport defined by a center and radius (meters)
-     */
     @GetMapping(params = ["centerLat", "centerLng", "radiusMeters"])
-    fun getViewportTilesByCenter(
+    fun getViewportQuadrasByCenter(
         @RequestParam centerLat: Double,
         @RequestParam centerLng: Double,
         @RequestParam radiusMeters: Double
-    ): ResponseEntity<List<TileService.ViewportTileDto>> {
+    ): ResponseEntity<List<TileService.ViewportQuadraDto>> {
         if (!isValidLat(centerLat) || !isValidLng(centerLng)) {
             return ResponseEntity.badRequest().build()
         }
@@ -63,58 +57,40 @@ class TileController(private val tileService: TileService) {
         }
         return ResponseEntity.ok(tileService.getViewportTiles(bounds))
     }
-    
-    /**
-     * Get a specific tile by its H3 ID
-     */
+
     @GetMapping("/{id}")
-    fun getTileById(@PathVariable id: String): ResponseEntity<TileService.TileDto> {
-        val tile = tileService.getTileById(id)
-            ?: throw ResponseStatusException(HttpStatus.NOT_FOUND, "Tile not found")
-        return ResponseEntity.ok(tile)
+    fun getQuadraById(@PathVariable id: String): ResponseEntity<TileService.QuadraDto> {
+        val quadra = tileService.getTileById(id)
+            ?: throw ResponseStatusException(HttpStatus.NOT_FOUND, "Quadra not found")
+        return ResponseEntity.ok(quadra)
     }
-    
-    /**
-     * Get tile info for a coordinate
-     */
+
     @GetMapping("/at")
-    fun getTileAtCoordinate(
+    fun getQuadraAtCoordinate(
         @RequestParam lat: Double,
         @RequestParam lng: Double
-    ): ResponseEntity<TileService.TileDto> {
-        val tile = tileService.getTileForCoordinate(lat, lng)
-        return ResponseEntity.ok(tile)
+    ): ResponseEntity<TileService.QuadraDto> {
+        val quadra = tileService.getTileForCoordinate(lat, lng)
+        return ResponseEntity.ok(quadra)
     }
-    
-    /**
-     * Get all tiles owned by a user (solo)
-     */
+
     @GetMapping("/user/{userId}")
-    fun getTilesByUser(@PathVariable userId: UUID): ResponseEntity<List<TileService.TileDto>> {
+    fun getQuadrasByUser(@PathVariable userId: UUID): ResponseEntity<List<TileService.QuadraDto>> {
         return ResponseEntity.ok(tileService.getTilesByUser(userId))
     }
-    
-    /**
-     * Get all tiles owned by a bandeira
-     */
+
     @GetMapping("/bandeira/{bandeiraId}")
-    fun getTilesByBandeira(@PathVariable bandeiraId: UUID): ResponseEntity<List<TileService.TileDto>> {
+    fun getQuadrasByBandeira(@PathVariable bandeiraId: UUID): ResponseEntity<List<TileService.QuadraDto>> {
         return ResponseEntity.ok(tileService.getTilesByBandeira(bandeiraId))
     }
-    
-    /**
-     * Get all tiles currently in dispute
-     */
+
     @GetMapping("/disputed")
-    fun getDisputedTiles(): ResponseEntity<List<TileService.TileDto>> {
+    fun getDisputedQuadras(): ResponseEntity<List<TileService.QuadraDto>> {
         return ResponseEntity.ok(tileService.getTilesInDispute())
     }
-    
-    /**
-     * Get game statistics
-     */
+
     @GetMapping("/stats")
-    fun getStats(): ResponseEntity<TileService.GameStats> {
+    fun getStats(): ResponseEntity<TileService.QuadraStats> {
         return ResponseEntity.ok(tileService.getStats())
     }
 

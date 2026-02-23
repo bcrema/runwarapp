@@ -4,6 +4,7 @@ import com.fasterxml.jackson.databind.ObjectMapper
 import com.runwar.domain.run.CapsService
 import com.runwar.domain.run.Run
 import com.runwar.domain.run.RunOrigin
+import com.runwar.domain.run.RunCompetitionMode
 import com.runwar.domain.run.RunStatus
 import com.runwar.domain.run.TerritoryActionType
 import com.runwar.domain.run.TurnResult
@@ -26,6 +27,7 @@ class RunTelemetryService(
         val userId: UUID,
         val origin: RunOrigin,
         val status: RunStatus,
+        val competitionMode: RunCompetitionMode,
         val createdAt: Instant,
         val isLoopValid: Boolean,
         val loopDistanceMeters: Double,
@@ -57,6 +59,7 @@ class RunTelemetryService(
         val userId: String,
         val origin: String,
         val status: String,
+        val competitionMode: String,
         val createdAt: Instant,
         val loop: LoopTelemetry,
         val tile: TileTelemetry,
@@ -136,6 +139,7 @@ class RunTelemetryService(
                 "userId",
                 "origin",
                 "status",
+                "competitionMode",
                 "isLoopValid",
                 "loopDistanceMeters",
                 "loopDurationSeconds",
@@ -169,6 +173,7 @@ class RunTelemetryService(
                     event.userId,
                     event.origin.name,
                     event.status.name,
+                    event.competitionMode.name,
                     event.isLoopValid,
                     event.loopDistanceMeters,
                     event.loopDurationSeconds,
@@ -222,6 +227,7 @@ class RunTelemetryService(
             userId = run.user.id,
             origin = run.origin,
             status = run.status,
+            competitionMode = run.competitionMode,
             createdAt = run.createdAt,
             isLoopValid = validation.isLoopValid,
             loopDistanceMeters = validation.metrics.loopDistanceMeters,
@@ -255,6 +261,7 @@ class RunTelemetryService(
             userId = fields.userId.toString(),
             origin = fields.origin.name,
             status = fields.status.name,
+            competitionMode = fields.competitionMode.name,
             createdAt = fields.createdAt,
             loop =
                 LoopTelemetry(
@@ -303,6 +310,7 @@ class RunTelemetryService(
             userId = fields.userId,
             origin = fields.origin,
             status = fields.status,
+            competitionMode = fields.competitionMode,
             isLoopValid = fields.isLoopValid,
             loopDistanceMeters = fields.loopDistanceMeters,
             loopDurationSeconds = fields.loopDurationSeconds,
