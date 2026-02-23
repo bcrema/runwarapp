@@ -27,11 +27,28 @@
 - `04` Companion HUD (Modo Competitivo vs Treino) - Status: Done.
 - `05` Pipeline Sync/Upload com Modo - Status: Todo.
 - `06` Resultado Pos-corrida e Foco em Quadra - Status: Todo.
-- `07` Refactor e Limpeza de Legado Tile - Status: Todo.
+- `07` Refactor e Limpeza de Legado Tile - Status: Done.
 - `08` Testes, QA e Gates de Merge (V2 Quadras) - Status: Todo.
 - `09` Hardening e Release Readiness (V2 Quadras) - Status: Todo.
 
 ## Atualizacoes
+- `07` 2026-02-22 - Status: Done.
+  Resumo tecnico: Limpeza de legado `tile` concluida no fluxo funcional de Mapa + Corrida + Resultado, com remocao de componentes obsoletos sem uso (`StrategicMapView`, `StrategicMapViewModel`, `TileDetailsView`, `TileService`), padronizacao de nomenclatura para `quadra` no fluxo ativo (`MapViewModel`, `ActiveRunHUD`, `QuadraEligibilityPolicy`, `MissionSummaryView`) e retirada de chaves legadas `tile_*` no presentation de resultado.
+  Branch/worktree: feature/ios-step07-refactor-legado-tile-wt em /Users/brunocrema/runwarapp/ios/.worktrees/step07-refactor.
+  Testes: `cd ios/LigaRun && xcodegen generate` (ok), `cd ios/LigaRun && CLANG_MODULE_CACHE_PATH=$(pwd)/ModuleCache SWIFT_MODULE_CACHE_PATH=$(pwd)/ModuleCache SWIFTPM_CACHE_PATH=$(pwd)/.swiftpm/cache xcodebuild -project LigaRun.xcodeproj -scheme LigaRun -destination "platform=iOS Simulator,name=iPhone 17,OS=26.2" -derivedDataPath $(pwd)/DerivedData -clonedSourcePackagesDirPath /Users/brunocrema/runwarapp/ios/SourcePackages -disableAutomaticPackageResolution -only-testing:LigaRunTests/MapViewModelTests -only-testing:LigaRunTests/SubmissionResultPresentationTests -only-testing:LigaRunTests/QuadraEligibilityPolicyTests test` (25 testes, 0 falhas).
+  Excecoes de legado permitidas: compatibilidade de decode em `ApiModels.swift` mantida para chaves de payload antigo (`targetTileId`, `tilesCovered`, `primaryTile`, `tileId`) e termos de produto fora do fluxo funcional alvo (ex.: Profile/Bandeiras/Auth com "Tiles").
+- `07` 2026-02-22 - Status: In Progress.
+  Resumo tecnico: Inicio do passo 07 para limpeza de legado `tile` no fluxo funcional (Mapa + Corrida + Resultado), com branch/worktree dedicados para isolamento e varredura textual das referencias residuais.
+  Branch/worktree: feature/ios-step07-refactor-legado-tile-wt em /Users/brunocrema/runwarapp/ios/.worktrees/step07-refactor.
+  Testes: varredura inicial pendente; suites iOS serao executadas apos os ajustes.
+- `06` 2026-02-22 - Status: Done.
+  Resumo tecnico: Fluxo pos-corrida consolidado em semantica de quadra no presentation, sem aliases funcionais `tile_*` em reasons; CTA "Ver no mapa" segue foco por `mapFocusQuadraId` com prioridade `turnResult.quadraId` > `territoryResult.quadraId` > `loopValidation.primaryQuadra`. Ajustes de estabilizacao no workspace iOS para viabilizar build/teste (regeneracao do `LigaRun.xcodeproj`, correcoes de compilacao em `ApiModels`/`MapViewModel` e fixtures de teste legadas).
+  Branch/worktree: feature/ios-uxflow-step06-quadra-focus em /Users/brunocrema/runwarapp.
+  Testes: `cd ios/LigaRun && xcodebuild -scheme LigaRun -destination "platform=iOS Simulator,name=iPhone 17,OS=26.2" -only-testing:LigaRunTests/SubmissionResultPresentationTests test` (passou: 8 testes, 0 falhas).
+- `06` 2026-02-22 - Status: In Progress.
+  Resumo tecnico: Retomada do passo 06 para consolidar o fluxo pos-corrida em semantica exclusiva de quadra, validar foco por `quadraId` no CTA "Ver no mapa" e remover referencias funcionais legadas de `tile` no presentation.
+  Branch/worktree: feature/ios-uxflow-step06-quadra-focus em /Users/brunocrema/runwarapp.
+  Testes: em execucao (`cd ios/LigaRun && xcodebuild -scheme LigaRun -destination "platform=iOS Simulator,name=iPhone 17,OS=26.2" -only-testing:LigaRunTests/SubmissionResultPresentationTests test`).
 - `06` 2026-02-21 - Status: Blocked.
   Resumo tecnico: Fluxo pos-corrida migrado para semantica de quadra no iOS (`submissionQuadraFocusId`, labels/textos em RunsView, `mapFocusQuadraId` em SessionStore/MapScreen) e reason-map atualizado para chaves `quadra_*` com compatibilidade legada para `tile_*`; testes unitarios do presentation ajustados para foco/reasons de quadra.
   Branch/worktree: feature/ios-step06-resultado-quadras em /workspace/runwarapp.

@@ -41,7 +41,7 @@ final class MapViewModel: ObservableObject {
         defer { isLoading = false }
 
         do {
-            tiles = try await api.getQuadras(bounds: bounds)
+            quadras = try await api.getQuadras(bounds: bounds)
             lastVisibleBounds = bounds
         } catch {
             errorMessage = mapErrorMessage(for: error)
@@ -55,7 +55,7 @@ final class MapViewModel: ObservableObject {
 
     func refreshDisputedQuadras() async {
         do {
-            tiles = try await api.getDisputedQuadras()
+            quadras = try await api.getDisputedQuadras()
         } catch {
             errorMessage = mapErrorMessage(for: error)
         }
@@ -63,9 +63,9 @@ final class MapViewModel: ObservableObject {
 
     func focusOnQuadra(id: String) async {
         do {
-            let tile = try await api.getQuadra(id: id)
-            focusCoordinate = CLLocationCoordinate2D(latitude: tile.lat, longitude: tile.lng)
-            upsert(tile: tile)
+            let quadra = try await api.getQuadra(id: id)
+            focusCoordinate = CLLocationCoordinate2D(latitude: quadra.lat, longitude: quadra.lng)
+            upsert(quadra: quadra)
         } catch {
             errorMessage = mapErrorMessage(for: error)
         }

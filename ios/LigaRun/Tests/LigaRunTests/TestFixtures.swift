@@ -146,12 +146,10 @@ func makeQuadraFixture(
         championBandeiraId: championBandeiraId,
         championName: nil,
         guardianId: nil,
-        guardianName: nil,
-        championUserId: nil,
-        championBandeiraId: nil,
-        championName: nil
+        guardianName: nil
     )
 }
+
 
 func makeBandeiraFixture(id: String = "b1", name: String = "Liga Azul") -> Bandeira {
     Bandeira(
