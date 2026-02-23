@@ -34,7 +34,7 @@ class RunControllerTest {
     @Test
     fun `submitRunWithCoordinates returns iOS contract response shape with dailyActionsRemaining`() {
         val submissionResult = makeSubmissionResult()
-        every { runService.submitRunFromCoordinates(any(), any(), any(), any()) } returns submissionResult
+        every { runService.submitRunFromCoordinates(any(), any(), any(), any(), any(), any()) } returns submissionResult
         val startSec = Instant.now().minusSeconds(900).epochSecond
 
         val response = controller.submitRunWithCoordinates(
@@ -44,7 +44,9 @@ class RunControllerTest {
                     RunController.CoordinatePoint(-25.43, -49.27),
                     RunController.CoordinatePoint(-25.431, -49.271)
                 ),
-                timestamps = listOf(startSec, startSec + 900)
+                timestamps = listOf(startSec, startSec + 900),
+                mode = RunCompetitionMode.COMPETITIVE,
+                targetQuadraId = "8928308280fffff"
             )
         )
 
@@ -59,10 +61,12 @@ class RunControllerTest {
         assertTrue(node.has("dailyActionsRemaining"))
         assertTrue(node.path("loopValidation").has("isValid"))
         assertTrue(node.path("loopValidation").has("failureReasons"))
-        assertTrue(node.path("loopValidation").has("primaryTileCoverage"))
+        assertTrue(node.path("loopValidation").has("primaryQuadraCoverage"))
         assertTrue(node.path("territoryResult").has("shieldBefore"))
         assertTrue(node.path("run").has("distanceMeters"))
         assertTrue(node.path("run").has("loopDistanceMeters"))
+        assertTrue(node.path("run").has("targetQuadraId"))
+        assertTrue(node.path("turnResult").has("quadraId"))
     }
 
     @Test
@@ -71,7 +75,7 @@ class RunControllerTest {
         val capturedTimestamps = slot<List<Instant>>()
         val startSec = Instant.now().minusSeconds(900).epochSecond
         every {
-            runService.submitRunFromCoordinates(any(), any(), capture(capturedTimestamps), RunOrigin.WEB)
+            runService.submitRunFromCoordinates(any(), any(), capture(capturedTimestamps), RunOrigin.WEB, RunCompetitionMode.COMPETITIVE, null)
         } returns submissionResult
 
         controller.submitRunWithCoordinates(
@@ -81,7 +85,8 @@ class RunControllerTest {
                     RunController.CoordinatePoint(-25.43, -49.27),
                     RunController.CoordinatePoint(-25.431, -49.271)
                 ),
-                timestamps = listOf(startSec, startSec + 900)
+                timestamps = listOf(startSec, startSec + 900),
+                mode = RunCompetitionMode.COMPETITIVE
             )
         )
 
@@ -95,7 +100,7 @@ class RunControllerTest {
         val capturedTimestamps = slot<List<Instant>>()
         val startMillis = Instant.now().minusSeconds(900).toEpochMilli()
         every {
-            runService.submitRunFromCoordinates(any(), any(), capture(capturedTimestamps), RunOrigin.WEB)
+            runService.submitRunFromCoordinates(any(), any(), capture(capturedTimestamps), RunOrigin.WEB, RunCompetitionMode.COMPETITIVE, null)
         } returns submissionResult
 
         controller.submitRunWithCoordinates(
@@ -105,7 +110,8 @@ class RunControllerTest {
                     RunController.CoordinatePoint(-25.43, -49.27),
                     RunController.CoordinatePoint(-25.431, -49.271)
                 ),
-                timestamps = listOf(startMillis, startMillis + 900_000)
+                timestamps = listOf(startMillis, startMillis + 900_000),
+                mode = RunCompetitionMode.COMPETITIVE
             )
         )
 
@@ -124,12 +130,13 @@ class RunControllerTest {
                         RunController.CoordinatePoint(-25.43, -49.27),
                         RunController.CoordinatePoint(-25.431, -49.271)
                     ),
-                    timestamps = listOf(nowMillis + 10_000, nowMillis)
+                    timestamps = listOf(nowMillis + 10_000, nowMillis),
+                    mode = RunCompetitionMode.COMPETITIVE
                 )
             )
         }
 
-        verify(exactly = 0) { runService.submitRunFromCoordinates(any(), any(), any(), any()) }
+        verify(exactly = 0) { runService.submitRunFromCoordinates(any(), any(), any(), any(), any(), any()) }
     }
 
     private fun makeSubmissionResult(): RunService.RunSubmissionResult {
@@ -151,7 +158,7 @@ class RunControllerTest {
             loopDistance = 5.1,
             loopDistanceMeters = 5100.0,
             territoryAction = "CONQUEST",
-            targetTileId = "8928308280fffff",
+            targetQuadraId = "8928308280fffff",
             isValidForTerritory = true,
             fraudFlags = emptyList(),
             createdAt = Instant.parse("2026-02-12T10:30:30Z")
@@ -185,7 +192,7 @@ class RunControllerTest {
 
         val turnResult = TurnResult(
             actionType = TerritoryActionType.CONQUEST,
-            tileId = "8928308280fffff",
+            quadraId = "8928308280fffff",
             h3Index = "8928308280fffff",
             previousOwner = null,
             newOwner = null,

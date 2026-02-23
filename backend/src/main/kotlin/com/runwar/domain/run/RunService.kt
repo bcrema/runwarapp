@@ -51,7 +51,7 @@ class RunService(
                 val loopDistance: Double?, // kilometers (iOS compatibility)
                 val loopDistanceMeters: Double?,
                 val territoryAction: String?,
-                val targetTileId: String?,
+                val targetQuadraId: String?,
                 val isValidForTerritory: Boolean,
                 val fraudFlags: List<String>,
                 val createdAt: Instant
@@ -79,7 +79,7 @@ class RunService(
                                         loopDistance = loopDistanceMeters?.div(1000.0),
                                         loopDistanceMeters = loopDistanceMeters,
                                         territoryAction = run.territoryAction?.name,
-                                        targetTileId = run.targetTile?.id,
+                                        targetQuadraId = run.targetTile?.id,
                                         isValidForTerritory = run.isValidForTerritory,
                                         fraudFlags = run.fraudFlags,
                                         createdAt = run.createdAt
@@ -100,7 +100,9 @@ class RunService(
         fun submitRun(
                 user: User,
                 gpxFile: MultipartFile,
-                origin: RunOrigin = RunOrigin.IMPORT
+                origin: RunOrigin = RunOrigin.IMPORT,
+                competitionMode: RunCompetitionMode = RunCompetitionMode.COMPETITIVE,
+                targetQuadraId: String? = null
         ): RunSubmissionResult {
                 val managedUser = loadUserWithBandeira(user.id)
 
@@ -139,6 +141,8 @@ class RunService(
                                         BigDecimal.valueOf(validation.metrics.loopDistanceMeters),
                                 closingDistance =
                                         BigDecimal.valueOf(validation.metrics.closureMeters),
+                                competitionMode = competitionMode,
+                                targetTile = targetQuadraId?.let { tileRepository.findById(it).orElse(null) },
                                 fraudFlags = validation.fraudFlags
                         )
 
@@ -149,7 +153,11 @@ class RunService(
                                 ?.let { OwnerSnapshot(id = it.ownerId, type = it.ownerType) }
 
                 // Process territory action if valid
-                if (validation.isLoopValid && validation.primaryTile != null) {
+                if (
+                        competitionMode == RunCompetitionMode.COMPETITIVE &&
+                                validation.isLoopValid &&
+                                validation.primaryTile != null
+                ) {
                         run.isValidForTerritory = true
 
                         if (!capsCheck.userCapReached && !capsCheck.bandeiraCapReached) {
@@ -162,7 +170,6 @@ class RunService(
 
                         if (territoryResult?.success == true) {
                                 run.territoryAction = territoryResult.actionType
-                                run.targetTile = null // Will be set by repository
                         }
                 }
 
@@ -180,7 +187,9 @@ class RunService(
                                 previousOwner,
                                 managedUser,
                                 capsCheck.actionsToday,
-                                capsCheck.bandeiraActionsToday
+                                capsCheck.bandeiraActionsToday,
+                                competitionMode,
+                                targetQuadraId
                         )
 
                 runTelemetryService.recordRunTelemetry(
@@ -205,7 +214,9 @@ class RunService(
                 user: User,
                 coordinates: List<LatLngPoint>,
                 timestamps: List<Instant>,
-                origin: RunOrigin = RunOrigin.WEB
+                origin: RunOrigin = RunOrigin.WEB,
+                competitionMode: RunCompetitionMode = RunCompetitionMode.COMPETITIVE,
+                targetQuadraId: String? = null
         ): RunSubmissionResult {
                 val managedUser = loadUserWithBandeira(user.id)
 
@@ -246,6 +257,8 @@ class RunService(
                                         BigDecimal.valueOf(validation.metrics.loopDistanceMeters),
                                 closingDistance =
                                         BigDecimal.valueOf(validation.metrics.closureMeters),
+                                competitionMode = competitionMode,
+                                targetTile = targetQuadraId?.let { tileRepository.findById(it).orElse(null) },
                                 fraudFlags = validation.fraudFlags
                         )
 
@@ -255,7 +268,11 @@ class RunService(
                                 ?.let { tileRepository.findById(it).orElse(null) }
                                 ?.let { OwnerSnapshot(id = it.ownerId, type = it.ownerType) }
 
-                if (validation.isLoopValid && validation.primaryTile != null) {
+                if (
+                        competitionMode == RunCompetitionMode.COMPETITIVE &&
+                                validation.isLoopValid &&
+                                validation.primaryTile != null
+                ) {
                         run.isValidForTerritory = true
 
                         if (!capsCheck.userCapReached && !capsCheck.bandeiraCapReached) {
@@ -285,7 +302,9 @@ class RunService(
                                 previousOwner,
                                 managedUser,
                                 capsCheck.actionsToday,
-                                capsCheck.bandeiraActionsToday
+                                capsCheck.bandeiraActionsToday,
+                                competitionMode,
+                                targetQuadraId
                         )
 
                 runTelemetryService.recordRunTelemetry(
@@ -324,15 +343,17 @@ class RunService(
                 previousOwner: OwnerSnapshot?,
                 user: User,
                 actionsToday: Int,
-                bandeiraActionsToday: Int?
+                bandeiraActionsToday: Int?,
+                competitionMode: RunCompetitionMode,
+                targetQuadraId: String?
         ): TurnResult {
-                val tileId = territoryResult?.tileId ?: validation.primaryTile
-                val tile = tileId?.let { tileRepository.findById(it).orElse(null) }
+                val quadraId = territoryResult?.tileId ?: targetQuadraId ?: validation.primaryTile
+                val quadra = quadraId?.let { tileRepository.findById(it).orElse(null) }
 
                 val disputeState =
                         when {
-                                tile == null || tile.ownerType == null -> DisputeState.NONE
-                                tile.isInDispute(gameProperties.disputeThreshold) ->
+                                quadra == null || quadra.ownerType == null -> DisputeState.NONE
+                                quadra.isInDispute(gameProperties.disputeThreshold) ->
                                         DisputeState.DISPUTED
                                 else -> DisputeState.STABLE
                         }
@@ -355,8 +376,12 @@ class RunService(
                 if (!validation.isLoopValid) {
                         reasons.addAll(validation.reasons)
                 }
-                if (validation.isLoopValid && validation.primaryTile == null) {
-                        reasons.add("no_primary_tile")
+                if (
+                        competitionMode == RunCompetitionMode.COMPETITIVE &&
+                                validation.isLoopValid &&
+                                validation.primaryTile == null
+                ) {
+                        reasons.add("no_primary_quadra")
                 }
 
                 val userCapReached = actionsToday >= gameProperties.userDailyActionCap
@@ -367,10 +392,10 @@ class RunService(
                         }
                                 ?: false
 
-                if (userCapReached) {
+                if (competitionMode == RunCompetitionMode.COMPETITIVE && userCapReached) {
                         reasons.add("user_daily_cap_reached")
                 }
-                if (bandeiraCapReached) {
+                if (competitionMode == RunCompetitionMode.COMPETITIVE && bandeiraCapReached) {
                         reasons.add("bandeira_daily_cap_reached")
                 }
 
@@ -382,14 +407,14 @@ class RunService(
                         actionType =
                                 if (territoryResult?.success == true) territoryResult.actionType
                                 else null,
-                        tileId = tileId,
-                        h3Index = tileId,
+                        quadraId = quadraId,
+                        h3Index = quadraId,
                         previousOwner = previousOwner,
                         newOwner =
-                                tile?.let { OwnerSnapshot(id = it.ownerId, type = it.ownerType) },
+                                quadra?.let { OwnerSnapshot(id = it.ownerId, type = it.ownerType) },
                         shieldBefore = territoryResult?.shieldBefore,
                         shieldAfter = territoryResult?.shieldAfter,
-                        cooldownUntil = tile?.cooldownUntil,
+                        cooldownUntil = quadra?.cooldownUntil,
                         disputeState = disputeState,
                         capsRemaining =
                                 CapsRemaining(

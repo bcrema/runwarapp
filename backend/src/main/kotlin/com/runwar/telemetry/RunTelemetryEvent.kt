@@ -1,6 +1,7 @@
 package com.runwar.telemetry
 
 import com.runwar.domain.run.RunOrigin
+import com.runwar.domain.run.RunCompetitionMode
 import com.runwar.domain.run.RunStatus
 import com.runwar.domain.run.TerritoryActionType
 import jakarta.persistence.Column
@@ -27,6 +28,9 @@ class RunTelemetryEvent(
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
     val status: RunStatus,
+    @Enumerated(EnumType.STRING)
+    @Column(name = "competition_mode", nullable = false)
+    val competitionMode: RunCompetitionMode,
     @Column(name = "is_loop_valid", nullable = false)
     val isLoopValid: Boolean,
     @Column(name = "loop_distance_meters", nullable = false)

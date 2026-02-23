@@ -68,10 +68,11 @@ docker run -p 8080:8080 --env-file .env runwar-backend
 - `POST /api/bandeiras/{id}/join` - Entrar
 - `POST /api/bandeiras/leave` - Sair
 
-### Tiles (Público)
-- `GET /api/tiles?minLat=&minLng=&maxLat=&maxLng=` - Tiles no viewport
-- `GET /api/tiles/{id}` - Detalhes do tile
-- `GET /api/tiles/stats` - Estatísticas do jogo
+### Quadras (Público)
+- `GET /api/quadras?minLat=&minLng=&maxLat=&maxLng=` - Quadras no viewport
+- `GET /api/quadras/{id}` - Detalhes da quadra
+- `GET /api/quadras/disputed` - Quadras em disputa
+- `GET /api/quadras/stats` - Estatísticas do jogo
 
 ### Runs
 - `POST /api/runs` - Submeter corrida (GPX)
@@ -79,14 +80,19 @@ docker run -p 8080:8080 --env-file .env runwar-backend
 - `GET /api/runs` - Histórico de corridas
 - `GET /api/runs/daily-status` - Status de ações diárias
 
-### Contrato de compatibilidade iOS v1
+### Contrato iOS v2 (quadras)
 
-- `POST /api/runs/coordinates` aceita `timestamps` em **epoch seconds** e **epoch milliseconds** (normalização automática server-side).
+- `POST /api/runs/coordinates` aceita:
+  - `coordinates`, `timestamps`, `mode` (`COMPETITIVE`/`TRAINING`) e `targetQuadraId` opcional;
+  - `timestamps` em **epoch seconds** e **epoch milliseconds** (normalização automática server-side).
+- `mode=TRAINING` não executa ação territorial e não consome ação diária.
 - Resposta de submissão (`POST /api/runs` e `POST /api/runs/coordinates`) retorna:
   - `run.distance` e `run.loopDistance` em **km** (compatibilidade iOS atual);
   - `run.distanceMeters` e `run.loopDistanceMeters` em **metros** (referência canônica);
-  - `loopValidation` no formato `{ isValid, distance, duration, closingDistance, tilesCovered, primaryTile, primaryTileCoverage, fraudFlags, failureReasons }`;
+  - `run.targetQuadraId`;
+  - `loopValidation` no formato `{ isValid, distance, duration, closingDistance, quadrasCovered, primaryQuadra, primaryQuadraCoverage, fraudFlags, failureReasons }`;
   - `territoryResult` quando houver ação territorial processada;
+  - `territoryResult.quadraId` e `turnResult.quadraId`;
   - `dailyActionsRemaining` derivado de `turnResult.capsRemaining.userActionsRemaining`.
 - `GET /api/users/me` e `AuthResponse.user`:
   - `totalDistance` em **km**;

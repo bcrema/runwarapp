@@ -33,7 +33,9 @@ class RunController(private val runService: RunService) {
     /** Submit a run via raw coordinates (from web GPS recording) */
     data class SubmitCoordinatesRequest(
             val coordinates: List<CoordinatePoint>,
-            val timestamps: List<Long> // accepts epoch seconds or epoch millis
+            val timestamps: List<Long>, // accepts epoch seconds or epoch millis
+            val mode: RunCompetitionMode,
+            val targetQuadraId: String? = null
     )
 
     data class CoordinatePoint(val lat: Double, val lng: Double)
@@ -68,7 +70,9 @@ class RunController(private val runService: RunService) {
                         principal.user,
                         coordinates,
                         timestamps,
-                        RunOrigin.WEB
+                        RunOrigin.WEB,
+                        request.mode,
+                        request.targetQuadraId
                 )
         return ResponseEntity.ok(toRunSubmissionResponse(result))
     }
@@ -132,7 +136,7 @@ class RunController(private val runService: RunService) {
             val loopDistance: Double?,
             val loopDistanceMeters: Double?,
             val territoryAction: String?,
-            val targetTileId: String?,
+            val targetQuadraId: String?,
             val isValidForTerritory: Boolean,
             val fraudFlags: List<String>,
             val createdAt: Instant
@@ -143,9 +147,9 @@ class RunController(private val runService: RunService) {
             val distance: Double,
             val duration: Int,
             val closingDistance: Double,
-            val tilesCovered: List<String>,
-            val primaryTile: String?,
-            val primaryTileCoverage: Double,
+            val quadrasCovered: List<String>,
+            val primaryQuadra: String?,
+            val primaryQuadraCoverage: Double,
             val fraudFlags: List<String>,
             val failureReasons: List<String>
     )
@@ -159,7 +163,7 @@ class RunController(private val runService: RunService) {
             val shieldBefore: Int,
             val shieldAfter: Int,
             val inDispute: Boolean,
-            val tileId: String?
+            val quadraId: String?
     )
 
     data class RunSubmissionResponse(
@@ -189,7 +193,7 @@ class RunController(private val runService: RunService) {
                     loopDistance = run.loopDistance,
                     loopDistanceMeters = run.loopDistanceMeters,
                     territoryAction = run.territoryAction,
-                    targetTileId = run.targetTileId,
+                    targetQuadraId = run.targetQuadraId,
                     isValidForTerritory = run.isValidForTerritory,
                     fraudFlags = run.fraudFlags,
                     createdAt = run.createdAt
@@ -212,9 +216,9 @@ class RunController(private val runService: RunService) {
                     distance = validation.metrics.loopDistanceMeters,
                     duration = validation.metrics.loopDurationSeconds,
                     closingDistance = validation.metrics.closureMeters,
-                    tilesCovered = validation.tilesCovered,
-                    primaryTile = validation.primaryTile,
-                    primaryTileCoverage = validation.metrics.coveragePct,
+                    quadrasCovered = validation.tilesCovered,
+                    primaryQuadra = validation.primaryTile,
+                    primaryQuadraCoverage = validation.metrics.coveragePct,
                     fraudFlags = validation.fraudFlags,
                     failureReasons = validation.reasons
             )
@@ -230,7 +234,7 @@ class RunController(private val runService: RunService) {
                     shieldBefore = result.shieldBefore,
                     shieldAfter = result.shieldAfter,
                     inDispute = result.inDispute,
-                    tileId = result.tileId
+                    quadraId = result.tileId
             )
     }
 }

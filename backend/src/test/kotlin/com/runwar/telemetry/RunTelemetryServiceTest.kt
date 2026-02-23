@@ -5,6 +5,7 @@ import com.runwar.domain.run.CapsRemaining
 import com.runwar.domain.run.CapsService
 import com.runwar.domain.run.DisputeState
 import com.runwar.domain.run.Run
+import com.runwar.domain.run.RunCompetitionMode
 import com.runwar.domain.run.RunOrigin
 import com.runwar.domain.run.RunStatus
 import com.runwar.domain.run.TerritoryActionType
@@ -70,7 +71,7 @@ class RunTelemetryServiceTest {
         val turnResult =
             TurnResult(
                 actionType = TerritoryActionType.CONQUEST,
-                tileId = "tile-1",
+                quadraId = "tile-1",
                 h3Index = "tile-1",
                 previousOwner = null,
                 newOwner = null,
@@ -94,6 +95,7 @@ class RunTelemetryServiceTest {
 
         val payloadNode = objectMapper.readTree(saved.captured.payloadJson)
         assertEquals(run.id.toString(), payloadNode["runId"].asText())
+        assertEquals("COMPETITIVE", payloadNode["competitionMode"].asText())
         assertTrue(payloadNode["loop"]["isLoopValid"].asBoolean())
     }
 
@@ -108,6 +110,7 @@ class RunTelemetryServiceTest {
                 userId = UUID.randomUUID(),
                 origin = RunOrigin.IMPORT,
                 status = RunStatus.VALIDATED,
+                competitionMode = RunCompetitionMode.COMPETITIVE,
                 isLoopValid = true,
                 loopDistanceMeters = 10.0,
                 loopDurationSeconds = 600,

@@ -93,7 +93,15 @@ class RunIngestionController(private val runService: RunService) {
         val timestamps = normalizedTimestamps.instants
         val origin = request.origin ?: RunOrigin.IMPORT
 
-        val result = runService.submitRunFromCoordinates(principal.user, coordinates, timestamps, origin)
+        val result =
+            runService.submitRunFromCoordinates(
+                principal.user,
+                coordinates,
+                timestamps,
+                origin,
+                RunCompetitionMode.COMPETITIVE,
+                null
+            )
         return ResponseEntity.ok(RunIngestionResponse(result.run.id, result.run.status))
     }
 }

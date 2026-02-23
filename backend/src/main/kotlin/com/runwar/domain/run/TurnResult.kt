@@ -6,7 +6,7 @@ import java.util.UUID
 
 data class TurnResult(
     val actionType: TerritoryActionType?,
-    val tileId: String?,
+    val quadraId: String?,
     val h3Index: String?,
     val previousOwner: OwnerSnapshot?,
     val newOwner: OwnerSnapshot?,

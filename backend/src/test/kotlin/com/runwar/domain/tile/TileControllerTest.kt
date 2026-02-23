@@ -18,33 +18,34 @@ class TileControllerTest {
 
     @BeforeEach
     fun setUp() {
-        mockMvc = MockMvcBuilders.standaloneSetup(TileController(tileService))
+        mockMvc = MockMvcBuilders.standaloneSetup(QuadraController(tileService))
             .setControllerAdvice(GlobalExceptionHandler())
             .build()
     }
 
     @Test
-    fun `get tile by id returns 404 with JSON payload when tile is missing`() {
-        every { tileService.getTileById("missing-tile") } returns null
+    fun `get quadra by id returns 404 with JSON payload when quadra is missing`() {
+        every { tileService.getTileById("missing-quadra") } returns null
 
-        mockMvc.perform(get("/api/tiles/missing-tile"))
+        mockMvc.perform(get("/api/quadras/missing-quadra"))
             .andExpect(status().isNotFound)
             .andExpect(jsonPath("$.error").value("NOT_FOUND"))
-            .andExpect(jsonPath("$.message").value("Tile not found"))
+            .andExpect(jsonPath("$.message").value("Quadra not found"))
     }
 
     @Test
-    fun `get tile by id returns tile payload when tile exists`() {
-        every { tileService.getTileById("tile-1") } returns makeTileDto("tile-1")
+    fun `get quadra by id returns quadra payload when quadra exists`() {
+        every { tileService.getTileById("quadra-1") } returns makeQuadraDto("quadra-1")
 
-        mockMvc.perform(get("/api/tiles/tile-1"))
+        mockMvc.perform(get("/api/quadras/quadra-1"))
             .andExpect(status().isOk)
-            .andExpect(jsonPath("$.id").value("tile-1"))
+            .andExpect(jsonPath("$.id").value("quadra-1"))
+            .andExpect(jsonPath("$.championName").value("runner"))
             .andExpect(jsonPath("$.shield").value(80))
     }
 
-    private fun makeTileDto(id: String): TileService.TileDto {
-        return TileService.TileDto(
+    private fun makeQuadraDto(id: String): TileService.QuadraDto {
+        return TileService.QuadraDto(
             id = id,
             lat = -25.43,
             lng = -49.27,
@@ -60,6 +61,9 @@ class TileControllerTest {
             shield = 80,
             isInCooldown = false,
             isInDispute = false,
+            championUserId = java.util.UUID.fromString("11111111-1111-1111-1111-111111111111"),
+            championBandeiraId = null,
+            championName = "runner",
             guardianId = null,
             guardianName = null
         )

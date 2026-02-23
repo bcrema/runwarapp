@@ -2,6 +2,7 @@ package com.runwar.telemetry
 
 import com.runwar.config.GlobalExceptionHandler
 import com.runwar.config.UserPrincipal
+import com.runwar.domain.run.RunCompetitionMode
 import com.runwar.domain.run.RunOrigin
 import com.runwar.domain.run.RunStatus
 import com.runwar.domain.run.TerritoryActionType
@@ -82,6 +83,7 @@ class RunTelemetryControllerTest {
                 userId = UUID.randomUUID(),
                 origin = RunOrigin.IMPORT,
                 status = RunStatus.VALIDATED,
+                competitionMode = RunCompetitionMode.COMPETITIVE,
                 isLoopValid = true,
                 loopDistanceMeters = 10.0,
                 loopDurationSeconds = 600,
