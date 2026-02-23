@@ -91,12 +91,12 @@ struct MapScreen: View {
         } message: {
             Text(viewModel.errorMessage ?? "")
         }
-        .onChange(of: session.mapFocusTileId) { newValue in
+        .onChange(of: session.mapFocusQuadraId) { newValue in
             guard let quadraId = newValue else { return }
             Task {
                 await viewModel.refreshVisibleQuadras()
                 await viewModel.focusOnQuadra(id: quadraId)
-                session.mapFocusTileId = nil
+                session.mapFocusQuadraId = nil
             }
         }
         .onChange(of: session.selectedTabIndex) { newValue in
