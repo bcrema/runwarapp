@@ -3,7 +3,7 @@ package com.runwar.domain.run
 import com.runwar.config.GameProperties
 import com.runwar.domain.bandeira.Bandeira
 import com.runwar.domain.bandeira.BandeiraCategory
-import com.runwar.domain.tile.TileRepository
+import com.runwar.domain.quadra.QuadraRepository
 import com.runwar.domain.user.User
 import com.runwar.domain.user.UserRepository
 import com.runwar.game.LatLngPoint
@@ -35,7 +35,7 @@ class RunServiceTest {
         val loopValidator = mockk<LoopValidator>(relaxed = true)
         val loopValidationFlagService = mockk<LoopValidationFlagService>(relaxed = true)
         val shieldMechanics = mockk<ShieldMechanics>(relaxed = true)
-        val tileRepository = mockk<TileRepository>(relaxed = true)
+        val quadraRepository = mockk<QuadraRepository>(relaxed = true)
         val capsService = mockk<CapsService>()
         val runTelemetryService = mockk<RunTelemetryService>(relaxed = true)
         val userRepository = mockk<UserRepository>()
@@ -47,7 +47,7 @@ class RunServiceTest {
             loopValidationFlagService = loopValidationFlagService,
             shieldMechanics = shieldMechanics,
             gameProperties = GameProperties(userDailyActionCap = 3),
-            tileRepository = tileRepository,
+            quadraRepository = quadraRepository,
             capsService = capsService,
             runTelemetryService = runTelemetryService,
             userRepository = userRepository
@@ -106,7 +106,7 @@ class RunServiceTest {
         val loopValidator = mockk<LoopValidator>(relaxed = true)
         val loopValidationFlagService = mockk<LoopValidationFlagService>(relaxed = true)
         val shieldMechanics = mockk<ShieldMechanics>(relaxed = true)
-        val tileRepository = mockk<TileRepository>(relaxed = true)
+        val quadraRepository = mockk<QuadraRepository>(relaxed = true)
         val capsService = mockk<CapsService>(relaxed = true)
         val runTelemetryService = mockk<RunTelemetryService>(relaxed = true)
         val userRepository = mockk<UserRepository>()
@@ -118,7 +118,7 @@ class RunServiceTest {
             loopValidationFlagService = loopValidationFlagService,
             shieldMechanics = shieldMechanics,
             gameProperties = GameProperties(),
-            tileRepository = tileRepository,
+            quadraRepository = quadraRepository,
             capsService = capsService,
             runTelemetryService = runTelemetryService,
             userRepository = userRepository
@@ -148,7 +148,7 @@ class RunServiceTest {
         val loopValidator = mockk<LoopValidator>()
         val loopValidationFlagService = mockk<LoopValidationFlagService>()
         val shieldMechanics = mockk<ShieldMechanics>(relaxed = true)
-        val tileRepository = mockk<TileRepository>(relaxed = true)
+        val quadraRepository = mockk<QuadraRepository>(relaxed = true)
         val capsService = mockk<CapsService>()
         val runTelemetryService = mockk<RunTelemetryService>(relaxed = true)
         val userRepository = mockk<UserRepository>()
@@ -179,8 +179,8 @@ class RunServiceTest {
                 closureMeters = 120.0,
                 coveragePct = 0.35
             ),
-            tilesCovered = listOf("8928308280fffff"),
-            primaryTile = "8928308280fffff",
+            quadrasCovered = listOf("8928308280fffff"),
+            primaryQuadra = "8928308280fffff",
             fraudFlags = emptyList()
         )
         every { runRepository.save(any()) } answers { firstArg() }
@@ -192,7 +192,7 @@ class RunServiceTest {
             loopValidationFlagService = loopValidationFlagService,
             shieldMechanics = shieldMechanics,
             gameProperties = GameProperties(userDailyActionCap = 3),
-            tileRepository = tileRepository,
+            quadraRepository = quadraRepository,
             capsService = capsService,
             runTelemetryService = runTelemetryService,
             userRepository = userRepository
@@ -229,7 +229,7 @@ class RunServiceTest {
         val loopValidator = mockk<LoopValidator>()
         val loopValidationFlagService = mockk<LoopValidationFlagService>()
         val shieldMechanics = mockk<ShieldMechanics>(relaxed = true)
-        val tileRepository = mockk<TileRepository>()
+        val quadraRepository = mockk<QuadraRepository>()
         val capsService = mockk<CapsService>()
         val runTelemetryService = mockk<RunTelemetryService>(relaxed = true)
         val userRepository = mockk<UserRepository>()
@@ -260,11 +260,11 @@ class RunServiceTest {
                 closureMeters = 10.0,
                 coveragePct = 0.8
             ),
-            tilesCovered = listOf("8928308280fffff"),
-            primaryTile = "8928308280fffff",
+            quadrasCovered = listOf("8928308280fffff"),
+            primaryQuadra = "8928308280fffff",
             fraudFlags = emptyList()
         )
-        every { tileRepository.findById(any()) } returns java.util.Optional.empty()
+        every { quadraRepository.findById(any()) } returns java.util.Optional.empty()
         every { runRepository.save(any()) } answers { firstArg() }
 
         val service = RunService(
@@ -274,7 +274,7 @@ class RunServiceTest {
             loopValidationFlagService = loopValidationFlagService,
             shieldMechanics = shieldMechanics,
             gameProperties = GameProperties(userDailyActionCap = 3),
-            tileRepository = tileRepository,
+            quadraRepository = quadraRepository,
             capsService = capsService,
             runTelemetryService = runTelemetryService,
             userRepository = userRepository

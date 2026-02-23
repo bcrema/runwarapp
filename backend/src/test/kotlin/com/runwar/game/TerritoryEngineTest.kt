@@ -2,9 +2,9 @@ package com.runwar.game
 
 import com.runwar.domain.run.Run
 import com.runwar.domain.run.TerritoryActionType
-import com.runwar.domain.tile.OwnerType
-import com.runwar.domain.tile.Tile
-import com.runwar.domain.tile.TileRepository
+import com.runwar.domain.quadra.OwnerType
+import com.runwar.domain.quadra.Quadra
+import com.runwar.domain.quadra.QuadraRepository
 import com.runwar.domain.territory.TerritoryAction
 import com.runwar.domain.territory.TerritoryActionRepository
 import com.runwar.domain.user.User
@@ -28,7 +28,7 @@ class TerritoryEngineTest {
 
     @Test
     fun `neutral tile leads to conquest`() {
-        val tileRepository = mockk<TileRepository>()
+        val tileRepository = mockk<QuadraRepository>()
         val actionRepository = mockk<TerritoryActionRepository>()
         val engine = TerritoryEngine(tileRepository, actionRepository)
 
@@ -36,7 +36,7 @@ class TerritoryEngineTest {
         val tile = createTile()
         val run = createRun(actor)
 
-        val savedTile = slot<Tile>()
+        val savedTile = slot<Quadra>()
         val savedAction = slot<TerritoryAction>()
         every { tileRepository.save(capture(savedTile)) } answers { savedTile.captured }
         every { actionRepository.save(capture(savedAction)) } answers { savedAction.captured }
@@ -56,7 +56,7 @@ class TerritoryEngineTest {
 
     @Test
     fun `rival tile leads to attack`() {
-        val tileRepository = mockk<TileRepository>()
+        val tileRepository = mockk<QuadraRepository>()
         val actionRepository = mockk<TerritoryActionRepository>()
         val engine = TerritoryEngine(tileRepository, actionRepository)
 
@@ -69,7 +69,7 @@ class TerritoryEngineTest {
         )
         val run = createRun(actor)
 
-        val savedTile = slot<Tile>()
+        val savedTile = slot<Quadra>()
         val savedAction = slot<TerritoryAction>()
         every { tileRepository.save(capture(savedTile)) } answers { savedTile.captured }
         every { actionRepository.save(capture(savedAction)) } answers { savedAction.captured }
@@ -88,7 +88,7 @@ class TerritoryEngineTest {
 
     @Test
     fun `owner tile leads to defense`() {
-        val tileRepository = mockk<TileRepository>()
+        val tileRepository = mockk<QuadraRepository>()
         val actionRepository = mockk<TerritoryActionRepository>()
         val engine = TerritoryEngine(tileRepository, actionRepository)
 
@@ -100,7 +100,7 @@ class TerritoryEngineTest {
         )
         val run = createRun(actor)
 
-        val savedTile = slot<Tile>()
+        val savedTile = slot<Quadra>()
         val savedAction = slot<TerritoryAction>()
         every { tileRepository.save(capture(savedTile)) } answers { savedTile.captured }
         every { actionRepository.save(capture(savedAction)) } answers { savedAction.captured }
@@ -116,7 +116,7 @@ class TerritoryEngineTest {
 
     @Test
     fun `attack that breaks shield transfers ownership with cooldown`() {
-        val tileRepository = mockk<TileRepository>()
+        val tileRepository = mockk<QuadraRepository>()
         val actionRepository = mockk<TerritoryActionRepository>()
         val engine = TerritoryEngine(tileRepository, actionRepository)
 
@@ -129,7 +129,7 @@ class TerritoryEngineTest {
         )
         val run = createRun(actor)
 
-        val savedTile = slot<Tile>()
+        val savedTile = slot<Quadra>()
         val savedAction = slot<TerritoryAction>()
         every { tileRepository.save(capture(savedTile)) } answers { savedTile.captured }
         every { actionRepository.save(capture(savedAction)) } answers { savedAction.captured }
@@ -154,8 +154,8 @@ class TerritoryEngineTest {
         ownerId: UUID? = null,
         ownerType: OwnerType? = null,
         shield: Int = 0
-    ): Tile {
-        return Tile(
+    ): Quadra {
+        return Quadra(
             id = "tile-1",
             center = geometryFactory.createPoint(Coordinate(0.0, 0.0)),
             ownerType = ownerType,

@@ -40,8 +40,8 @@ class Bandeira(
     @Column(name = "member_count")
     var memberCount: Int = 1,
     
-    @Column(name = "total_tiles")
-    var totalTiles: Int = 0,
+    @Column(name = "total_quadras")
+    var totalQuadras: Int = 0,
     
     @Column(name = "created_at")
     val createdAt: Instant = Instant.now()

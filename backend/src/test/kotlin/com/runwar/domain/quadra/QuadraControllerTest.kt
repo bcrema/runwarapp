@@ -1,4 +1,4 @@
-package com.runwar.domain.tile
+package com.runwar.domain.quadra
 
 import com.runwar.config.GlobalExceptionHandler
 import io.mockk.every
@@ -11,9 +11,9 @@ import org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPat
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers.status
 import org.springframework.test.web.servlet.setup.MockMvcBuilders
 
-class TileControllerTest {
+class QuadraControllerTest {
 
-    private val tileService = mockk<TileService>()
+    private val tileService = mockk<QuadraService>()
     private lateinit var mockMvc: MockMvc
 
     @BeforeEach
@@ -25,7 +25,7 @@ class TileControllerTest {
 
     @Test
     fun `get quadra by id returns 404 with JSON payload when quadra is missing`() {
-        every { tileService.getTileById("missing-quadra") } returns null
+        every { tileService.getQuadraById("missing-quadra") } returns null
 
         mockMvc.perform(get("/api/quadras/missing-quadra"))
             .andExpect(status().isNotFound)
@@ -35,7 +35,7 @@ class TileControllerTest {
 
     @Test
     fun `get quadra by id returns quadra payload when quadra exists`() {
-        every { tileService.getTileById("quadra-1") } returns makeQuadraDto("quadra-1")
+        every { tileService.getQuadraById("quadra-1") } returns makeQuadraDto("quadra-1")
 
         mockMvc.perform(get("/api/quadras/quadra-1"))
             .andExpect(status().isOk)
@@ -44,8 +44,8 @@ class TileControllerTest {
             .andExpect(jsonPath("$.shield").value(80))
     }
 
-    private fun makeQuadraDto(id: String): TileService.QuadraDto {
-        return TileService.QuadraDto(
+    private fun makeQuadraDto(id: String): QuadraService.QuadraDto {
+        return QuadraService.QuadraDto(
             id = id,
             lat = -25.43,
             lng = -49.27,

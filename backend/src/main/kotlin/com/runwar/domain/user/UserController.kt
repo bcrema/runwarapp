@@ -55,7 +55,7 @@ class UserController(
         val totalRuns: Int,
         val totalDistance: Double,
         val totalDistanceMeters: Double,
-        val totalTilesConquered: Int
+        val totalQuadrasConquered: Int
     )
 
     data class AuthResponse(
@@ -179,7 +179,7 @@ class UserController(
             totalRuns = user.totalRuns,
             totalDistance = user.totalDistance,
             totalDistanceMeters = user.totalDistanceMeters,
-            totalTilesConquered = user.totalTilesConquered
+            totalQuadrasConquered = user.totalQuadrasConquered
         )
     }
 }

@@ -40,8 +40,8 @@ class User(
     @Column(name = "total_distance")
     var totalDistance: BigDecimal = BigDecimal.ZERO,
     
-    @Column(name = "total_tiles_conquered")
-    var totalTilesConquered: Int = 0,
+    @Column(name = "total_quadras_conquered")
+    var totalQuadrasConquered: Int = 0,
     
     @Column(name = "created_at")
     val createdAt: Instant = Instant.now()

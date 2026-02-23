@@ -13,8 +13,8 @@ class LoopValidator(
         val isLoopValid: Boolean,
         val reasons: List<String>,
         val metrics: LoopValidationMetrics,
-        val tilesCovered: List<String>,
-        val primaryTile: String?,
+        val quadrasCovered: List<String>,
+        val primaryQuadra: String?,
         val fraudFlags: List<String>
     ) {
         companion object {
@@ -27,8 +27,8 @@ class LoopValidator(
                     closureMeters = 0.0,
                     coveragePct = 0.0
                 ),
-                tilesCovered = emptyList(),
-                primaryTile = null,
+                quadrasCovered = emptyList(),
+                primaryQuadra = null,
                 fraudFlags = emptyList()
             )
         }
@@ -68,11 +68,11 @@ class LoopValidator(
         
         // Get tiles covered and their coverage percentages
         val tileCoverage = h3GridService.calculateTileCoverage(coordinates)
-        val tilesCovered = tileCoverage.keys.toList()
+        val quadrasCovered = tileCoverage.keys.toList()
         
         // Find primary tile (highest coverage)
         val primaryTileEntry = tileCoverage.maxByOrNull { it.value }
-        val primaryTile = primaryTileEntry?.key
+        val primaryQuadra = primaryTileEntry?.key
         val primaryCoverage = primaryTileEntry?.value ?: 0.0
         
         // Run anti-fraud checks
@@ -100,8 +100,8 @@ class LoopValidator(
         }
         
         // Check if primary tile is within Curitiba
-        if (primaryTile != null) {
-            val center = h3GridService.getTileCenter(primaryTile)
+        if (primaryQuadra != null) {
+            val center = h3GridService.getTileCenter(primaryQuadra)
             if (!h3GridService.isInCuritiba(center.lat, center.lng)) {
                 failureReasons.add("outside_game_area")
             }
@@ -118,8 +118,8 @@ class LoopValidator(
                 closureMeters = closingDistance,
                 coveragePct = primaryCoverage
             ),
-            tilesCovered = tilesCovered,
-            primaryTile = primaryTile,
+            quadrasCovered = quadrasCovered,
+            primaryQuadra = primaryQuadra,
             fraudFlags = fraudFlags
         )
     }

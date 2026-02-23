@@ -1,7 +1,7 @@
 package com.runwar.domain.run
 
 import com.runwar.config.GameProperties
-import com.runwar.domain.tile.TileRepository
+import com.runwar.domain.quadra.QuadraRepository
 import com.runwar.domain.user.User
 import com.runwar.domain.user.UserRepository
 import com.runwar.game.LatLngPoint
@@ -27,7 +27,7 @@ class RunService(
         private val loopValidationFlagService: LoopValidationFlagService,
         private val shieldMechanics: ShieldMechanics,
         private val gameProperties: GameProperties,
-        private val tileRepository: TileRepository,
+        private val quadraRepository: QuadraRepository,
         private val capsService: CapsService,
         private val runTelemetryService: RunTelemetryService,
         private val userRepository: UserRepository
@@ -79,7 +79,7 @@ class RunService(
                                         loopDistance = loopDistanceMeters?.div(1000.0),
                                         loopDistanceMeters = loopDistanceMeters,
                                         territoryAction = run.territoryAction?.name,
-                                        targetQuadraId = run.targetTile?.id,
+                                        targetQuadraId = run.targetQuadra?.id,
                                         isValidForTerritory = run.isValidForTerritory,
                                         fraudFlags = run.fraudFlags,
                                         createdAt = run.createdAt
@@ -142,28 +142,28 @@ class RunService(
                                 closingDistance =
                                         BigDecimal.valueOf(validation.metrics.closureMeters),
                                 competitionMode = competitionMode,
-                                targetTile = targetQuadraId?.let { tileRepository.findById(it).orElse(null) },
+                                targetQuadra = targetQuadraId?.let { quadraRepository.findById(it).orElse(null) },
                                 fraudFlags = validation.fraudFlags
                         )
 
                 var territoryResult: ShieldMechanics.ActionResult? = null
                 val previousOwner =
-                        validation.primaryTile
-                                ?.let { tileRepository.findById(it).orElse(null) }
+                                validation.primaryQuadra
+                                ?.let { quadraRepository.findById(it).orElse(null) }
                                 ?.let { OwnerSnapshot(id = it.ownerId, type = it.ownerType) }
 
                 // Process territory action if valid
                 if (
                         competitionMode == RunCompetitionMode.COMPETITIVE &&
                                 validation.isLoopValid &&
-                                validation.primaryTile != null
+                                validation.primaryQuadra != null
                 ) {
                         run.isValidForTerritory = true
 
                         if (!capsCheck.userCapReached && !capsCheck.bandeiraCapReached) {
                                 territoryResult =
                                         shieldMechanics.processAction(
-                                                validation.primaryTile,
+                                                validation.primaryQuadra,
                                                 managedUser
                                         )
                         }
@@ -258,27 +258,27 @@ class RunService(
                                 closingDistance =
                                         BigDecimal.valueOf(validation.metrics.closureMeters),
                                 competitionMode = competitionMode,
-                                targetTile = targetQuadraId?.let { tileRepository.findById(it).orElse(null) },
+                                targetQuadra = targetQuadraId?.let { quadraRepository.findById(it).orElse(null) },
                                 fraudFlags = validation.fraudFlags
                         )
 
                 var territoryResult: ShieldMechanics.ActionResult? = null
                 val previousOwner =
-                        validation.primaryTile
-                                ?.let { tileRepository.findById(it).orElse(null) }
+                                validation.primaryQuadra
+                                ?.let { quadraRepository.findById(it).orElse(null) }
                                 ?.let { OwnerSnapshot(id = it.ownerId, type = it.ownerType) }
 
                 if (
                         competitionMode == RunCompetitionMode.COMPETITIVE &&
                                 validation.isLoopValid &&
-                                validation.primaryTile != null
+                                validation.primaryQuadra != null
                 ) {
                         run.isValidForTerritory = true
 
                         if (!capsCheck.userCapReached && !capsCheck.bandeiraCapReached) {
                                 territoryResult =
                                         shieldMechanics.processAction(
-                                                validation.primaryTile,
+                                                validation.primaryQuadra,
                                                 managedUser
                                         )
                         }
@@ -347,8 +347,8 @@ class RunService(
                 competitionMode: RunCompetitionMode,
                 targetQuadraId: String?
         ): TurnResult {
-                val quadraId = territoryResult?.tileId ?: targetQuadraId ?: validation.primaryTile
-                val quadra = quadraId?.let { tileRepository.findById(it).orElse(null) }
+                val quadraId = territoryResult?.quadraId ?: targetQuadraId ?: validation.primaryQuadra
+                val quadra = quadraId?.let { quadraRepository.findById(it).orElse(null) }
 
                 val disputeState =
                         when {
@@ -379,7 +379,7 @@ class RunService(
                 if (
                         competitionMode == RunCompetitionMode.COMPETITIVE &&
                                 validation.isLoopValid &&
-                                validation.primaryTile == null
+                                validation.primaryQuadra == null
                 ) {
                         reasons.add("no_primary_quadra")
                 }

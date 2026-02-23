@@ -49,7 +49,7 @@ class UserControllerTest {
                 totalRuns = 0,
                 totalDistance = 0.0,
                 totalDistanceMeters = 0.0,
-                totalTilesConquered = 0
+                totalQuadrasConquered = 0
             ),
             accessToken = "access-token",
             refreshToken = "refresh-token"

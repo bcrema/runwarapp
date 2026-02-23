@@ -34,10 +34,10 @@ class RunTelemetryService(
         val loopDurationSeconds: Int,
         val closureMeters: Double,
         val coveragePct: Double,
-        val primaryTileId: String?,
-        val tilesCoveredCount: Int,
-        val tilesCovered: List<String>,
-        val actionTileId: String?,
+        val primaryQuadraId: String?,
+        val quadrasCoveredCount: Int,
+        val quadrasCovered: List<String>,
+        val actionQuadraId: String?,
         val actionType: TerritoryActionType?,
         val actionSuccess: Boolean,
         val actionReason: String?,
@@ -62,7 +62,7 @@ class RunTelemetryService(
         val competitionMode: String,
         val createdAt: Instant,
         val loop: LoopTelemetry,
-        val tile: TileTelemetry,
+        val quadra: QuadraTelemetry,
         val action: ActionTelemetry,
         val caps: CapsTelemetry,
         val antifraud: AntiFraudTelemetry,
@@ -77,14 +77,14 @@ class RunTelemetryService(
         val coveragePct: Double
     )
 
-    data class TileTelemetry(
-        val primaryTileId: String?,
-        val tilesCoveredCount: Int,
-        val tilesCovered: List<String>
+    data class QuadraTelemetry(
+        val primaryQuadraId: String?,
+        val quadrasCoveredCount: Int,
+        val quadrasCovered: List<String>
     )
 
     data class ActionTelemetry(
-        val tileId: String?,
+        val quadraId: String?,
         val actionType: String?,
         val success: Boolean,
         val reason: String?,
@@ -145,9 +145,9 @@ class RunTelemetryService(
                 "loopDurationSeconds",
                 "closureMeters",
                 "coveragePct",
-                "primaryTileId",
-                "tilesCoveredCount",
-                "tilesCovered",
+                "primaryQuadraId",
+                "quadrasCoveredCount",
+                "quadrasCovered",
                 "actionType",
                 "actionSuccess",
                 "actionReason",
@@ -179,9 +179,9 @@ class RunTelemetryService(
                     event.loopDurationSeconds,
                     event.closureMeters,
                     event.coveragePct,
-                    event.primaryTileId,
-                    event.tilesCoveredCount,
-                    event.tilesCovered.joinToString("|"),
+                    event.primaryQuadraId,
+                    event.quadrasCoveredCount,
+                    event.quadrasCovered.joinToString("|"),
                     event.actionType?.name,
                     event.actionSuccess,
                     event.actionReason,
@@ -234,10 +234,10 @@ class RunTelemetryService(
             loopDurationSeconds = validation.metrics.loopDurationSeconds,
             closureMeters = validation.metrics.closureMeters,
             coveragePct = validation.metrics.coveragePct,
-            primaryTileId = validation.primaryTile,
-            tilesCoveredCount = validation.tilesCovered.size,
-            tilesCovered = validation.tilesCovered,
-            actionTileId = territoryResult?.tileId ?: validation.primaryTile,
+            primaryQuadraId = validation.primaryQuadra,
+            quadrasCoveredCount = validation.quadrasCovered.size,
+            quadrasCovered = validation.quadrasCovered,
+            actionQuadraId = territoryResult?.quadraId ?: validation.primaryQuadra,
             actionType = territoryResult?.actionType,
             actionSuccess = territoryResult?.success == true,
             actionReason = territoryResult?.reason,
@@ -271,15 +271,15 @@ class RunTelemetryService(
                     closureMeters = fields.closureMeters,
                     coveragePct = fields.coveragePct
                 ),
-            tile =
-                TileTelemetry(
-                    primaryTileId = fields.primaryTileId,
-                    tilesCoveredCount = fields.tilesCoveredCount,
-                    tilesCovered = fields.tilesCovered
+            quadra =
+                QuadraTelemetry(
+                    primaryQuadraId = fields.primaryQuadraId,
+                    quadrasCoveredCount = fields.quadrasCoveredCount,
+                    quadrasCovered = fields.quadrasCovered
                 ),
             action =
                 ActionTelemetry(
-                    tileId = fields.actionTileId,
+                    quadraId = fields.actionQuadraId,
                     actionType = fields.actionType?.name,
                     success = fields.actionSuccess,
                     reason = fields.actionReason,
@@ -316,9 +316,9 @@ class RunTelemetryService(
             loopDurationSeconds = fields.loopDurationSeconds,
             closureMeters = fields.closureMeters,
             coveragePct = fields.coveragePct,
-            primaryTileId = fields.primaryTileId,
-            tilesCoveredCount = fields.tilesCoveredCount,
-            tilesCovered = fields.tilesCovered,
+            primaryQuadraId = fields.primaryQuadraId,
+            quadrasCoveredCount = fields.quadrasCoveredCount,
+            quadrasCovered = fields.quadrasCovered,
             actionType = fields.actionType,
             actionSuccess = fields.actionSuccess,
             actionReason = fields.actionReason,

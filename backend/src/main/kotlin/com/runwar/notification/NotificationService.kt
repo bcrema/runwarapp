@@ -1,6 +1,6 @@
 package com.runwar.notification
 
-import com.runwar.domain.tile.Tile
+import com.runwar.domain.quadra.Quadra
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
 
@@ -10,19 +10,19 @@ class NotificationService {
     private val logger = LoggerFactory.getLogger(NotificationService::class.java)
     
     /**
-     * Notify when a tile is taken over by a new owner
+     * Notify when a quadra is taken over by a new owner
      */
-    fun notifyTileTakeover(tile: Tile) {
-        logger.info("Tile ${tile.id} was taken over. New owner: ${tile.ownerId}")
+    fun notifyQuadraTakeover(quadra: Quadra) {
+        logger.info("Quadra ${quadra.id} was taken over. New owner: ${quadra.ownerId}")
         // TODO: Implement push notifications / in-app notifications
         // For MVP: Just log, notifications will be polled via API
     }
     
     /**
-     * Notify when a tile enters dispute state (shield < threshold)
+     * Notify when a quadra enters dispute state (shield < threshold)
      */
-    fun notifyTileInDispute(tile: Tile) {
-        logger.info("Tile ${tile.id} is now in dispute. Shield: ${tile.shield}")
+    fun notifyQuadraInDispute(quadra: Quadra) {
+        logger.info("Quadra ${quadra.id} is now in dispute. Shield: ${quadra.shield}")
         // TODO: Implement push notifications
     }
     

@@ -3,9 +3,9 @@ package com.runwar.seed
 import com.runwar.domain.bandeira.Bandeira
 import com.runwar.domain.bandeira.BandeiraCategory
 import com.runwar.domain.bandeira.BandeiraRepository
-import com.runwar.domain.tile.OwnerType
-import com.runwar.domain.tile.Tile
-import com.runwar.domain.tile.TileRepository
+import com.runwar.domain.quadra.OwnerType
+import com.runwar.domain.quadra.Quadra
+import com.runwar.domain.quadra.QuadraRepository
 import com.runwar.domain.user.User
 import com.runwar.domain.user.UserRepository
 import com.runwar.domain.user.UserRole
@@ -24,7 +24,7 @@ import org.springframework.transaction.annotation.Transactional
 class TestDataSeeder(
     private val userRepository: UserRepository,
     private val bandeiraRepository: BandeiraRepository,
-    private val tileRepository: TileRepository,
+    private val quadraRepository: QuadraRepository,
     private val passwordEncoder: PasswordEncoder,
     private val h3GridService: H3GridService
 ) : ApplicationRunner {
@@ -34,7 +34,7 @@ class TestDataSeeder(
     override fun run(args: ApplicationArguments) {
         val alphaAdminEmail = "alpha.admin+seed@runwar.local"
         if (userRepository.existsByEmail(alphaAdminEmail)) return
-        log.info("Seeding mock data (users/bandeiras/tiles) into database...")
+        log.info("Seeding mock data (users/bandeiras/quadras) into database...")
 
         val password = "password123"
         val alphaAdmin = createUser(email = alphaAdminEmail, username = "alpha_admin", password = password, role = UserRole.ADMIN)
@@ -82,17 +82,17 @@ class TestDataSeeder(
         beta.memberCount = userRepository.findByBandeiraId(beta.id).size
         bandeiraRepository.saveAll(listOf(alpha, beta))
 
-        seedTiles(alpha, beta, alphaAdmin, dave)
+        seedQuadras(alpha, beta, alphaAdmin, dave)
         log.info("Mock data seeding completed.")
     }
 
-    private fun seedTiles(alpha: Bandeira, beta: Bandeira, admin: User, dave: User) {
+    private fun seedQuadras(alpha: Bandeira, beta: Bandeira, admin: User, dave: User) {
         val now = Instant.now()
-        val baseTileId = h3GridService.getTileId(-25.4386, -49.2732)
-        val tileIds = generateTileIds(baseTileId, count = 22)
+        val baseQuadraId = h3GridService.getTileId(-25.4386, -49.2732)
+        val quadraIds = generateQuadraIds(baseQuadraId, count = 22)
 
-        val tiles =
-            tileIds.mapIndexed { index, tileId ->
+        val quadras =
+            quadraIds.mapIndexed { index, quadraId ->
                 val ownerType: OwnerType
                 val ownerId: java.util.UUID
                 val shield: Int
@@ -125,9 +125,9 @@ class TestDataSeeder(
                     }
                 }
 
-                Tile(
-                    id = tileId,
-                    center = h3GridService.getTileCenterAsPoint(tileId),
+                Quadra(
+                    id = quadraId,
+                    center = h3GridService.getTileCenterAsPoint(quadraId),
                     ownerType = ownerType,
                     ownerId = ownerId,
                     shield = shield,
@@ -138,14 +138,14 @@ class TestDataSeeder(
                 )
             }
 
-        tileRepository.saveAll(tiles)
+        quadraRepository.saveAll(quadras)
 
-        alpha.totalTiles = tileRepository.countByOwnerId(alpha.id)
-        beta.totalTiles = tileRepository.countByOwnerId(beta.id)
+        alpha.totalQuadras = quadraRepository.countByOwnerId(alpha.id)
+        beta.totalQuadras = quadraRepository.countByOwnerId(beta.id)
         bandeiraRepository.saveAll(listOf(alpha, beta))
 
-        admin.totalTilesConquered = tileRepository.countByOwnerId(admin.id)
-        dave.totalTilesConquered = tileRepository.countByOwnerId(dave.id)
+        admin.totalQuadrasConquered = quadraRepository.countByOwnerId(admin.id)
+        dave.totalQuadrasConquered = quadraRepository.countByOwnerId(dave.id)
         userRepository.saveAll(listOf(admin, dave))
     }
 
@@ -161,12 +161,12 @@ class TestDataSeeder(
         )
     }
 
-    private fun generateTileIds(baseTileId: String, count: Int): List<String> {
+    private fun generateQuadraIds(baseQuadraId: String, count: Int): List<String> {
         val visited = LinkedHashSet<String>()
         val queue = ArrayDeque<String>()
 
-        visited.add(baseTileId)
-        queue.add(baseTileId)
+        visited.add(baseQuadraId)
+        queue.add(baseQuadraId)
 
         while (queue.isNotEmpty() && visited.size < count) {
             val current = queue.removeFirst()

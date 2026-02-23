@@ -22,13 +22,13 @@ interface UserRepository : JpaRepository<User, UUID> {
     @Query("SELECT u FROM User u WHERE u.bandeira.id = :bandeiraId")
     fun findByBandeiraId(bandeiraId: UUID): List<User>
     
-    @Query("SELECT u FROM User u WHERE u.bandeira.id = :bandeiraId ORDER BY u.totalTilesConquered DESC")
+    @Query("SELECT u FROM User u WHERE u.bandeira.id = :bandeiraId ORDER BY u.totalQuadrasConquered DESC")
     fun findTopContributorsByBandeira(bandeiraId: UUID): List<User>
     
     @Query("""
         SELECT u FROM User u 
         WHERE u.bandeira IS NULL 
-        ORDER BY u.totalTilesConquered DESC
+        ORDER BY u.totalQuadrasConquered DESC
     """)
     fun findTopSoloPlayers(): List<User>
 }

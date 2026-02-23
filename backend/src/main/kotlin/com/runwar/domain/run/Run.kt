@@ -1,6 +1,6 @@
 package com.runwar.domain.run
 
-import com.runwar.domain.tile.Tile
+import com.runwar.domain.quadra.Quadra
 import com.runwar.domain.user.User
 import jakarta.persistence.*
 import java.math.BigDecimal
@@ -39,8 +39,8 @@ class Run(
         @Column(name = "territory_action")
         var territoryAction: TerritoryActionType? = null,
         @ManyToOne(fetch = FetchType.LAZY)
-        @JoinColumn(name = "target_tile_id")
-        var targetTile: Tile? = null,
+        @JoinColumn(name = "target_quadra_id")
+        var targetQuadra: Quadra? = null,
         @Column(name = "is_valid_for_territory") var isValidForTerritory: Boolean = false,
         @Column(name = "fraud_flags", columnDefinition = "text[]")
         var fraudFlags: List<String> = emptyList(),

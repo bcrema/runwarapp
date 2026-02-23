@@ -173,8 +173,8 @@ class RunControllerTest {
                 closureMeters = 12.0,
                 coveragePct = 0.72
             ),
-            tilesCovered = listOf("8928308280fffff"),
-            primaryTile = "8928308280fffff",
+            quadrasCovered = listOf("8928308280fffff"),
+            primaryQuadra = "8928308280fffff",
             fraudFlags = emptyList()
         )
 
@@ -187,7 +187,7 @@ class RunControllerTest {
             shieldBefore = 0,
             shieldAfter = 100,
             inDispute = false,
-            tileId = "8928308280fffff"
+            quadraId = "8928308280fffff"
         )
 
         val turnResult = TurnResult(

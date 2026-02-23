@@ -46,39 +46,39 @@ class H3GridService(private val gameProperties: GameProperties) {
     /**
      * Get the center point of a tile
      */
-    fun getTileCenter(tileId: String): LatLngPoint {
-        val center = h3.cellToLatLng(tileId)
+    fun getTileCenter(quadraId: String): LatLngPoint {
+        val center = h3.cellToLatLng(quadraId)
         return LatLngPoint(center.lat, center.lng)
     }
     
     /**
      * Get the center as a JTS Point
      */
-    fun getTileCenterAsPoint(tileId: String): Point {
-        val center = getTileCenter(tileId)
+    fun getTileCenterAsPoint(quadraId: String): Point {
+        val center = getTileCenter(quadraId)
         return geometryFactory.createPoint(Coordinate(center.lng, center.lat))
     }
     
     /**
      * Get the boundary vertices of a tile (hexagon)
      */
-    fun getTileBoundary(tileId: String): List<LatLngPoint> {
-        return h3.cellToBoundary(tileId).map { LatLngPoint(it.lat, it.lng) }
+    fun getTileBoundary(quadraId: String): List<LatLngPoint> {
+        return h3.cellToBoundary(quadraId).map { LatLngPoint(it.lat, it.lng) }
     }
 
     /**
      * Resolve a tile index and polygon for a coordinate (map overlay).
      */
     fun getTileOverlay(lat: Double, lng: Double): TileOverlay {
-        val tileId = getTileId(lat, lng)
-        return TileOverlay(tileId = tileId, boundary = getTileBoundary(tileId))
+        val quadraId = getTileId(lat, lng)
+        return TileOverlay(quadraId = quadraId, boundary = getTileBoundary(quadraId))
     }
     
     /**
      * Get neighboring tiles (k=1 ring)
      */
-    fun getNeighbors(tileId: String): List<String> {
-        return h3.gridDisk(tileId, 1).filter { it != tileId }
+    fun getNeighbors(quadraId: String): List<String> {
+        return h3.gridDisk(quadraId, 1).filter { it != quadraId }
     }
     
     /**
@@ -138,11 +138,11 @@ class H3GridService(private val gameProperties: GameProperties) {
             )
 
             val candidateTiles = getCandidateTilesForSegment(p1, p2, segmentDistance)
-            candidateTiles.forEach { tileId ->
-                val polygon = getTilePolygon(tileId)
+            candidateTiles.forEach { quadraId ->
+                val polygon = getTilePolygon(quadraId)
                 val distanceInTile = intersectionDistanceMeters(line, polygon)
                 if (distanceInTile > 0) {
-                    segmentsByTile[tileId] = (segmentsByTile[tileId] ?: 0.0) + distanceInTile
+                    segmentsByTile[quadraId] = (segmentsByTile[quadraId] ?: 0.0) + distanceInTile
                 }
             }
         }
@@ -162,7 +162,7 @@ class H3GridService(private val gameProperties: GameProperties) {
         val coverage = calculateTileCoverage(coordinates)
         val primary = coverage.maxByOrNull { it.value } ?: return null
         return TileCoverageResult(
-            tileId = primary.key,
+            quadraId = primary.key,
             coverage = primary.value,
             boundary = getTileBoundary(primary.key)
         )
@@ -227,10 +227,10 @@ class H3GridService(private val gameProperties: GameProperties) {
             }
     }
 
-    private fun getTilePolygon(tileId: String): Polygon {
-        val boundary = h3.cellToBoundary(tileId)
+    private fun getTilePolygon(quadraId: String): Polygon {
+        val boundary = h3.cellToBoundary(quadraId)
         require(boundary.isNotEmpty()) {
-            "Invalid H3 tile ID '$tileId': cellToBoundary returned an empty boundary."
+            "Invalid H3 tile ID '$quadraId': cellToBoundary returned an empty boundary."
         }
         val coordinates = boundary.map { Coordinate(it.lng, it.lat) }.toMutableList()
         coordinates.add(coordinates.first())
@@ -329,12 +329,12 @@ data class LatLngPoint(
 )
 
 data class TileOverlay(
-    val tileId: String,
+    val quadraId: String,
     val boundary: List<LatLngPoint>
 )
 
 data class TileCoverageResult(
-    val tileId: String,
+    val quadraId: String,
     val coverage: Double,
     val boundary: List<LatLngPoint>
 )

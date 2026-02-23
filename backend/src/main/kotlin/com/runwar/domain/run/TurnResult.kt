@@ -1,6 +1,6 @@
 package com.runwar.domain.run
 
-import com.runwar.domain.tile.OwnerType
+import com.runwar.domain.quadra.OwnerType
 import java.time.Instant
 import java.util.UUID
 
