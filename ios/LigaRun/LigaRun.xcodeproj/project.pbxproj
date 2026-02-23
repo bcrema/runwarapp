@@ -3,7 +3,7 @@
 	archiveVersion = 1;
 	classes = {
 	};
-	objectVersion = 63;
+	objectVersion = 77;
 	objects = {
 
 /* Begin PBXBuildFile section */
@@ -21,11 +21,10 @@
 		4BD2C417BBA74CA787C77817 /* HealthKitAuthorizationStoreTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = DF28D4B9293A3AE9EF358F7F /* HealthKitAuthorizationStoreTests.swift */; };
 		532970604BDC326CC3C445D7 /* BandeirasViewModelTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = D56C2F8711166F1582C2B3CA /* BandeirasViewModelTests.swift */; };
 		5CA49102985C5F34D817F883 /* HealthKitRunSyncService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4F90AB19C8B78C9A9BC20A01 /* HealthKitRunSyncService.swift */; };
-		5D6E46DABDB85C4724F6B1FD /* StrategicMapView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5D8DEFA61C26D1DBF72C2F17 /* StrategicMapView.swift */; };
 		61AD7B72A54804F27E128DD2 /* CompanionSyncCoordinator.swift in Sources */ = {isa = PBXBuildFile; fileRef = B1D6E67AF68CC0619F86920E /* CompanionSyncCoordinator.swift */; };
-		687D08AA35AF49AFE7AA1F40 /* TileService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 868F9127D460C6187D54C342 /* TileService.swift */; };
 		6A5C14AF83F03E4B64061676 /* RunsViewModelTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 788CCFC00DB261E33D463C15 /* RunsViewModelTests.swift */; };
 		6E3B2E6B818B1B702CE620B8 /* TestFixtures.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7CF9246D57FA43D354D503E3 /* TestFixtures.swift */; };
+		708D791FC616ACD13F768585 /* QuadraEligibilityPolicyTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5211D010B78B5D8BBF901EF3 /* QuadraEligibilityPolicyTests.swift */; };
 		7A4BAF903A26254740CFA752 /* SubmissionResultPresentation.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3DBD6363768644A41C6EDDC6 /* SubmissionResultPresentation.swift */; };
 		7DEDDC97CA4E3E6EA8C88603 /* HealthKitAuthorizationStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = 130949A44776191A527B5206 /* HealthKitAuthorizationStore.swift */; };
 		82736BAE69FA31A1E71B330E /* ActiveRunHUD.swift in Sources */ = {isa = PBXBuildFile; fileRef = D067E56BD2C745F2C0F36694 /* ActiveRunHUD.swift */; };
@@ -35,14 +34,13 @@
 		98623452FBBF4D575A289094 /* APIClient.swift in Sources */ = {isa = PBXBuildFile; fileRef = 99C81E6498BAC1CA9DCB927C /* APIClient.swift */; };
 		9A3A0DBEBECDF1B0DFD7FCC0 /* ProfileView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3458657E74B93B192484D16C /* ProfileView.swift */; };
 		9CA95BB60E2D6623522DCA36 /* RunSessionStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5F5D2B441C2DC5B52A3BAC8D /* RunSessionStore.swift */; };
-		9F271213BC043C21421A9873 /* TileDetailsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6755542C76AB597836FCEA9E /* TileDetailsView.swift */; };
+		A65C5AE77B4B1905650E2815 /* QuadraEligibilityPolicy.swift in Sources */ = {isa = PBXBuildFile; fileRef = FD6CAE3D41A79CE86229A94F /* QuadraEligibilityPolicy.swift */; };
 		A9C21A8BBF97477FB84A90A5 /* ProfileViewModelTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 001C5F5DF1C810B7F21CEF8E /* ProfileViewModelTests.swift */; };
 		AFC9F94528C7FB52CD2CA02B /* GeoUtils.swift in Sources */ = {isa = PBXBuildFile; fileRef = DF1030E3CEB927D3E9B219EC /* GeoUtils.swift */; };
 		B88EBB9D6AAB0728C4CE6AAE /* RunSyncCoordinatorTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3CF5C9F70C59A082A68337D8 /* RunSyncCoordinatorTests.swift */; };
 		B899FB4A41BFE5793DC1F91B /* AuthView.swift in Sources */ = {isa = PBXBuildFile; fileRef = C055D58127E516529511A460 /* AuthView.swift */; };
 		B90E06E75CDE1E679B921284 /* RunUploadService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 15A2F38261691C62DC800076 /* RunUploadService.swift */; };
 		BD7535AF5995F861EDF49320 /* MissionSummaryView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8A8F4D495F9291551EE47D15 /* MissionSummaryView.swift */; };
-		C222BAC1FB80EA71B5184770 /* StrategicMapViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4F97C7EC05598F2091E1DA28 /* StrategicMapViewModel.swift */; };
 		CC0630A644CF12E8A8FC05D6 /* CompanionSyncStateTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = EBC788670B9D532DE9FCAADA /* CompanionSyncStateTests.swift */; };
 		CE4BE5CEDC2D309246DD9912 /* HexMapView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A7BD8E9AA1F055D350735CEB /* HexMapView.swift */; };
 		D937F9F046A34D0C6512C56E /* SubmissionResultPresentationTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1E2F8608AB9053AFB32DE60F /* SubmissionResultPresentationTests.swift */; };
@@ -83,22 +81,19 @@
 		36317B4036D4EC17DAAE3D05 /* SessionStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SessionStore.swift; sourceTree = "<group>"; };
 		3CF5C9F70C59A082A68337D8 /* RunSyncCoordinatorTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RunSyncCoordinatorTests.swift; sourceTree = "<group>"; };
 		3DBD6363768644A41C6EDDC6 /* SubmissionResultPresentation.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SubmissionResultPresentation.swift; sourceTree = "<group>"; };
-		4460EDCA5A8392F6B0412BD1 /* LigaRun.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = LigaRun.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		4460EDCA5A8392F6B0412BD1 /* LigaRun.app */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = wrapper.application; path = LigaRun.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		4F90AB19C8B78C9A9BC20A01 /* HealthKitRunSyncService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HealthKitRunSyncService.swift; sourceTree = "<group>"; };
-		4F97C7EC05598F2091E1DA28 /* StrategicMapViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StrategicMapViewModel.swift; sourceTree = "<group>"; };
 		4FCA68DFEAEAEFFEEA94FAC3 /* CompanionRunManagerTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CompanionRunManagerTests.swift; sourceTree = "<group>"; };
 		5120777A2B8A3D3C793D3036 /* CompanionRunManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CompanionRunManager.swift; sourceTree = "<group>"; };
-		5D8DEFA61C26D1DBF72C2F17 /* StrategicMapView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StrategicMapView.swift; sourceTree = "<group>"; };
+		5211D010B78B5D8BBF901EF3 /* QuadraEligibilityPolicyTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = QuadraEligibilityPolicyTests.swift; sourceTree = "<group>"; };
 		5F5D2B441C2DC5B52A3BAC8D /* RunSessionStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RunSessionStore.swift; sourceTree = "<group>"; };
-		6755542C76AB597836FCEA9E /* TileDetailsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TileDetailsView.swift; sourceTree = "<group>"; };
 		687A5818C9839BD446B9CCBA /* BandeirasViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BandeirasViewModel.swift; sourceTree = "<group>"; };
 		68A46DA068E959FFAEE24347 /* AuthViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AuthViewModel.swift; sourceTree = "<group>"; };
 		6A2084EF36D9101EA1AAC5A0 /* KeychainStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = KeychainStore.swift; sourceTree = "<group>"; };
-		6D90C1473BE29FA146C52610 /* LigaRunTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = LigaRunTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
+		6D90C1473BE29FA146C52610 /* LigaRunTests.xctest */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = wrapper.cfbundle; path = LigaRunTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		77D7169C2E064CB5E6F569DB /* BandeirasView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BandeirasView.swift; sourceTree = "<group>"; };
 		788CCFC00DB261E33D463C15 /* RunsViewModelTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RunsViewModelTests.swift; sourceTree = "<group>"; };
 		7CF9246D57FA43D354D503E3 /* TestFixtures.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TestFixtures.swift; sourceTree = "<group>"; };
-		868F9127D460C6187D54C342 /* TileService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TileService.swift; sourceTree = "<group>"; };
 		8A476164F6DEFB40D8EB759C /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; path = Info.plist; sourceTree = "<group>"; };
 		8A8F4D495F9291551EE47D15 /* MissionSummaryView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MissionSummaryView.swift; sourceTree = "<group>"; };
 		99C81E6498BAC1CA9DCB927C /* APIClient.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = APIClient.swift; sourceTree = "<group>"; };
@@ -124,6 +119,7 @@
 		EA97388AAB84B14E4418C4D4 /* MapViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MapViewModel.swift; sourceTree = "<group>"; };
 		EBC788670B9D532DE9FCAADA /* CompanionSyncStateTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CompanionSyncStateTests.swift; sourceTree = "<group>"; };
 		F319063A28F6BCE60735016B /* MainTabView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MainTabView.swift; sourceTree = "<group>"; };
+		FD6CAE3D41A79CE86229A94F /* QuadraEligibilityPolicy.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = QuadraEligibilityPolicy.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -145,6 +141,7 @@
 				5120777A2B8A3D3C793D3036 /* CompanionRunManager.swift */,
 				B1D6E67AF68CC0619F86920E /* CompanionSyncCoordinator.swift */,
 				8A8F4D495F9291551EE47D15 /* MissionSummaryView.swift */,
+				FD6CAE3D41A79CE86229A94F /* QuadraEligibilityPolicy.swift */,
 				A1D6F8821C77AEC6DD6E6A09 /* RunManager.swift */,
 				CF920B486730172950D145DF /* RunsView.swift */,
 				2AA19CFFF99B6C539A0ED851 /* RunsViewModel.swift */,
@@ -215,7 +212,6 @@
 				C44CA3A3941B2BF370DDF251 /* RunService.swift */,
 				5F5D2B441C2DC5B52A3BAC8D /* RunSessionStore.swift */,
 				15A2F38261691C62DC800076 /* RunUploadService.swift */,
-				868F9127D460C6187D54C342 /* TileService.swift */,
 			);
 			path = Services;
 			sourceTree = "<group>";
@@ -234,8 +230,6 @@
 				A7BD8E9AA1F055D350735CEB /* HexMapView.swift */,
 				C7F05BBC671A8D948634E040 /* MapScreen.swift */,
 				EA97388AAB84B14E4418C4D4 /* MapViewModel.swift */,
-				4F97C7EC05598F2091E1DA28 /* StrategicMapViewModel.swift */,
-				6755542C76AB597836FCEA9E /* TileDetailsView.swift */,
 			);
 			path = Map;
 			sourceTree = "<group>";
@@ -301,6 +295,7 @@
 				DF28D4B9293A3AE9EF358F7F /* HealthKitAuthorizationStoreTests.swift */,
 				BC68E42C1CA9770755AA8C3C /* MapViewModelTests.swift */,
 				001C5F5DF1C810B7F21CEF8E /* ProfileViewModelTests.swift */,
+				5211D010B78B5D8BBF901EF3 /* QuadraEligibilityPolicyTests.swift */,
 				32507D4DD9EC6B847C11129C /* RunSessionStoreTests.swift */,
 				788CCFC00DB261E33D463C15 /* RunsViewModelTests.swift */,
 				3CF5C9F70C59A082A68337D8 /* RunSyncCoordinatorTests.swift */,
@@ -315,7 +310,6 @@
 		FE14795C6000252E127B61D1 /* Features */ = {
 			isa = PBXGroup;
 			children = (
-				5D8DEFA61C26D1DBF72C2F17 /* StrategicMapView.swift */,
 				2B5383E75516A822D3B5512F /* Auth */,
 				1743E9B7210037FFBB82760A /* Bandeiras */,
 				B5752918D4EA56FBF891B2C9 /* Map */,
@@ -399,6 +393,7 @@
 			packageReferences = (
 				08A1DAF369C22FABD28B48AE /* XCRemoteSwiftPackageReference "mapbox-maps-ios" */,
 			);
+			preferredProjectObjectVersion = 77;
 			projectDirPath = "";
 			projectRoot = "";
 			targets = (
@@ -431,6 +426,7 @@
 				4BD2C417BBA74CA787C77817 /* HealthKitAuthorizationStoreTests.swift in Sources */,
 				E30D0B0C6DB6F64279D60538 /* MapViewModelTests.swift in Sources */,
 				A9C21A8BBF97477FB84A90A5 /* ProfileViewModelTests.swift in Sources */,
+				708D791FC616ACD13F768585 /* QuadraEligibilityPolicyTests.swift in Sources */,
 				957CC1FF1FFABB049E975C5E /* RunSessionStoreTests.swift in Sources */,
 				B88EBB9D6AAB0728C4CE6AAE /* RunSyncCoordinatorTests.swift in Sources */,
 				4A71D24F2F575A37D29DC64E /* RunUploadServiceTests.swift in Sources */,
@@ -467,6 +463,7 @@
 				16B9AECA3F588774B244EA64 /* MapViewModel.swift in Sources */,
 				BD7535AF5995F861EDF49320 /* MissionSummaryView.swift in Sources */,
 				9A3A0DBEBECDF1B0DFD7FCC0 /* ProfileView.swift in Sources */,
+				A65C5AE77B4B1905650E2815 /* QuadraEligibilityPolicy.swift in Sources */,
 				ECD8E5771692B85108E4F00B /* RunManager.swift in Sources */,
 				1E0867982BE45F2A1751601D /* RunService.swift in Sources */,
 				9CA95BB60E2D6623522DCA36 /* RunSessionStore.swift in Sources */,
@@ -474,11 +471,7 @@
 				137EBF945C61CE847D80E400 /* RunsView.swift in Sources */,
 				E54A9529436E283603107766 /* RunsViewModel.swift in Sources */,
 				36794CBA91B90E076BB5D4DC /* SessionStore.swift in Sources */,
-				5D6E46DABDB85C4724F6B1FD /* StrategicMapView.swift in Sources */,
-				C222BAC1FB80EA71B5184770 /* StrategicMapViewModel.swift in Sources */,
 				7A4BAF903A26254740CFA752 /* SubmissionResultPresentation.swift in Sources */,
-				9F271213BC043C21421A9873 /* TileDetailsView.swift in Sources */,
-				687D08AA35AF49AFE7AA1F40 /* TileService.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -500,7 +493,6 @@
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CODE_SIGN_ENTITLEMENTS = Config/LigaRun.entitlements;
 				CODE_SIGN_IDENTITY = "iPhone Developer";
-				DEVELOPMENT_TEAM = D3TUSJSBC5;
 				INFOPLIST_FILE = Resources/Info.plist;
 				IPHONEOS_DEPLOYMENT_TARGET = 16.0;
 				LD_RUNPATH_SEARCH_PATHS = (
@@ -577,7 +569,6 @@
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CODE_SIGN_ENTITLEMENTS = Config/LigaRun.entitlements;
 				CODE_SIGN_IDENTITY = "iPhone Developer";
-				DEVELOPMENT_TEAM = D3TUSJSBC5;
 				INFOPLIST_FILE = Resources/Info.plist;
 				IPHONEOS_DEPLOYMENT_TARGET = 16.0;
 				LD_RUNPATH_SEARCH_PATHS = (
@@ -595,7 +586,6 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				BUNDLE_LOADER = "$(TEST_HOST)";
-				DEVELOPMENT_TEAM = D3TUSJSBC5;
 				INFOPLIST_FILE = Tests/Info.plist;
 				IPHONEOS_DEPLOYMENT_TARGET = 16.0;
 				LD_RUNPATH_SEARCH_PATHS = (
@@ -614,7 +604,6 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				BUNDLE_LOADER = "$(TEST_HOST)";
-				DEVELOPMENT_TEAM = D3TUSJSBC5;
 				INFOPLIST_FILE = Tests/Info.plist;
 				IPHONEOS_DEPLOYMENT_TARGET = 16.0;
 				LD_RUNPATH_SEARCH_PATHS = (

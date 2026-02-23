@@ -65,9 +65,6 @@ struct Quadra: Codable, Identifiable {
     let championName: String?
     let guardianId: String?
     let guardianName: String?
-    let championUserId: String?
-    let championBandeiraId: String?
-    let championName: String?
 
     var boundaryCoordinates: [CLLocationCoordinate2D] {
         boundary.map { CLLocationCoordinate2D(latitude: $0[0], longitude: $0[1]) }
@@ -84,7 +81,7 @@ struct QuadraStats: Codable {
     let disputePercentage: Double
 }
 
-struct Run: Codable, Identifiable {
+struct Run: Decodable, Identifiable {
     let id: String
     let userId: String
     let distance: Double
@@ -123,7 +120,7 @@ struct Run: Codable, Identifiable {
     }
 }
 
-struct LoopValidation: Codable {
+struct LoopValidation: Decodable {
     let isValid: Bool
     let distance: Double
     let duration: Double
@@ -156,7 +153,7 @@ struct LoopValidation: Codable {
     }
 }
 
-struct TerritoryResult: Codable {
+struct TerritoryResult: Decodable {
     let success: Bool
     let actionType: String?
     let reason: String?
@@ -186,7 +183,7 @@ struct TerritoryResult: Codable {
     }
 }
 
-struct TurnResult: Codable {
+struct TurnResult: Decodable {
     let actionType: String?
     let quadraId: String?
     let h3Index: String?
@@ -230,7 +227,7 @@ struct TurnCapsRemaining: Codable {
     let bandeiraActionsRemaining: Int?
 }
 
-struct RunSubmissionResult: Codable {
+struct RunSubmissionResult: Decodable {
     let run: Run
     let loopValidation: LoopValidation
     let territoryResult: TerritoryResult?

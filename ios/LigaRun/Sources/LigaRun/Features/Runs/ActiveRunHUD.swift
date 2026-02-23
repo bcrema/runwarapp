@@ -8,7 +8,7 @@ struct ActiveRunHUD: View {
     @StateObject private var runManager: CompanionRunManager
     @Environment(\.dismiss) private var dismiss
 
-    @State private var currentQuadra: Tile?
+    @State private var currentQuadra: Quadra?
     @State private var currentEligibility = QuadraEligibilityResult(status: .trainingOnly(reason: .missingQuadraOwnershipData))
     @State private var focusCoordinate: CLLocationCoordinate2D?
     @State private var lastFocusLocation: CLLocation?
