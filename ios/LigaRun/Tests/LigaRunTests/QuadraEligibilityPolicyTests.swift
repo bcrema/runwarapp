@@ -6,7 +6,7 @@ final class QuadraEligibilityPolicyTests: XCTestCase {
 
     func testEvaluateEligibleCompetitiveWhenUserIsSoloOwner() {
         let user = makeUserFixture(id: "runner-1", bandeiraId: nil)
-        let quadra = makeTileFixture(ownerType: .solo, ownerId: "runner-1")
+        let quadra = makeQuadraFixture(ownerType: .solo, ownerId: "runner-1")
 
         let result = policy.evaluate(currentUser: user, quadra: quadra)
 
@@ -16,7 +16,7 @@ final class QuadraEligibilityPolicyTests: XCTestCase {
 
     func testEvaluateEligibleCompetitiveWhenUserBandeiraOwnsQuadra() {
         let user = makeUserFixture(id: "runner-1", bandeiraId: "band-1")
-        let quadra = makeTileFixture(ownerType: .bandeira, ownerId: "band-1")
+        let quadra = makeQuadraFixture(ownerType: .bandeira, ownerId: "band-1")
 
         let result = policy.evaluate(currentUser: user, quadra: quadra)
 
@@ -25,7 +25,7 @@ final class QuadraEligibilityPolicyTests: XCTestCase {
 
     func testEvaluateEligibleCompetitiveWhenUserIsChampion() {
         let user = makeUserFixture(id: "runner-1", bandeiraId: nil)
-        let quadra = makeTileFixture(ownerType: .solo, ownerId: "owner-2", championUserId: "runner-1")
+        let quadra = makeQuadraFixture(ownerType: .solo, ownerId: "owner-2", championUserId: "runner-1")
 
         let result = policy.evaluate(currentUser: user, quadra: quadra)
 
@@ -34,7 +34,7 @@ final class QuadraEligibilityPolicyTests: XCTestCase {
 
     func testEvaluateEligibleCompetitiveWhenUserBandeiraIsChampion() {
         let user = makeUserFixture(id: "runner-1", bandeiraId: "band-1")
-        let quadra = makeTileFixture(ownerType: .solo, ownerId: "owner-2", championBandeiraId: "band-1")
+        let quadra = makeQuadraFixture(ownerType: .solo, ownerId: "owner-2", championBandeiraId: "band-1")
 
         let result = policy.evaluate(currentUser: user, quadra: quadra)
 
@@ -43,7 +43,7 @@ final class QuadraEligibilityPolicyTests: XCTestCase {
 
     func testEvaluateTrainingOnlyWhenQuadraMetadataIsMissing() {
         let user = makeUserFixture(id: "runner-1", bandeiraId: "band-1")
-        let quadra = makeTileFixture(ownerType: nil, ownerId: nil, championUserId: nil, championBandeiraId: nil)
+        let quadra = makeQuadraFixture(ownerType: nil, ownerId: nil, championUserId: nil, championBandeiraId: nil)
 
         let result = policy.evaluate(currentUser: user, quadra: quadra)
 
@@ -54,19 +54,19 @@ final class QuadraEligibilityPolicyTests: XCTestCase {
     func testEvaluateTrainingOnlyWhenUserContextIsMissing() {
         let resultWithoutUser = policy.evaluate(
             currentUser: nil,
-            quadra: makeTileFixture(ownerType: .solo, ownerId: "owner-2")
+            quadra: makeQuadraFixture(ownerType: .solo, ownerId: "owner-2")
         )
 
         XCTAssertEqual(resultWithoutUser.status, .trainingOnly(reason: .missingUserContext))
 
         let userWithoutBandeira = makeUserFixture(id: "runner-1", bandeiraId: nil)
-        let bandeiraOwnedQuadra = makeTileFixture(ownerType: .bandeira, ownerId: "band-1")
+        let bandeiraOwnedQuadra = makeQuadraFixture(ownerType: .bandeira, ownerId: "band-1")
 
         let resultWithoutBandeiraContext = policy.evaluate(currentUser: userWithoutBandeira, quadra: bandeiraOwnedQuadra)
 
         XCTAssertEqual(resultWithoutBandeiraContext.status, .trainingOnly(reason: .missingUserContext))
 
-        let quadraWithOnlyBandeiraChampion = makeTileFixture(
+        let quadraWithOnlyBandeiraChampion = makeQuadraFixture(
             ownerType: nil,
             ownerId: nil,
             championUserId: nil,
@@ -83,7 +83,7 @@ final class QuadraEligibilityPolicyTests: XCTestCase {
 
     func testEvaluateTrainingOnlyWhenUserIsNotOwnerNorChampion() {
         let user = makeUserFixture(id: "runner-1", bandeiraId: "band-1")
-        let quadra = makeTileFixture(ownerType: .solo, ownerId: "owner-2", championUserId: "runner-2", championBandeiraId: "band-2")
+        let quadra = makeQuadraFixture(ownerType: .solo, ownerId: "owner-2", championUserId: "runner-2", championBandeiraId: "band-2")
 
         let result = policy.evaluate(currentUser: user, quadra: quadra)
 
@@ -93,7 +93,7 @@ final class QuadraEligibilityPolicyTests: XCTestCase {
 
     func testCanCompeteTrueWhenEligible() {
         let user = makeUserFixture(id: "runner-1", bandeiraId: nil)
-        let quadra = makeTileFixture(ownerType: .solo, ownerId: "runner-1")
+        let quadra = makeQuadraFixture(ownerType: .solo, ownerId: "runner-1")
 
         XCTAssertTrue(policy.canCompete(currentUser: user, quadra: quadra))
     }

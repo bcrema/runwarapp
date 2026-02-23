@@ -28,7 +28,7 @@ final class CompanionRunManagerTests: XCTestCase {
         XCTAssertEqual(locationManager.stopTrackingCalls, 2)
         await Task.yield()
         XCTAssertEqual(syncCoordinator.finishRunCalls, 1)
-        XCTAssertEqual(syncCoordinator.lastModeContext?.mode, .treino)
+        XCTAssertEqual(syncCoordinator.lastCompetitionMode, .training)
     }
 
 
@@ -116,9 +116,9 @@ final class CompanionRunManagerTests: XCTestCase {
         await Task.yield()
 
         XCTAssertEqual(syncCoordinator.finishRunCalls, 1)
-        XCTAssertEqual(syncCoordinator.lastModeContext?.mode, .competitivo)
-        XCTAssertEqual(syncCoordinator.lastModeContext?.currentQuadraId, "quadra-123")
-        XCTAssertNil(syncCoordinator.lastModeContext?.ineligibilityReason)
+        XCTAssertEqual(syncCoordinator.lastCompetitionMode, .competitive)
+        XCTAssertEqual(syncCoordinator.lastTargetQuadraId, "quadra-123")
+        XCTAssertNil(syncCoordinator.lastEligibilityReason)
     }
 
     private func isState(_ lhs: RunState, _ rhs: RunState) -> Bool {
@@ -164,7 +164,6 @@ private final class RunSyncCoordinatorSpy: RunSyncCoordinating {
     private(set) var lastEligibilityReason: String?
     private(set) var retryCalls = 0
     private(set) var resetCalls = 0
-    private(set) var lastModeContext: RunModeContext?
 
     func reset() {
         resetCalls += 1

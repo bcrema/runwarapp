@@ -111,7 +111,7 @@ final class CompanionRunManager: ObservableObject {
     }
 
     func stopAndSync(
-        competitionMode: RunCompetitionMode = .training,
+        competitionMode: RunCompetitionMode? = nil,
         targetQuadraId: String? = nil,
         eligibilityReason: String? = nil
     ) {
@@ -129,6 +129,9 @@ final class CompanionRunManager: ObservableObject {
         let capturedDuration = duration
         let capturedDistance = distanceMeters
         let capturedLocations = locations
+        let resolvedCompetitionMode = competitionMode ?? mapRunCompetitionMode(from: runModeContext.mode)
+        let resolvedTargetQuadraId = targetQuadraId ?? runModeContext.currentQuadraId
+        let resolvedEligibilityReason = eligibilityReason ?? runModeContext.ineligibilityReason?.rawValue
         self.startTime = nil
 
         Task { [weak self] in
@@ -139,9 +142,9 @@ final class CompanionRunManager: ObservableObject {
                 duration: capturedDuration,
                 distanceMeters: capturedDistance,
                 locations: capturedLocations,
-                competitionMode: competitionMode,
-                targetQuadraId: targetQuadraId,
-                eligibilityReason: eligibilityReason
+                competitionMode: resolvedCompetitionMode,
+                targetQuadraId: resolvedTargetQuadraId,
+                eligibilityReason: resolvedEligibilityReason
             )
         }
     }
@@ -176,6 +179,15 @@ final class CompanionRunManager: ObservableObject {
 
     private func updateLoopProgress() {
         loopProgress = min(distanceMeters / loopGoal, 1.0)
+    }
+
+    private func mapRunCompetitionMode(from mode: RunMode) -> RunCompetitionMode {
+        switch mode {
+        case .competitivo:
+            return .competitive
+        case .treino:
+            return .training
+        }
     }
 
     func updateRunModeContext(_ context: RunModeContext) {
