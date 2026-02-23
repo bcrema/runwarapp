@@ -32,10 +32,10 @@
 - `09` Hardening e Release Readiness (V2 Quadras) - Status: Todo.
 
 ## Atualizacoes
-- `04` 2026-02-21 - Status: In Progress.
-  Resumo tecnico: Inicio da implementacao do companion com modo competitivo/treino em runtime, incluindo avaliacao de elegibilidade por quadra no HUD e preparacao de contexto para consumo no encerramento da corrida.
-  Branch/worktree: feature/ios-step04-companion-modo em /workspace/runwarapp.
-  Testes: em execucao (sera atualizado ao concluir o passo).
+- `05` 2026-02-21 - Status: In Progress.
+  Resumo tecnico: Inicio do passo 05 com foco em persistencia de contexto competitivo (mode + targetQuadraId) no pipeline de sync/upload da corrida.
+  Branch/worktree: work em /workspace/runwarapp.
+  Testes: aguardando implementacao e execucao.
 - `08` 2026-02-21 - Status: In Progress.
   Resumo tecnico: Inicio do passo de QA v2 com consolidacao da matriz de suites obrigatorias, sequencia por rodadas e definicao de gate unico de merge.
   Branch/worktree: feature/ios-qa-gates-v2-step08 em /workspace/runwarapp.
@@ -44,7 +44,7 @@
   Resumo tecnico: Matriz QA por passo, sequencia oficial por rodada e checklist de gate de merge foram definidos no documento do passo 08; execucao local das suites ficou bloqueada por ausencia de toolchain Apple (xcodegen/xcodebuild) no ambiente Linux atual.
   Branch/worktree: feature/ios-qa-gates-v2-step08 em /workspace/runwarapp.
   Testes: `cd ios/LigaRun && xcodegen generate` (falhou: command not found), `cd ios/LigaRun && xcodebuild -scheme LigaRun -destination "platform=iOS Simulator,name=iPhone 17,OS=26.2" -only-testing:LigaRunTests/<SUITE> test` para 7 suites obrigatorias (falhou: command not found), `cd ios/LigaRun && xcodebuild -scheme LigaRun -destination "platform=iOS Simulator,name=iPhone 17,OS=26.2" test` (falhou: command not found).
-- `04` 2026-02-21 - Status: Done.
-  Resumo tecnico: Companion atualizado para avaliar elegibilidade por quadra em tempo real e sinalizar `Modo competitivo` vs `Modo treino` sem interromper a corrida; HUD mostra motivo curto de bloqueio competitivo e o `CompanionRunManager` agora propaga contexto de modo/quadra no encerramento para consumo do passo 05.
-  Branch/worktree: feature/ios-step04-companion-modo em /workspace/runwarapp.
-  Testes: `cd ios/LigaRun && xcodegen generate` (falhou: command not found), `cd ios/LigaRun && xcodebuild -scheme LigaRun -destination "platform=iOS Simulator,name=iPhone 15" -only-testing:LigaRunTests/CompanionRunManagerTests test` (falhou: command not found).
+- `05` 2026-02-21 - Status: Blocked.
+  Resumo tecnico: Persistencia e propagacao de `competitionMode`/`targetQuadraId`/`eligibilityReason` implementadas no RunSessionStore + Coordinator + RunUploadService, com cobertura de testes atualizada para decode legado e payload de upload com fallback TRAINING.
+  Branch/worktree: work em /workspace/runwarapp.
+  Testes: `cd ios/LigaRun && xcodegen generate` (falhou: command not found), `cd ios/LigaRun && xcodebuild -scheme LigaRun -destination "platform=iOS Simulator,name=iPhone 15" test` (falhou: command not found).

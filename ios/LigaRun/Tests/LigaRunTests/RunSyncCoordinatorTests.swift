@@ -22,14 +22,19 @@ final class RunSyncCoordinatorTests: XCTestCase {
             duration: 600,
             distanceMeters: 1500,
             locations: makeLocations(),
-            modeContext: RunModeContext(mode: .treino, currentQuadraId: nil, ineligibilityReason: .missingQuadraOwnershipData)
+            competitionMode: .competitive,
+            targetQuadraId: "quadra-sync",
+            eligibilityReason: nil
         )
 
         XCTAssertTrue(containsState(transitions, matching: .waitingForSync))
         XCTAssertTrue(containsState(transitions, matching: .uploading))
         XCTAssertTrue(containsState(transitions, matching: .completed(expectedResult)))
-        let uploadCalls = await uploadService.recordedUploadCalls()
+        let uploadCalls = uploadService.recordedUploadCalls()
         XCTAssertEqual(uploadCalls, 1)
+        let uploadedSessions = uploadService.recordedSessions()
+        XCTAssertEqual(uploadedSessions.first?.competitionMode, .competitive)
+        XCTAssertEqual(uploadedSessions.first?.targetQuadraId, "quadra-sync")
     }
 
 
@@ -54,7 +59,9 @@ final class RunSyncCoordinatorTests: XCTestCase {
             duration: 300,
             distanceMeters: 1300,
             locations: makeLocations(),
-            modeContext: RunModeContext(mode: .treino, currentQuadraId: nil, ineligibilityReason: .missingQuadraOwnershipData)
+            competitionMode: .training,
+            targetQuadraId: nil,
+            eligibilityReason: "user_not_owner_nor_champion"
         )
 
         guard case .failed = coordinator.state else {
@@ -67,14 +74,16 @@ final class RunSyncCoordinatorTests: XCTestCase {
             duration: 150,
             distanceMeters: 900,
             locations: makeLocations(),
-            modeContext: RunModeContext(mode: .treino, currentQuadraId: nil, ineligibilityReason: .missingQuadraOwnershipData)
+            competitionMode: .competitive,
+            targetQuadraId: "quadra-final",
+            eligibilityReason: nil
         )
 
         guard case .completed(let result) = coordinator.state else {
             return XCTFail("Expected completed state after second finish")
         }
         XCTAssertEqual(result.run.id, secondResult.run.id)
-        let uploadCalls = await uploadService.recordedUploadCalls()
+        let uploadCalls = uploadService.recordedUploadCalls()
         XCTAssertEqual(uploadCalls, 2)
     }
 
@@ -99,7 +108,9 @@ final class RunSyncCoordinatorTests: XCTestCase {
             duration: 300,
             distanceMeters: 1300,
             locations: makeLocations(),
-            modeContext: RunModeContext(mode: .treino, currentQuadraId: nil, ineligibilityReason: .missingQuadraOwnershipData)
+            competitionMode: .training,
+            targetQuadraId: nil,
+            eligibilityReason: "missing_user_context"
         )
 
         guard case .failed(let message) = coordinator.state else {
@@ -113,7 +124,7 @@ final class RunSyncCoordinatorTests: XCTestCase {
             return XCTFail("Expected completed state after retry")
         }
         XCTAssertEqual(result.run.id, "run-sync-retry")
-        let uploadCalls = await uploadService.recordedUploadCalls()
+        let uploadCalls = uploadService.recordedUploadCalls()
         XCTAssertEqual(uploadCalls, 2)
     }
 
@@ -133,7 +144,9 @@ final class RunSyncCoordinatorTests: XCTestCase {
             duration: 200,
             distanceMeters: 1200,
             locations: makeLocations(),
-            modeContext: RunModeContext(mode: .treino, currentQuadraId: nil, ineligibilityReason: .missingQuadraOwnershipData)
+            competitionMode: .competitive,
+            targetQuadraId: "quadra-timeout",
+            eligibilityReason: nil
         )
 
         guard case .failed(let message) = coordinator.state else {
@@ -179,6 +192,7 @@ private enum UploadOutcome {
 private final class RunUploadServiceStub: RunUploadServiceProtocol {
     private var outcomes: [UploadOutcome]
     private var uploadCalls = 0
+    private var sessions: [RunSessionRecord] = []
 
     init(outcomes: [UploadOutcome]) {
         self.outcomes = outcomes
@@ -190,6 +204,7 @@ private final class RunUploadServiceStub: RunUploadServiceProtocol {
 
     func upload(_ session: RunSessionRecord) async throws -> RunSubmissionResult {
         uploadCalls += 1
+        sessions.append(session)
         guard !outcomes.isEmpty else {
             throw APIError(error: "INTERNAL_ERROR", message: "Missing test outcome", details: nil)
         }
@@ -208,5 +223,9 @@ private final class RunUploadServiceStub: RunUploadServiceProtocol {
 
     func recordedUploadCalls() -> Int {
         uploadCalls
+    }
+
+    func recordedSessions() -> [RunSessionRecord] {
+        sessions
     }
 }

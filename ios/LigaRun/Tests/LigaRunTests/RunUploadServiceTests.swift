@@ -30,7 +30,7 @@ final class RunUploadServiceTests: XCTestCase {
     @MainActor
     func testUploadConvertsTrackPointsIntoCoordinatesAndTimestamps() async throws {
         let store = RunSessionStore(fileURL: makeTempFileURL())
-        let session = makeSessionFixture(id: UUID(), status: .pending)
+        let session = makeSessionFixture(id: UUID(), status: .pending, competitionMode: .competitive, targetQuadraId: "quadra-target")
         let api = RunSubmissionAPISpy(result: .success(makeRunSubmissionResultFixture(runId: "run-payload")))
         let service = RunUploadService(api: api, store: store)
 
@@ -43,6 +43,8 @@ final class RunUploadServiceTests: XCTestCase {
         XCTAssertEqual(payload?.coordinates.first?["lat"], session.points.first?.latitude)
         XCTAssertEqual(payload?.coordinates.first?["lng"], session.points.first?.longitude)
         XCTAssertEqual(payload?.timestamps.first, Int(session.points.first?.timestamp.timeIntervalSince1970 ?? 0))
+        XCTAssertEqual(payload?.mode, "COMPETITIVE")
+        XCTAssertEqual(payload?.targetQuadraId, "quadra-target")
     }
 
     @MainActor
@@ -159,10 +161,34 @@ final class RunUploadServiceTests: XCTestCase {
         XCTAssertEqual(syncSpy.lastTimeout, 42)
     }
 
+
+    @MainActor
+    func testUploadUsesTrainingModeAndNoTargetQuadraForTrainingSession() async throws {
+        let store = RunSessionStore(fileURL: makeTempFileURL())
+        let session = makeSessionFixture(
+            id: UUID(),
+            status: .pending,
+            competitionMode: .training,
+            targetQuadraId: nil,
+            eligibilityReason: "user_not_owner_nor_champion"
+        )
+        let api = RunSubmissionAPISpy(result: .success(makeRunSubmissionResultFixture(runId: "run-training")))
+        let service = RunUploadService(api: api, store: store)
+
+        _ = try await store.append(session)
+        _ = try await service.upload(session)
+
+        XCTAssertEqual(api.lastPayload?.mode, "TRAINING")
+        XCTAssertNil(api.lastPayload?.targetQuadraId)
+    }
+
     private func makeSessionFixture(
         id: UUID,
         status: RunSessionStatus,
-        source: RunSessionSource = .localTracking
+        source: RunSessionSource = .localTracking,
+        competitionMode: RunCompetitionMode = .training,
+        targetQuadraId: String? = nil,
+        eligibilityReason: String? = nil
     ) -> RunSessionRecord {
         let startedAt = Date().addingTimeInterval(-600)
         let endedAt = Date()
@@ -177,6 +203,9 @@ final class RunUploadServiceTests: XCTestCase {
                 makeTrackPointFixture(lat: -25.4290, lng: -49.2710, timestamp: startedAt.addingTimeInterval(5))
             ],
             source: source,
+            competitionMode: competitionMode,
+            targetQuadraId: targetQuadraId,
+            eligibilityReason: eligibilityReason,
             status: status,
             lastUploadAttempt: nil,
             lastError: nil

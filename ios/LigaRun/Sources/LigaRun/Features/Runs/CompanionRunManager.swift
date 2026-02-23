@@ -110,7 +110,11 @@ final class CompanionRunManager: ObservableObject {
         stopAndSync()
     }
 
-    func stopAndSync() {
+    func stopAndSync(
+        competitionMode: RunCompetitionMode = .training,
+        targetQuadraId: String? = nil,
+        eligibilityReason: String? = nil
+    ) {
         guard state != .idle else { return }
         state = .idle
         timer?.cancel()
@@ -135,7 +139,9 @@ final class CompanionRunManager: ObservableObject {
                 duration: capturedDuration,
                 distanceMeters: capturedDistance,
                 locations: capturedLocations,
-                modeContext: runModeContext
+                competitionMode: competitionMode,
+                targetQuadraId: targetQuadraId,
+                eligibilityReason: eligibilityReason
             )
         }
     }

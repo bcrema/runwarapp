@@ -31,6 +31,23 @@ final class CompanionRunManagerTests: XCTestCase {
         XCTAssertEqual(syncCoordinator.lastModeContext?.mode, .treino)
     }
 
+
+    @MainActor
+    func testStopAndSyncForwardsCompetitionContextToCoordinator() async {
+        let locationManager = LocationManagerSpy()
+        let syncCoordinator = RunSyncCoordinatorSpy()
+        let runManager = CompanionRunManager(locationManager: locationManager, syncCoordinator: syncCoordinator)
+
+        runManager.start()
+        runManager.stopAndSync(competitionMode: .competitive, targetQuadraId: "quadra-ctx", eligibilityReason: nil)
+        await Task.yield()
+
+        XCTAssertEqual(syncCoordinator.finishRunCalls, 1)
+        XCTAssertEqual(syncCoordinator.lastCompetitionMode, .competitive)
+        XCTAssertEqual(syncCoordinator.lastTargetQuadraId, "quadra-ctx")
+        XCTAssertNil(syncCoordinator.lastEligibilityReason)
+    }
+
     @MainActor
     func testStartIfNeededDoesNotRestartWhenAlreadyRunning() {
         let locationManager = LocationManagerSpy()
@@ -142,6 +159,9 @@ private final class RunSyncCoordinatorSpy: RunSyncCoordinating {
     var onStateChange: ((CompanionSyncState) -> Void)?
 
     private(set) var finishRunCalls = 0
+    private(set) var lastCompetitionMode: RunCompetitionMode?
+    private(set) var lastTargetQuadraId: String?
+    private(set) var lastEligibilityReason: String?
     private(set) var retryCalls = 0
     private(set) var resetCalls = 0
     private(set) var lastModeContext: RunModeContext?
@@ -158,10 +178,14 @@ private final class RunSyncCoordinatorSpy: RunSyncCoordinating {
         duration: TimeInterval,
         distanceMeters: Double,
         locations: [CLLocation],
-        modeContext: RunModeContext
+        competitionMode: RunCompetitionMode,
+        targetQuadraId: String?,
+        eligibilityReason: String?
     ) async {
         finishRunCalls += 1
-        lastModeContext = modeContext
+        lastCompetitionMode = competitionMode
+        lastTargetQuadraId = targetQuadraId
+        lastEligibilityReason = eligibilityReason
     }
 
     func retry() async {

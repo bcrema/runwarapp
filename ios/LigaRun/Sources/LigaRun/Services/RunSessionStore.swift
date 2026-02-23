@@ -39,6 +39,11 @@ enum RunSessionSource: String, Codable {
     case healthKit
 }
 
+enum RunCompetitionMode: String, Codable {
+    case competitive = "COMPETITIVE"
+    case training = "TRAINING"
+}
+
 struct RunSessionRecord: Codable, Identifiable, Equatable {
     let id: UUID
     let startedAt: Date
@@ -47,6 +52,9 @@ struct RunSessionRecord: Codable, Identifiable, Equatable {
     let distanceMeters: Double
     var points: [RunTrackPoint]
     var source: RunSessionSource = .localTracking
+    var competitionMode: RunCompetitionMode = .training
+    var targetQuadraId: String?
+    var eligibilityReason: String?
     var status: RunSessionStatus
     var lastUploadAttempt: Date?
     var lastError: String?
@@ -59,6 +67,9 @@ struct RunSessionRecord: Codable, Identifiable, Equatable {
         case distanceMeters
         case points
         case source
+        case competitionMode
+        case targetQuadraId
+        case eligibilityReason
         case status
         case lastUploadAttempt
         case lastError
@@ -72,6 +83,9 @@ struct RunSessionRecord: Codable, Identifiable, Equatable {
         distanceMeters: Double,
         points: [RunTrackPoint],
         source: RunSessionSource = .localTracking,
+        competitionMode: RunCompetitionMode = .training,
+        targetQuadraId: String? = nil,
+        eligibilityReason: String? = nil,
         status: RunSessionStatus,
         lastUploadAttempt: Date?,
         lastError: String?
@@ -83,6 +97,9 @@ struct RunSessionRecord: Codable, Identifiable, Equatable {
         self.distanceMeters = distanceMeters
         self.points = points
         self.source = source
+        self.competitionMode = competitionMode
+        self.targetQuadraId = targetQuadraId
+        self.eligibilityReason = eligibilityReason
         self.status = status
         self.lastUploadAttempt = lastUploadAttempt
         self.lastError = lastError
@@ -97,6 +114,13 @@ struct RunSessionRecord: Codable, Identifiable, Equatable {
         distanceMeters = try container.decode(Double.self, forKey: .distanceMeters)
         points = try container.decode([RunTrackPoint].self, forKey: .points)
         source = try container.decodeIfPresent(RunSessionSource.self, forKey: .source) ?? .localTracking
+        if let modeString = try container.decodeIfPresent(String.self, forKey: .competitionMode) {
+            competitionMode = RunCompetitionMode(rawValue: modeString) ?? .training
+        } else {
+            competitionMode = .training
+        }
+        targetQuadraId = try container.decodeIfPresent(String.self, forKey: .targetQuadraId)
+        eligibilityReason = try container.decodeIfPresent(String.self, forKey: .eligibilityReason)
         status = try container.decode(RunSessionStatus.self, forKey: .status)
         lastUploadAttempt = try container.decodeIfPresent(Date.self, forKey: .lastUploadAttempt)
         lastError = try container.decodeIfPresent(String.self, forKey: .lastError)
@@ -110,6 +134,9 @@ struct RunSessionRecord: Codable, Identifiable, Equatable {
               lhs.distanceMeters == rhs.distanceMeters,
               lhs.points == rhs.points,
               lhs.source == rhs.source,
+              lhs.competitionMode == rhs.competitionMode,
+              lhs.targetQuadraId == rhs.targetQuadraId,
+              lhs.eligibilityReason == rhs.eligibilityReason,
               lhs.status == rhs.status,
               datesEqual(lhs.lastUploadAttempt, rhs.lastUploadAttempt),
               lhs.lastError == rhs.lastError
