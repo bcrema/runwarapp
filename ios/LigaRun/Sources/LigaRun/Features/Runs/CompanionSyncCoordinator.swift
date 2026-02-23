@@ -62,7 +62,10 @@ protocol RunSyncCoordinating: AnyObject {
         endedAt: Date,
         duration: TimeInterval,
         distanceMeters: Double,
-        locations: [CLLocation]
+        locations: [CLLocation],
+        competitionMode: RunCompetitionMode,
+        targetQuadraId: String?,
+        eligibilityReason: String?
     ) async
     func retry() async
     func cancel()
@@ -127,7 +130,10 @@ final class RunSyncCoordinator: RunSyncCoordinating {
         endedAt: Date,
         duration: TimeInterval,
         distanceMeters: Double,
-        locations: [CLLocation]
+        locations: [CLLocation],
+        competitionMode: RunCompetitionMode,
+        targetQuadraId: String?,
+        eligibilityReason: String?
     ) async {
         cancelCurrentTask()
         transition(.reset)
@@ -140,6 +146,9 @@ final class RunSyncCoordinator: RunSyncCoordinating {
             duration: duration,
             distanceMeters: distanceMeters,
             points: locations.map(RunTrackPoint.init(location:)),
+            competitionMode: competitionMode,
+            targetQuadraId: targetQuadraId,
+            eligibilityReason: eligibilityReason,
             status: .pending,
             lastUploadAttempt: nil,
             lastError: nil

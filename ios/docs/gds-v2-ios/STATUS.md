@@ -24,7 +24,7 @@
   Testes: xcodegen generate (falhou: xcodegen indisponivel no ambiente), xcodebuild -scheme LigaRun -destination "platform=iOS Simulator,name=iPhone 17,OS=26.2" -only-testing:LigaRunTests/MapViewModelTests test (falhou: xcodebuild indisponivel no ambiente).
 - `02` Mapa Quadras (Render + Interacao) - Status: Todo.
 - `03` Elegibilidade Local (Campeao ou Dono) - Status: Todo.
-- `04` Companion HUD (Modo Competitivo vs Treino) - Status: Todo.
+- `04` Companion HUD (Modo Competitivo vs Treino) - Status: Done.
 - `05` Pipeline Sync/Upload com Modo - Status: Todo.
 - `06` Resultado Pos-corrida e Foco em Quadra - Status: Todo.
 - `07` Refactor e Limpeza de Legado Tile - Status: Todo.
@@ -44,3 +44,7 @@
   Resumo tecnico: Matriz QA por passo, sequencia oficial por rodada e checklist de gate de merge foram definidos no documento do passo 08; execucao local das suites ficou bloqueada por ausencia de toolchain Apple (xcodegen/xcodebuild) no ambiente Linux atual.
   Branch/worktree: feature/ios-qa-gates-v2-step08 em /workspace/runwarapp.
   Testes: `cd ios/LigaRun && xcodegen generate` (falhou: command not found), `cd ios/LigaRun && xcodebuild -scheme LigaRun -destination "platform=iOS Simulator,name=iPhone 17,OS=26.2" -only-testing:LigaRunTests/<SUITE> test` para 7 suites obrigatorias (falhou: command not found), `cd ios/LigaRun && xcodebuild -scheme LigaRun -destination "platform=iOS Simulator,name=iPhone 17,OS=26.2" test` (falhou: command not found).
+- `05` 2026-02-21 - Status: Blocked.
+  Resumo tecnico: Persistencia e propagacao de `competitionMode`/`targetQuadraId`/`eligibilityReason` implementadas no RunSessionStore + Coordinator + RunUploadService, com cobertura de testes atualizada para decode legado e payload de upload com fallback TRAINING.
+  Branch/worktree: work em /workspace/runwarapp.
+  Testes: `cd ios/LigaRun && xcodegen generate` (falhou: command not found), `cd ios/LigaRun && xcodebuild -scheme LigaRun -destination "platform=iOS Simulator,name=iPhone 15" test` (falhou: command not found).
