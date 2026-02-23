@@ -150,33 +150,6 @@ func makeQuadraFixture(
     )
 }
 
-func makeTileFixture(
-    id: String = "quadra-1",
-    lat: Double = -25.429,
-    lng: Double = -49.271,
-    ownerType: OwnerType? = .solo,
-    ownerId: String? = "owner-1",
-    ownerName: String? = "Runner",
-    ownerColor: String? = "#00AACC",
-    championUserId: String? = nil,
-    championBandeiraId: String? = nil,
-    shield: Int = 70,
-    isInDispute: Bool = false
-) -> Quadra {
-    makeQuadraFixture(
-        id: id,
-        lat: lat,
-        lng: lng,
-        ownerType: ownerType,
-        ownerId: ownerId,
-        ownerName: ownerName,
-        ownerColor: ownerColor,
-        championUserId: championUserId,
-        championBandeiraId: championBandeiraId,
-        shield: shield,
-        isInDispute: isInDispute
-    )
-}
 
 func makeBandeiraFixture(id: String = "b1", name: String = "Liga Azul") -> Bandeira {
     Bandeira(

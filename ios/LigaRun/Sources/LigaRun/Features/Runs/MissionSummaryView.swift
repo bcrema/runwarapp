@@ -4,7 +4,7 @@ import MapboxMaps
 struct MissionSummaryView: View {
     let distance: Double // meters
     let duration: TimeInterval
-    let tilesConquered: Int
+    let quadrasConquered: Int
     let loopValid: Bool
     let actionsUsed: Int
     let actionCap: Int
@@ -59,7 +59,7 @@ struct MissionSummaryView: View {
                 HStack(spacing: 40) {
                     StatBubble(icon: "figure.run", value: String(format: "%.1f", distance / 1000), unit: "km", label: "Distance")
                     StatBubble(icon: "clock", value: formatDuration(duration), unit: "min", label: "Time")
-                    StatBubble(icon: "hexagon", value: "\(tilesConquered)", unit: "", label: "Tiles")
+                    StatBubble(icon: "hexagon", value: "\(quadrasConquered)", unit: "", label: "Quadras")
                 }
                 
                 // Loop Validation Card
@@ -77,8 +77,8 @@ struct MissionSummaryView: View {
                     Divider()
                     
                     // Action Log
-                    if tilesConquered > 0 {
-                        ActionRow(icon: "flag.fill", color: .green, text: "Conquered Tile #802", badge: "+100 Shield")
+                    if quadrasConquered > 0 {
+                        ActionRow(icon: "flag.fill", color: .green, text: "Conquered Quadra #802", badge: "+100 Shield")
                     } else {
                         Text("No territories affected this run.")
                             .font(.caption)

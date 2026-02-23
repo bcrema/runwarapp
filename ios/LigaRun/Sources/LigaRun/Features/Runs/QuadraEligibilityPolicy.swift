@@ -21,7 +21,7 @@ struct QuadraEligibilityResult: Equatable {
 }
 
 struct QuadraEligibilityPolicy {
-    func evaluate(currentUser: User?, quadra: Tile) -> QuadraEligibilityResult {
+    func evaluate(currentUser: User?, quadra: Quadra) -> QuadraEligibilityResult {
         guard let currentUser else {
             return QuadraEligibilityResult(status: .trainingOnly(reason: .missingUserContext))
         }
@@ -44,17 +44,17 @@ struct QuadraEligibilityPolicy {
         return QuadraEligibilityResult(status: .eligibleCompetitive)
     }
 
-    func canCompete(currentUser: User?, quadra: Tile) -> Bool {
+    func canCompete(currentUser: User?, quadra: Quadra) -> Bool {
         evaluate(currentUser: currentUser, quadra: quadra).status == .eligibleCompetitive
     }
 
-    private func hasMinimumOwnershipMetadata(in quadra: Tile) -> Bool {
+    private func hasMinimumOwnershipMetadata(in quadra: Quadra) -> Bool {
         let hasOwnerMetadata = quadra.ownerType != nil && quadra.ownerId != nil
         let hasChampionMetadata = quadra.championUserId != nil || quadra.championBandeiraId != nil
         return hasOwnerMetadata || hasChampionMetadata
     }
 
-    private func isOwner(currentUser: User, quadra: Tile) -> Bool {
+    private func isOwner(currentUser: User, quadra: Quadra) -> Bool {
         switch quadra.ownerType {
         case .solo:
             return quadra.ownerId == currentUser.id
@@ -66,7 +66,7 @@ struct QuadraEligibilityPolicy {
         }
     }
 
-    private func isChampion(currentUser: User, quadra: Tile) -> Bool {
+    private func isChampion(currentUser: User, quadra: Quadra) -> Bool {
         if quadra.championUserId == currentUser.id {
             return true
         }
@@ -75,7 +75,7 @@ struct QuadraEligibilityPolicy {
         return quadra.championBandeiraId == bandeiraId
     }
 
-    private func isBandeiraOnlyEligibility(_ quadra: Tile) -> Bool {
+    private func isBandeiraOnlyEligibility(_ quadra: Quadra) -> Bool {
         let isBandeiraOwnedWithoutChampionData =
             quadra.ownerType == .bandeira &&
             quadra.ownerId != nil &&
