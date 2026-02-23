@@ -8,7 +8,8 @@ struct ActiveRunHUD: View {
     @StateObject private var runManager: CompanionRunManager
     @Environment(\.dismiss) private var dismiss
 
-    @State private var currentTile: Tile?
+    @State private var currentQuadra: Tile?
+    @State private var currentEligibility = QuadraEligibilityResult(status: .trainingOnly(reason: .missingQuadraOwnershipData))
     @State private var focusCoordinate: CLLocationCoordinate2D?
     @State private var lastFocusLocation: CLLocation?
 
@@ -73,7 +74,7 @@ struct ActiveRunHUD: View {
             runManager.startIfNeeded()
         }
         .onChange(of: runManager.currentLocation) { _ in
-            updateCurrentTile()
+            updateCurrentQuadraAndMode()
             updateFocusCoordinate()
         }
         .onChange(of: runManager.submissionResult?.id) { _ in
@@ -83,7 +84,7 @@ struct ActiveRunHUD: View {
             dismiss()
         }
         .onReceive(mapViewModel.$quadras) { _ in
-            updateCurrentTile()
+            updateCurrentQuadraAndMode()
         }
         .alert("Erro", isPresented: Binding(get: {
             mapViewModel.errorMessage != nil
@@ -136,9 +137,9 @@ struct ActiveRunHUD: View {
         if runManager.state == .running {
             return (
                 title: "Corrida em andamento",
-                detail: territoryStatusText,
-                color: currentTile?.isInDispute == true ? .orange : tealColor,
-                icon: currentTile?.isInDispute == true ? "flame.fill" : "shield.fill"
+                detail: runModeStatusText,
+                color: statusAccentColor,
+                icon: statusIcon
             )
         }
 
@@ -190,16 +191,59 @@ struct ActiveRunHUD: View {
         }
     }
 
-    private var territoryStatusText: String {
-        guard let tile = currentTile else {
-            return "Buscando territorio..."
+    private var runModeStatusText: String {
+        guard let currentQuadra else {
+            return "Modo treino • Fora de quadra carregada"
         }
-        let owner = tile.ownerName ?? "Territorio neutro"
-        var parts = ["\(owner)", "Escudo \(tile.shield)%"]
-        if tile.isInDispute {
+
+        let owner = currentQuadra.ownerName ?? "Quadra neutra"
+        let modeText = currentModeLabel
+        var parts = ["\(modeText)", "\(owner)", "Escudo \(currentQuadra.shield)%"]
+        if currentQuadra.isInDispute {
             parts.append("Em disputa")
         }
-        return "Tile #\(String(tile.id.prefix(6))) • " + parts.joined(separator: " • ")
+        if let message = ineligibilityMessage {
+            parts.append(message)
+        }
+        return "Quadra #\(String(currentQuadra.id.prefix(6))) • " + parts.joined(separator: " • ")
+    }
+
+    private var currentModeLabel: String {
+        switch currentEligibility.status {
+        case .eligibleCompetitive:
+            return "Modo competitivo"
+        case .trainingOnly:
+            return "Modo treino"
+        }
+    }
+
+    private var ineligibilityMessage: String? {
+        guard case let .trainingOnly(reason) = currentEligibility.status else {
+            return nil
+        }
+
+        switch reason {
+        case .missingUserContext:
+            return "Bloqueio competitivo: sem usuário elegível"
+        case .missingQuadraOwnershipData:
+            return "Bloqueio competitivo: sem dados de posse"
+        case .userNotOwnerNorChampion:
+            return "Bloqueio competitivo: você não é dono/campeão"
+        }
+    }
+
+    private var statusAccentColor: Color {
+        if case .trainingOnly = currentEligibility.status {
+            return .orange
+        }
+        return currentQuadra?.isInDispute == true ? .orange : tealColor
+    }
+
+    private var statusIcon: String {
+        if case .trainingOnly = currentEligibility.status {
+            return "figure.walk.motion"
+        }
+        return currentQuadra?.isInDispute == true ? "flame.fill" : "shield.fill"
     }
 
     private var statsCard: some View {
@@ -380,14 +424,40 @@ struct ActiveRunHUD: View {
         runManager.stopAndSync()
     }
 
-    private func updateCurrentTile() {
+    private func updateCurrentQuadraAndMode() {
         guard let location = runManager.currentLocation else {
-            currentTile = nil
+            currentQuadra = nil
+            currentEligibility = QuadraEligibilityResult(status: .trainingOnly(reason: .missingQuadraOwnershipData))
+            runManager.updateRunModeContext(
+                RunModeContext(mode: .treino, currentQuadraId: nil, ineligibilityReason: .missingQuadraOwnershipData)
+            )
             return
         }
 
-        currentTile = mapViewModel.quadras.first { tile in
-            GeoUtils.isPoint(location.coordinate, inside: tile.boundaryCoordinates)
+        currentQuadra = mapViewModel.quadras.first { quadra in
+            GeoUtils.isPoint(location.coordinate, inside: quadra.boundaryCoordinates)
+        }
+
+        guard let currentQuadra else {
+            currentEligibility = QuadraEligibilityResult(status: .trainingOnly(reason: .missingQuadraOwnershipData))
+            runManager.updateRunModeContext(
+                RunModeContext(mode: .treino, currentQuadraId: nil, ineligibilityReason: .missingQuadraOwnershipData)
+            )
+            return
+        }
+
+        let eligibility = QuadraEligibilityPolicy().evaluate(currentUser: session.currentUser, quadra: currentQuadra)
+        currentEligibility = eligibility
+
+        switch eligibility.status {
+        case .eligibleCompetitive:
+            runManager.updateRunModeContext(
+                RunModeContext(mode: .competitivo, currentQuadraId: currentQuadra.id, ineligibilityReason: nil)
+            )
+        case .trainingOnly(let reason):
+            runManager.updateRunModeContext(
+                RunModeContext(mode: .treino, currentQuadraId: currentQuadra.id, ineligibilityReason: reason)
+            )
         }
     }
 

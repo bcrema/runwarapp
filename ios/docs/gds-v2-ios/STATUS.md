@@ -24,7 +24,7 @@
   Testes: xcodegen generate (falhou: xcodegen indisponivel no ambiente), xcodebuild -scheme LigaRun -destination "platform=iOS Simulator,name=iPhone 17,OS=26.2" -only-testing:LigaRunTests/MapViewModelTests test (falhou: xcodebuild indisponivel no ambiente).
 - `02` Mapa Quadras (Render + Interacao) - Status: Todo.
 - `03` Elegibilidade Local (Campeao ou Dono) - Status: Todo.
-- `04` Companion HUD (Modo Competitivo vs Treino) - Status: Todo.
+- `04` Companion HUD (Modo Competitivo vs Treino) - Status: Done.
 - `05` Pipeline Sync/Upload com Modo - Status: Todo.
 - `06` Resultado Pos-corrida e Foco em Quadra - Status: Todo.
 - `07` Refactor e Limpeza de Legado Tile - Status: Todo.

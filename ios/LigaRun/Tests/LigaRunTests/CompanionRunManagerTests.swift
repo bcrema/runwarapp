@@ -28,6 +28,7 @@ final class CompanionRunManagerTests: XCTestCase {
         XCTAssertEqual(locationManager.stopTrackingCalls, 2)
         await Task.yield()
         XCTAssertEqual(syncCoordinator.finishRunCalls, 1)
+        XCTAssertEqual(syncCoordinator.lastModeContext?.mode, .treino)
     }
 
 
@@ -100,6 +101,26 @@ final class CompanionRunManagerTests: XCTestCase {
         XCTAssertEqual(runManager.submissionResult?.run.id, "run-completed")
     }
 
+    @MainActor
+    func testStopPropagatesCompetitiveModeContextToSyncCoordinator() async {
+        let locationManager = LocationManagerSpy()
+        let syncCoordinator = RunSyncCoordinatorSpy()
+        let runManager = CompanionRunManager(locationManager: locationManager, syncCoordinator: syncCoordinator)
+
+        runManager.start()
+        runManager.updateRunModeContext(
+            RunModeContext(mode: .competitivo, currentQuadraId: "quadra-123", ineligibilityReason: nil)
+        )
+
+        runManager.stopAndSync()
+        await Task.yield()
+
+        XCTAssertEqual(syncCoordinator.finishRunCalls, 1)
+        XCTAssertEqual(syncCoordinator.lastModeContext?.mode, .competitivo)
+        XCTAssertEqual(syncCoordinator.lastModeContext?.currentQuadraId, "quadra-123")
+        XCTAssertNil(syncCoordinator.lastModeContext?.ineligibilityReason)
+    }
+
     private func isState(_ lhs: RunState, _ rhs: RunState) -> Bool {
         switch (lhs, rhs) {
         case (.idle, .idle), (.running, .running), (.paused, .paused):
@@ -143,6 +164,7 @@ private final class RunSyncCoordinatorSpy: RunSyncCoordinating {
     private(set) var lastEligibilityReason: String?
     private(set) var retryCalls = 0
     private(set) var resetCalls = 0
+    private(set) var lastModeContext: RunModeContext?
 
     func reset() {
         resetCalls += 1

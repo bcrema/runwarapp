@@ -2,6 +2,17 @@ import Foundation
 import CoreLocation
 import Combine
 
+enum RunMode: Equatable {
+    case competitivo
+    case treino
+}
+
+struct RunModeContext: Equatable {
+    let mode: RunMode
+    let currentQuadraId: String?
+    let ineligibilityReason: QuadraEligibilityReason?
+}
+
 @MainActor
 final class CompanionRunManager: ObservableObject {
     @Published var state: RunState = .idle
@@ -13,6 +24,7 @@ final class CompanionRunManager: ObservableObject {
     @Published var locations: [CLLocation] = []
     @Published var currentLocation: CLLocation?
     @Published var submissionResult: RunSubmissionResult?
+    @Published private(set) var runModeContext = RunModeContext(mode: .treino, currentQuadraId: nil, ineligibilityReason: nil)
 
     private let locationManager: LocationManager
     private let syncCoordinator: RunSyncCoordinating
@@ -58,6 +70,7 @@ final class CompanionRunManager: ObservableObject {
         loopProgress = 0
         locations = []
         submissionResult = nil
+        runModeContext = RunModeContext(mode: .treino, currentQuadraId: nil, ineligibilityReason: nil)
         syncCoordinator.reset()
         syncState = syncCoordinator.state
         startTime = Date()
@@ -163,6 +176,10 @@ final class CompanionRunManager: ObservableObject {
 
     private func updateLoopProgress() {
         loopProgress = min(distanceMeters / loopGoal, 1.0)
+    }
+
+    func updateRunModeContext(_ context: RunModeContext) {
+        runModeContext = context
     }
 
     var formattedDistance: String {
