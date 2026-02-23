@@ -43,6 +43,8 @@ final class CompanionRunManagerTests: XCTestCase {
 
         XCTAssertEqual(syncCoordinator.finishRunCalls, 1)
         XCTAssertEqual(syncCoordinator.lastCompetitionMode, .competitive)
+        XCTAssertEqual(syncCoordinator.lastTargetQuadraId, "quadra-ctx")
+        XCTAssertNil(syncCoordinator.lastEligibilityReason)
     }
 
     @MainActor
@@ -137,6 +139,8 @@ private final class RunSyncCoordinatorSpy: RunSyncCoordinating {
 
     private(set) var finishRunCalls = 0
     private(set) var lastCompetitionMode: RunCompetitionMode?
+    private(set) var lastTargetQuadraId: String?
+    private(set) var lastEligibilityReason: String?
     private(set) var retryCalls = 0
     private(set) var resetCalls = 0
 
@@ -158,6 +162,8 @@ private final class RunSyncCoordinatorSpy: RunSyncCoordinating {
     ) async {
         finishRunCalls += 1
         lastCompetitionMode = competitionMode
+        lastTargetQuadraId = targetQuadraId
+        lastEligibilityReason = eligibilityReason
     }
 
     func retry() async {

@@ -30,9 +30,9 @@ final class RunSyncCoordinatorTests: XCTestCase {
         XCTAssertTrue(containsState(transitions, matching: .waitingForSync))
         XCTAssertTrue(containsState(transitions, matching: .uploading))
         XCTAssertTrue(containsState(transitions, matching: .completed(expectedResult)))
-        let uploadCalls = await uploadService.recordedUploadCalls()
+        let uploadCalls = uploadService.recordedUploadCalls()
         XCTAssertEqual(uploadCalls, 1)
-        let uploadedSessions = await uploadService.recordedSessions()
+        let uploadedSessions = uploadService.recordedSessions()
         XCTAssertEqual(uploadedSessions.first?.competitionMode, .competitive)
         XCTAssertEqual(uploadedSessions.first?.targetQuadraId, "quadra-sync")
     }
@@ -83,7 +83,7 @@ final class RunSyncCoordinatorTests: XCTestCase {
             return XCTFail("Expected completed state after second finish")
         }
         XCTAssertEqual(result.run.id, secondResult.run.id)
-        let uploadCalls = await uploadService.recordedUploadCalls()
+        let uploadCalls = uploadService.recordedUploadCalls()
         XCTAssertEqual(uploadCalls, 2)
     }
 
@@ -124,7 +124,7 @@ final class RunSyncCoordinatorTests: XCTestCase {
             return XCTFail("Expected completed state after retry")
         }
         XCTAssertEqual(result.run.id, "run-sync-retry")
-        let uploadCalls = await uploadService.recordedUploadCalls()
+        let uploadCalls = uploadService.recordedUploadCalls()
         XCTAssertEqual(uploadCalls, 2)
     }
 

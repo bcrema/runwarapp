@@ -147,6 +147,39 @@ final class RunSessionStoreTests: XCTestCase {
         XCTAssertEqual(loaded.first?.eligibilityReason, "user_not_owner_nor_champion")
     }
 
+
+    func testLoadSessionsDefaultsUnknownCompetitionModeToTraining() async throws {
+        let fileURL = makeTempFileURL()
+        let store = RunSessionStore(fileURL: fileURL)
+        let json = """
+        [
+          {
+            "id": "33333333-3333-3333-3333-333333333333",
+            "startedAt": "2026-01-01T10:00:00.000Z",
+            "endedAt": "2026-01-01T10:10:00.000Z",
+            "duration": 600,
+            "distanceMeters": 1500,
+            "points": [],
+            "source": "localTracking",
+            "competitionMode": "UNKNOWN_MODE",
+            "status": "pending",
+            "lastUploadAttempt": null,
+            "lastError": null
+          }
+        ]
+        """
+
+        guard let data = json.data(using: .utf8) else {
+            XCTFail("Failed to encode fixture JSON")
+            return
+        }
+        try data.write(to: fileURL)
+
+        let loaded = await store.loadSessions()
+        XCTAssertEqual(loaded.count, 1)
+        XCTAssertEqual(loaded.first?.competitionMode, .training)
+    }
+
     private func makeTempFileURL() -> URL {
         let directory = FileManager.default.temporaryDirectory
             .appendingPathComponent(UUID().uuidString, isDirectory: true)

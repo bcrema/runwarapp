@@ -163,7 +163,7 @@ final class RunUploadServiceTests: XCTestCase {
 
 
     @MainActor
-    func testUploadUsesTrainingFallbackWhenSessionIsIneligible() async throws {
+    func testUploadUsesTrainingModeAndNoTargetQuadraForTrainingSession() async throws {
         let store = RunSessionStore(fileURL: makeTempFileURL())
         let session = makeSessionFixture(
             id: UUID(),
