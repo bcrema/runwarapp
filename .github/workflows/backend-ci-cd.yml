@@ -96,6 +96,36 @@ jobs:
       - name: Configure Docker for Artifact Registry
         run: gcloud auth configure-docker ${{ env.REGION }}-docker.pkg.dev --quiet
 
+      - name: Start Cloud SQL Auth Proxy
+        run: |
+          curl -fsSL https://storage.googleapis.com/cloud-sql-connectors/cloud-sql-proxy/v2.19.0/cloud-sql-proxy.linux.amd64 -o cloud-sql-proxy
+          chmod +x cloud-sql-proxy
+          ./cloud-sql-proxy ${{ env.DB_CONNECTION_NAME }} --port 5432 > /tmp/cloud-sql-proxy.log 2>&1 &
+
+          for i in {1..30}; do
+            if (echo > /dev/tcp/127.0.0.1/5432) >/dev/null 2>&1; then
+              echo "Cloud SQL Proxy is ready."
+              break
+            fi
+            if [ "$i" -eq 30 ]; then
+              echo "Cloud SQL Proxy failed to start"
+              cat /tmp/cloud-sql-proxy.log
+              exit 1
+            fi
+            sleep 1
+          done
+
+      - name: Run Flyway migrations
+        run: |
+          docker run --rm --network host \
+            -v "${{ github.workspace }}/backend/src/main/resources/db/migration:/flyway/sql" \
+            flyway/flyway:10.20.1 \
+            -url="jdbc:postgresql://127.0.0.1:5432/${{ env.DB_NAME }}" \
+            -user="${{ env.DB_USER }}" \
+            -password="${{ secrets.DB_PASSWORD }}" \
+            -locations="filesystem:/flyway/sql" \
+            migrate
+
       - name: Build Docker image
         run: |
           docker build \
