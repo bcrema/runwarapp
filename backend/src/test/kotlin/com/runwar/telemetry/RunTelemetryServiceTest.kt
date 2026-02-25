@@ -48,8 +48,8 @@ class RunTelemetryServiceTest {
                         closureMeters = 12.0,
                         coveragePct = 0.82
                     ),
-                tilesCovered = listOf("tile-1", "tile-2"),
-                primaryTile = "tile-1",
+                quadrasCovered = listOf("tile-1", "tile-2"),
+                primaryQuadra = "tile-1",
                 fraudFlags = listOf("speed_violation")
             )
         val territoryResult =
@@ -58,7 +58,7 @@ class RunTelemetryServiceTest {
                 actionType = TerritoryActionType.CONQUEST,
                 shieldBefore = 0,
                 shieldAfter = 100,
-                tileId = "tile-1",
+                quadraId = "tile-1",
                 cooldownUntil = Instant.parse("2024-01-01T00:00:00Z")
             )
         val capsCheck =
@@ -89,8 +89,8 @@ class RunTelemetryServiceTest {
         assertEquals(user.id, saved.captured.userId)
         assertEquals(RunOrigin.IMPORT, saved.captured.origin)
         assertEquals(RunStatus.VALIDATED, saved.captured.status)
-        assertEquals(2, saved.captured.tilesCoveredCount)
-        assertEquals(listOf("tile-1", "tile-2"), saved.captured.tilesCovered)
+        assertEquals(2, saved.captured.quadrasCoveredCount)
+        assertEquals(listOf("tile-1", "tile-2"), saved.captured.quadrasCovered)
         assertEquals(listOf("speed_violation"), saved.captured.fraudFlags)
 
         val payloadNode = objectMapper.readTree(saved.captured.payloadJson)
@@ -116,9 +116,9 @@ class RunTelemetryServiceTest {
                 loopDurationSeconds = 600,
                 closureMeters = 2.0,
                 coveragePct = 0.7,
-                primaryTileId = "tile-1",
-                tilesCoveredCount = 1,
-                tilesCovered = listOf("tile-1"),
+                primaryQuadraId = "tile-1",
+                quadrasCoveredCount = 1,
+                quadrasCovered = listOf("tile-1"),
                 actionType = TerritoryActionType.CONQUEST,
                 actionSuccess = true,
                 actionReason = null,

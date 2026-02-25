@@ -41,12 +41,12 @@ class RunTelemetryEvent(
     val closureMeters: Double,
     @Column(name = "coverage_pct", nullable = false)
     val coveragePct: Double,
-    @Column(name = "primary_tile_id")
-    val primaryTileId: String?,
-    @Column(name = "tiles_covered_count", nullable = false)
-    val tilesCoveredCount: Int,
-    @Column(name = "tiles_covered", nullable = false, columnDefinition = "text[]")
-    val tilesCovered: List<String>,
+    @Column(name = "primary_quadra_id")
+    val primaryQuadraId: String?,
+    @Column(name = "quadras_covered_count", nullable = false)
+    val quadrasCoveredCount: Int,
+    @Column(name = "quadras_covered", nullable = false, columnDefinition = "text[]")
+    val quadrasCovered: List<String>,
     @Enumerated(EnumType.STRING)
     @Column(name = "action_type")
     val actionType: TerritoryActionType?,

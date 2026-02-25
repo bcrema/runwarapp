@@ -35,7 +35,7 @@ class BandeiraControllerTest {
             logoUrl = null,
             description = "Equipe oficial",
             memberCount = 12,
-            totalTiles = 48,
+            totalQuadras = 48,
             createdById = UUID.fromString("22222222-2222-2222-2222-222222222222"),
             createdByUsername = "captain"
         )

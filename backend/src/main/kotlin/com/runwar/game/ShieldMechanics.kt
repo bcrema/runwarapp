@@ -5,9 +5,9 @@ import com.runwar.domain.bandeira.BandeiraRepository
 import com.runwar.domain.run.TerritoryActionType
 import com.runwar.domain.territory.TerritoryAction
 import com.runwar.domain.territory.TerritoryActionRepository
-import com.runwar.domain.tile.OwnerType
-import com.runwar.domain.tile.Tile
-import com.runwar.domain.tile.TileRepository
+import com.runwar.domain.quadra.OwnerType
+import com.runwar.domain.quadra.Quadra
+import com.runwar.domain.quadra.QuadraRepository
 import com.runwar.domain.user.User
 import com.runwar.domain.user.UserRepository
 import com.runwar.notification.NotificationService
@@ -20,7 +20,7 @@ import java.util.*
 @Service
 class ShieldMechanics(
     private val gameProperties: GameProperties,
-    private val tileRepository: TileRepository,
+    private val quadraRepository: QuadraRepository,
     private val territoryActionRepository: TerritoryActionRepository,
     private val userRepository: UserRepository,
     private val bandeiraRepository: BandeiraRepository,
@@ -41,36 +41,36 @@ class ShieldMechanics(
         val shieldBefore: Int = 0,
         val shieldAfter: Int = 0,
         val inDispute: Boolean = false,
-        val tileId: String? = null,
+        val quadraId: String? = null,
         val cooldownUntil: Instant? = null
     ) {
         companion object {
             fun failure(reason: String) = ActionResult(success = false, reason = reason)
 
-            fun failureWithTile(reason: String, tile: Tile, disputeThreshold: Int) =
+            fun failureWithQuadra(reason: String, quadra: Quadra, disputeThreshold: Int) =
                 ActionResult(
                     success = false,
                     reason = reason,
-                    previousOwnerId = tile.ownerId,
-                    previousOwnerType = tile.ownerType,
-                    newOwnerId = tile.ownerId,
-                    newOwnerType = tile.ownerType,
-                    shieldBefore = tile.shield,
-                    shieldAfter = tile.shield,
-                    inDispute = tile.isInDispute(disputeThreshold),
-                    tileId = tile.id,
-                    cooldownUntil = tile.cooldownUntil
+                    previousOwnerId = quadra.ownerId,
+                    previousOwnerType = quadra.ownerType,
+                    newOwnerId = quadra.ownerId,
+                    newOwnerType = quadra.ownerType,
+                    shieldBefore = quadra.shield,
+                    shieldAfter = quadra.shield,
+                    inDispute = quadra.isInDispute(disputeThreshold),
+                    quadraId = quadra.id,
+                    cooldownUntil = quadra.cooldownUntil
                 )
         }
     }
     
     /**
-     * Determine the appropriate action type for a user on a tile
+     * Determine the appropriate action type for a user on a quadra
      */
-    fun determineActionType(tile: Tile, user: User): TerritoryActionType? {
+    fun determineActionType(quadra: Quadra, user: User): TerritoryActionType? {
         return when {
-            tile.isNeutral() -> TerritoryActionType.CONQUEST
-            isOwner(tile, user) -> TerritoryActionType.DEFENSE
+            quadra.isNeutral() -> TerritoryActionType.CONQUEST
+            isOwner(quadra, user) -> TerritoryActionType.DEFENSE
             else -> TerritoryActionType.ATTACK
         }
     }
@@ -80,41 +80,41 @@ class ShieldMechanics(
      */
     @Transactional
     fun processAction(
-        tileId: String,
+        quadraId: String,
         user: User,
         providedActionType: TerritoryActionType? = null
     ): ActionResult {
-        // Find or create tile
-        val tile = tileRepository.findById(tileId).orElseGet {
-            createTile(tileId)
+        // Find or create quadra
+        val quadra = quadraRepository.findById(quadraId).orElseGet {
+            createQuadra(quadraId)
         }
         
         // Determine action type if not provided
-        val actionType = providedActionType ?: determineActionType(tile, user)
-            ?: return ActionResult.failureWithTile(
+        val actionType = providedActionType ?: determineActionType(quadra, user)
+            ?: return ActionResult.failureWithQuadra(
                 "cannot_determine_action",
-                tile,
+                quadra,
                 gameProperties.disputeThreshold
             )
         
         // Validate action is allowed
-        val validationError = validateAction(tile, user, actionType)
+        val validationError = validateAction(quadra, user, actionType)
         if (validationError != null) {
-            return ActionResult.failureWithTile(
+            return ActionResult.failureWithQuadra(
                 validationError,
-                tile,
+                quadra,
                 gameProperties.disputeThreshold
             )
         }
         
         val bandeira = user.bandeira
-        val shieldBefore = tile.shield
+        val shieldBefore = quadra.shield
         var shieldChange = 0
         var ownerChanged = false
-        val previousOwnerId = tile.ownerId
-        val previousOwnerType = tile.ownerType
-        var newOwnerId = tile.ownerId
-        var newOwnerType = tile.ownerType
+        val previousOwnerId = quadra.ownerId
+        val previousOwnerType = quadra.ownerType
+        var newOwnerId = quadra.ownerId
+        var newOwnerType = quadra.ownerType
         
         when (actionType) {
             TerritoryActionType.CONQUEST -> {
@@ -126,51 +126,51 @@ class ShieldMechanics(
             
             TerritoryActionType.ATTACK -> {
                 shieldChange = -gameProperties.attackDamage
-                val projectedShield = tile.shield + shieldChange
+                val projectedShield = quadra.shield + shieldChange
                 
-                if (projectedShield <= 0 && !tile.isInCooldown()) {
+                if (projectedShield <= 0 && !quadra.isInCooldown()) {
                     // Transfer ownership
                     newOwnerId = bandeira?.id ?: user.id
                     newOwnerType = if (bandeira != null) OwnerType.BANDEIRA else OwnerType.SOLO
-                    shieldChange = gameProperties.transferShield - tile.shield
+                    shieldChange = gameProperties.transferShield - quadra.shield
                     ownerChanged = true
-                } else if (tile.isInCooldown() && projectedShield < gameProperties.transferShield) {
+                } else if (quadra.isInCooldown() && projectedShield < gameProperties.transferShield) {
                     // Cap at transfer shield during cooldown
-                    shieldChange = gameProperties.transferShield - tile.shield
+                    shieldChange = gameProperties.transferShield - quadra.shield
                 }
             }
             
             TerritoryActionType.DEFENSE -> {
                 shieldChange = minOf(
                     gameProperties.defenseHeal,
-                    gameProperties.maxShield - tile.shield
+                    gameProperties.maxShield - quadra.shield
                 )
-                tile.lastDefenseAt = Instant.now()
+                quadra.lastDefenseAt = Instant.now()
             }
         }
         
-        val shieldAfter = (tile.shield + shieldChange).coerceIn(0, gameProperties.maxShield)
+        val shieldAfter = (quadra.shield + shieldChange).coerceIn(0, gameProperties.maxShield)
         
-        // Update tile
-        tile.shield = shieldAfter
+        // Update quadra
+        quadra.shield = shieldAfter
         if (ownerChanged) {
-            tile.ownerId = newOwnerId
-            tile.ownerType = newOwnerType
-            tile.cooldownUntil = Instant.now().plus(gameProperties.cooldownHours, ChronoUnit.HOURS)
-            tile.guardian = user
-            tile.guardianContribution = 1
+            quadra.ownerId = newOwnerId
+            quadra.ownerType = newOwnerType
+            quadra.cooldownUntil = Instant.now().plus(gameProperties.cooldownHours, ChronoUnit.HOURS)
+            quadra.guardian = user
+            quadra.guardianContribution = 1
             
             // Update stats
             updateOwnershipStats(previousOwnerId, previousOwnerType, newOwnerId, newOwnerType)
         }
-        tile.lastActionAt = Instant.now()
-        tileRepository.save(tile)
+        quadra.lastActionAt = Instant.now()
+        quadraRepository.save(quadra)
         
         // Record action
         val action = TerritoryAction(
             user = user,
             bandeira = bandeira,
-            tile = tile,
+            quadra = quadra,
             actionType = actionType,
             shieldChange = shieldChange,
             shieldBefore = shieldBefore,
@@ -181,20 +181,20 @@ class ShieldMechanics(
         
         // Update guardian if not owner change
         if (!ownerChanged && actionType != TerritoryActionType.CONQUEST) {
-            updateGuardian(tile, user)
+            updateGuardian(quadra, user)
         }
         
         // Send notifications
-        val inDispute = shieldAfter < gameProperties.disputeThreshold && tile.ownerType != null
+        val inDispute = shieldAfter < gameProperties.disputeThreshold && quadra.ownerType != null
         if (ownerChanged) {
-            notificationService.notifyTileTakeover(tile)
+            notificationService.notifyQuadraTakeover(quadra)
         } else if (inDispute && shieldBefore >= gameProperties.disputeThreshold) {
-            notificationService.notifyTileInDispute(tile)
+            notificationService.notifyQuadraInDispute(quadra)
         }
         
         // Update user stats
         if (actionType == TerritoryActionType.CONQUEST || ownerChanged) {
-            user.totalTilesConquered++
+            user.totalQuadrasConquered++
             userRepository.save(user)
         }
         
@@ -210,71 +210,71 @@ class ShieldMechanics(
             shieldBefore = shieldBefore,
             shieldAfter = shieldAfter,
             inDispute = inDispute,
-            tileId = tileId,
-            cooldownUntil = tile.cooldownUntil
+            quadraId = quadraId,
+            cooldownUntil = quadra.cooldownUntil
         )
     }
     
     /**
      * Validate if an action is allowed
      */
-    private fun validateAction(tile: Tile, user: User, actionType: TerritoryActionType): String? {
+    private fun validateAction(quadra: Quadra, user: User, actionType: TerritoryActionType): String? {
         return when (actionType) {
             TerritoryActionType.CONQUEST -> {
-                if (!tile.isNeutral()) "quadra_already_owned"
+                if (!quadra.isNeutral()) "quadra_already_owned"
                 else null
             }
             TerritoryActionType.ATTACK -> {
                 when {
-                    tile.isNeutral() -> "cannot_attack_neutral"
-                    isOwner(tile, user) -> "cannot_attack_own_quadra"
-                    tile.isInCooldown() && tile.shield <= gameProperties.transferShield -> "quadra_in_cooldown"
+                    quadra.isNeutral() -> "cannot_attack_neutral"
+                    isOwner(quadra, user) -> "cannot_attack_own_quadra"
+                    quadra.isInCooldown() && quadra.shield <= gameProperties.transferShield -> "quadra_in_cooldown"
                     else -> null
                 }
             }
             TerritoryActionType.DEFENSE -> {
-                if (!isOwner(tile, user)) "cannot_defend_rival_quadra"
+                if (!isOwner(quadra, user)) "cannot_defend_rival_quadra"
                 else null
             }
         }
     }
     
     /**
-     * Check if user (or their bandeira) owns the tile
+     * Check if user (or their bandeira) owns the quadra
      */
-    private fun isOwner(tile: Tile, user: User): Boolean {
-        return when (tile.ownerType) {
-            OwnerType.SOLO -> tile.ownerId == user.id
-            OwnerType.BANDEIRA -> tile.ownerId == user.bandeira?.id
+    private fun isOwner(quadra: Quadra, user: User): Boolean {
+        return when (quadra.ownerType) {
+            OwnerType.SOLO -> quadra.ownerId == user.id
+            OwnerType.BANDEIRA -> quadra.ownerId == user.bandeira?.id
             null -> false
         }
     }
     
     /**
-     * Create a new tile at the given H3 index
+     * Create a new quadra at the given H3 index
      */
-    private fun createTile(tileId: String): Tile {
-        val center = h3GridService.getTileCenterAsPoint(tileId)
-        val tile = Tile(id = tileId, center = center)
-        return tileRepository.save(tile)
+    private fun createQuadra(quadraId: String): Quadra {
+        val center = h3GridService.getTileCenterAsPoint(quadraId)
+        val quadra = Quadra(id = quadraId, center = center)
+        return quadraRepository.save(quadra)
     }
     
     /**
-     * Update the guardian (highest weekly contributor) for a tile
+     * Update the guardian (highest weekly contributor) for a quadra
      */
-    private fun updateGuardian(tile: Tile, user: User) {
+    private fun updateGuardian(quadra: Quadra, user: User) {
         val weekStart = Instant.now().minus(7, ChronoUnit.DAYS)
-        val contributions = territoryActionRepository.findWeeklyContributorsByTile(tile.id, weekStart)
+        val contributions = territoryActionRepository.findWeeklyContributorsByQuadra(quadra.id, weekStart)
         
         if (contributions.isNotEmpty()) {
             val topContributor = contributions.first()
             val userId = topContributor[0] as UUID
             val contribution = (topContributor[1] as Number).toInt()
             
-            if (tile.guardian?.id != userId || tile.guardianContribution != contribution) {
-                tile.guardian = userRepository.findById(userId).orElse(null)
-                tile.guardianContribution = contribution
-                tileRepository.save(tile)
+            if (quadra.guardian?.id != userId || quadra.guardianContribution != contribution) {
+                quadra.guardian = userRepository.findById(userId).orElse(null)
+                quadra.guardianContribution = contribution
+                quadraRepository.save(quadra)
             }
         }
     }
@@ -293,13 +293,13 @@ class ShieldMechanics(
             when (previousOwnerType) {
                 OwnerType.SOLO -> {
                     userRepository.findById(previousOwnerId).ifPresent { user ->
-                        user.totalTilesConquered = maxOf(0, user.totalTilesConquered - 1)
+                        user.totalQuadrasConquered = maxOf(0, user.totalQuadrasConquered - 1)
                         userRepository.save(user)
                     }
                 }
                 OwnerType.BANDEIRA -> {
                     bandeiraRepository.findById(previousOwnerId).ifPresent { bandeira ->
-                        bandeira.totalTiles = maxOf(0, bandeira.totalTiles - 1)
+                        bandeira.totalQuadras = maxOf(0, bandeira.totalQuadras - 1)
                         bandeiraRepository.save(bandeira)
                     }
                 }
@@ -312,7 +312,7 @@ class ShieldMechanics(
             when (newOwnerType) {
                 OwnerType.BANDEIRA -> {
                     bandeiraRepository.findById(newOwnerId).ifPresent { bandeira ->
-                        bandeira.totalTiles++
+                        bandeira.totalQuadras++
                         bandeiraRepository.save(bandeira)
                     }
                 }
@@ -322,22 +322,22 @@ class ShieldMechanics(
     }
     
     /**
-     * Apply decay to tiles that haven't been defended recently
+     * Apply decay to quadras that haven't been defended recently
      */
     @Transactional
     fun applyDecay() {
         val decayThreshold = Instant.now().minus(gameProperties.decayStartDays.toLong(), ChronoUnit.DAYS)
-        val tiles = tileRepository.findTilesForDecay(decayThreshold)
+        val quadras = quadraRepository.findQuadrasForDecay(decayThreshold)
         
-        tiles.forEach { tile ->
-            if (tile.shield > gameProperties.decayMinimum) {
-                val newShield = maxOf(gameProperties.decayMinimum, tile.shield - gameProperties.decayPerDay)
-                tile.shield = newShield
-                tileRepository.save(tile)
+        quadras.forEach { quadra ->
+            if (quadra.shield > gameProperties.decayMinimum) {
+                val newShield = maxOf(gameProperties.decayMinimum, quadra.shield - gameProperties.decayPerDay)
+                quadra.shield = newShield
+                quadraRepository.save(quadra)
                 
                 // Notify if entering dispute
                 if (newShield < gameProperties.disputeThreshold) {
-                    notificationService.notifyTileInDispute(tile)
+                    notificationService.notifyQuadraInDispute(quadra)
                 }
             }
         }

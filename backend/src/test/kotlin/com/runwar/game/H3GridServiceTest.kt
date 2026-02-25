@@ -19,8 +19,8 @@ class H3GridServiceTest {
     fun `calculateTileCoverage keeps single-tile tracks in same tile`() {
         val service = H3GridService(GameProperties(h3Resolution = 8))
         val base = LatLngPoint(-25.45, -49.25)
-        val tileId = service.getTileId(base.lat, base.lng)
-        val center = service.getTileCenter(tileId)
+        val quadraId = service.getTileId(base.lat, base.lng)
+        val center = service.getTileCenter(quadraId)
 
         val track = listOf(
             LatLngPoint(center.lat + 0.0003, center.lng),
@@ -30,16 +30,16 @@ class H3GridServiceTest {
         val coverage = service.calculateTileCoverage(track)
 
         assertEquals(1, coverage.size)
-        assertTrue(coverage.containsKey(tileId))
-        assertEquals(1.0, coverage[tileId]!!, 1e-6)
+        assertTrue(coverage.containsKey(quadraId))
+        assertEquals(1.0, coverage[quadraId]!!, 1e-6)
     }
 
     @Test
     fun `primary tile returns overlay and coverage`() {
         val service = H3GridService(GameProperties(h3Resolution = 8))
         val base = LatLngPoint(-25.45, -49.25)
-        val tileId = service.getTileId(base.lat, base.lng)
-        val center = service.getTileCenter(tileId)
+        val quadraId = service.getTileId(base.lat, base.lng)
+        val center = service.getTileCenter(quadraId)
 
         val track = listOf(
             LatLngPoint(center.lat + 0.0003, center.lng),
@@ -49,7 +49,7 @@ class H3GridServiceTest {
         val result = service.getPrimaryTileForTrack(track)
 
         assertNotNull(result)
-        assertEquals(tileId, result!!.tileId)
+        assertEquals(quadraId, result!!.quadraId)
         assertEquals(1.0, result.coverage, 1e-6)
         assertTrue(result.boundary.size >= 5)
     }

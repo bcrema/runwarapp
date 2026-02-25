@@ -4,9 +4,9 @@ import com.runwar.domain.run.Run
 import com.runwar.domain.run.TerritoryActionType
 import com.runwar.domain.territory.TerritoryAction
 import com.runwar.domain.territory.TerritoryActionRepository
-import com.runwar.domain.tile.OwnerType
-import com.runwar.domain.tile.Tile
-import com.runwar.domain.tile.TileRepository
+import com.runwar.domain.quadra.OwnerType
+import com.runwar.domain.quadra.Quadra
+import com.runwar.domain.quadra.QuadraRepository
 import com.runwar.domain.user.User
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
@@ -15,7 +15,7 @@ import java.time.temporal.ChronoUnit
 
 @Service
 class TerritoryEngine(
-    private val tileRepository: TileRepository,
+    private val quadraRepository: QuadraRepository,
     private val territoryActionRepository: TerritoryActionRepository
 ) {
     data class ActionOutcome(
@@ -28,30 +28,30 @@ class TerritoryEngine(
     )
 
     @Transactional
-    fun applyAction(run: Run, tile: Tile, actor: User): ActionOutcome {
-        val actionType = determineActionType(tile, actor)
-        val shieldBefore = tile.shield
-        var shieldAfter = tile.shield
+    fun applyAction(run: Run, quadra: Quadra, actor: User): ActionOutcome {
+        val actionType = determineActionType(quadra, actor)
+        val shieldBefore = quadra.shield
+        var shieldAfter = quadra.shield
         var ownerChanged = false
 
         when (actionType) {
             TerritoryActionType.CONQUEST -> {
                 val (ownerId, ownerType) = resolveOwner(actor)
-                tile.ownerId = ownerId
-                tile.ownerType = ownerType
+                quadra.ownerId = ownerId
+                quadra.ownerType = ownerType
                 shieldAfter = CONQUEST_SHIELD
-                tile.cooldownUntil = null
+                quadra.cooldownUntil = null
                 ownerChanged = true
             }
             TerritoryActionType.ATTACK -> {
-                val projectedShield = tile.shield - ATTACK_DAMAGE
-                val inCooldown = tile.isInCooldown()
+                val projectedShield = quadra.shield - ATTACK_DAMAGE
+                val inCooldown = quadra.isInCooldown()
                 if (!inCooldown && projectedShield <= 0) {
                     val (ownerId, ownerType) = resolveOwner(actor)
-                    tile.ownerId = ownerId
-                    tile.ownerType = ownerType
+                    quadra.ownerId = ownerId
+                    quadra.ownerType = ownerType
                     shieldAfter = TRANSFER_SHIELD
-                    tile.cooldownUntil = Instant.now().plus(COOLDOWN_HOURS, ChronoUnit.HOURS)
+                    quadra.cooldownUntil = Instant.now().plus(COOLDOWN_HOURS, ChronoUnit.HOURS)
                     ownerChanged = true
                 } else if (inCooldown && projectedShield <= 0) {
                     // While in cooldown, prevent ownership transfer and cap shield at the transfer threshold
@@ -61,25 +61,25 @@ class TerritoryEngine(
                 }
             }
             TerritoryActionType.DEFENSE -> {
-                shieldAfter = minOf(MAX_SHIELD, tile.shield + DEFENSE_BOOST)
+                shieldAfter = minOf(MAX_SHIELD, quadra.shield + DEFENSE_BOOST)
             }
         }
 
         // Update activity timestamps for decay and tracking consistency
         val now = Instant.now()
-        tile.lastActionAt = now
+        quadra.lastActionAt = now
         if (actionType == TerritoryActionType.DEFENSE) {
-            tile.lastDefenseAt = now
+            quadra.lastDefenseAt = now
         }
         shieldAfter = shieldAfter.coerceIn(0, MAX_SHIELD)
-        tile.shield = shieldAfter
-        tileRepository.save(tile)
+        quadra.shield = shieldAfter
+        quadraRepository.save(quadra)
 
         val action = TerritoryAction(
             run = run,
             user = actor,
             bandeira = actor.bandeira,
-            tile = tile,
+            quadra = quadra,
             actionType = actionType,
             shieldChange = shieldAfter - shieldBefore,
             shieldBefore = shieldBefore,
@@ -93,23 +93,23 @@ class TerritoryEngine(
             ownerChanged = ownerChanged,
             shieldBefore = shieldBefore,
             shieldAfter = shieldAfter,
-            inDispute = tile.isInDispute(DISPUTE_THRESHOLD),
-            cooldownUntil = tile.cooldownUntil
+            inDispute = quadra.isInDispute(DISPUTE_THRESHOLD),
+            cooldownUntil = quadra.cooldownUntil
         )
     }
 
-    private fun determineActionType(tile: Tile, actor: User): TerritoryActionType {
+    private fun determineActionType(quadra: Quadra, actor: User): TerritoryActionType {
         return when {
-            tile.isNeutral() -> TerritoryActionType.CONQUEST
-            isOwner(tile, actor) -> TerritoryActionType.DEFENSE
+            quadra.isNeutral() -> TerritoryActionType.CONQUEST
+            isOwner(quadra, actor) -> TerritoryActionType.DEFENSE
             else -> TerritoryActionType.ATTACK
         }
     }
 
-    private fun isOwner(tile: Tile, actor: User): Boolean {
-        return when (tile.ownerType) {
-            OwnerType.SOLO -> tile.ownerId == actor.id
-            OwnerType.BANDEIRA -> tile.ownerId == actor.bandeira?.id
+    private fun isOwner(quadra: Quadra, actor: User): Boolean {
+        return when (quadra.ownerType) {
+            OwnerType.SOLO -> quadra.ownerId == actor.id
+            OwnerType.BANDEIRA -> quadra.ownerId == actor.bandeira?.id
             null -> false
         }
     }

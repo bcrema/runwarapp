@@ -216,8 +216,8 @@ class RunController(private val runService: RunService) {
                     distance = validation.metrics.loopDistanceMeters,
                     duration = validation.metrics.loopDurationSeconds,
                     closingDistance = validation.metrics.closureMeters,
-                    quadrasCovered = validation.tilesCovered,
-                    primaryQuadra = validation.primaryTile,
+                    quadrasCovered = validation.quadrasCovered,
+                    primaryQuadra = validation.primaryQuadra,
                     primaryQuadraCoverage = validation.metrics.coveragePct,
                     fraudFlags = validation.fraudFlags,
                     failureReasons = validation.reasons
@@ -234,7 +234,7 @@ class RunController(private val runService: RunService) {
                     shieldBefore = result.shieldBefore,
                     shieldAfter = result.shieldAfter,
                     inDispute = result.inDispute,
-                    quadraId = result.tileId
+                    quadraId = result.quadraId
             )
     }
 }

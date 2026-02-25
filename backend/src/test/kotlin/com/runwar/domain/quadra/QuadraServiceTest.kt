@@ -1,4 +1,4 @@
-package com.runwar.domain.tile
+package com.runwar.domain.quadra
 
 import com.runwar.config.GameProperties
 import com.runwar.domain.bandeira.BandeiraRepository
@@ -19,11 +19,11 @@ import org.locationtech.jts.geom.PrecisionModel
 import org.springframework.transaction.annotation.Transactional
 import java.util.Optional
 
-class TileServiceTest {
+class QuadraServiceTest {
 
     @Test
     fun `tile service is marked as read only transactional`() {
-        val transactional = TileService::class.java.getAnnotation(Transactional::class.java)
+        val transactional = QuadraService::class.java.getAnnotation(Transactional::class.java)
 
         assertNotNull(transactional)
         assertTrue(transactional.readOnly)
@@ -31,8 +31,8 @@ class TileServiceTest {
 
     @Test
     fun `toBoundingBox converts radius to bounds`() {
-        val service = TileService(
-            tileRepository = mockk(relaxed = true),
+        val service = QuadraService(
+            quadraRepository = mockk(relaxed = true),
             userRepository = mockk(relaxed = true),
             bandeiraRepository = mockk(relaxed = true),
             h3GridService = mockk(relaxed = true),
@@ -48,27 +48,27 @@ class TileServiceTest {
     }
 
     @Test
-    fun `getTileForCoordinate returns neutral tile info when unclaimed`() {
-        val tileRepository = mockk<TileRepository>()
+    fun `getQuadraForCoordinate returns neutral tile info when unclaimed`() {
+        val quadraRepository = mockk<QuadraRepository>()
         val h3GridService = mockk<H3GridService>()
 
         every { h3GridService.getTileId(10.0, 20.0) } returns "tile-1"
-        every { tileRepository.findById("tile-1") } returns Optional.empty()
+        every { quadraRepository.findById("tile-1") } returns Optional.empty()
         every { h3GridService.getTileCenter("tile-1") } returns LatLngPoint(1.0, 2.0)
         every { h3GridService.getTileBoundary("tile-1") } returns listOf(
             LatLngPoint(1.0, 2.0),
             LatLngPoint(3.0, 4.0)
         )
 
-        val service = TileService(
-            tileRepository = tileRepository,
+        val service = QuadraService(
+            quadraRepository = quadraRepository,
             userRepository = mockk(relaxed = true),
             bandeiraRepository = mockk(relaxed = true),
             h3GridService = h3GridService,
             gameProperties = GameProperties()
         )
 
-        val dto = service.getTileForCoordinate(10.0, 20.0)
+        val dto = service.getQuadraForCoordinate(10.0, 20.0)
 
         assertEquals("tile-1", dto.id)
         assertEquals(1.0, dto.lat)
@@ -81,8 +81,8 @@ class TileServiceTest {
     }
 
     @Test
-    fun `getViewportTiles caches within ttl`() {
-        val tileRepository = mockk<TileRepository>()
+    fun `getViewportQuadras caches within ttl`() {
+        val quadraRepository = mockk<QuadraRepository>()
         val userRepository = mockk<UserRepository>(relaxed = true)
         val bandeiraRepository = mockk<BandeiraRepository>(relaxed = true)
         val h3GridService = mockk<H3GridService>()
@@ -90,7 +90,7 @@ class TileServiceTest {
         every { h3GridService.resolution } returns 8
 
         val geometryFactory = GeometryFactory(PrecisionModel(), 4326)
-        val tile = Tile(
+        val tile = Quadra(
             id = "tile-1",
             center = geometryFactory.createPoint(Coordinate(0.0, 0.0)),
             ownerType = null,
@@ -98,27 +98,27 @@ class TileServiceTest {
             shield = 10
         )
 
-        every { tileRepository.findTilesInBoundingBox(any(), any(), any(), any()) } returns listOf(tile)
+        every { quadraRepository.findQuadrasInBoundingBox(any(), any(), any(), any()) } returns listOf(tile)
 
-        val service = TileService(
-            tileRepository = tileRepository,
+        val service = QuadraService(
+            quadraRepository = quadraRepository,
             userRepository = userRepository,
             bandeiraRepository = bandeiraRepository,
             h3GridService = h3GridService,
             gameProperties = GameProperties(disputeThreshold = 70)
         )
 
-        val bounds = TileService.BoundingBox(
+        val bounds = QuadraService.BoundingBox(
             minLng = -49.0,
             minLat = -25.0,
             maxLng = -48.0,
             maxLat = -24.0
         )
 
-        service.getViewportTiles(bounds)
-        service.getViewportTiles(bounds)
+        service.getViewportQuadras(bounds)
+        service.getViewportQuadras(bounds)
 
-        verify(exactly = 1) { tileRepository.findTilesInBoundingBox(any(), any(), any(), any()) }
+        verify(exactly = 1) { quadraRepository.findQuadrasInBoundingBox(any(), any(), any(), any()) }
         verify(exactly = 0) { bandeiraRepository.findAllById(any<Iterable<java.util.UUID>>()) }
     }
 }

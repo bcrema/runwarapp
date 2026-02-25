@@ -50,7 +50,7 @@ class UserService(
         val totalRuns: Int,
         val totalDistance: Double, // kilometers (iOS compatibility)
         val totalDistanceMeters: Double,
-        val totalTilesConquered: Int
+        val totalQuadrasConquered: Int
     ) {
         companion object {
             fun from(user: User): UserDto {
@@ -67,7 +67,7 @@ class UserService(
                 totalRuns = user.totalRuns,
                 totalDistance = totalDistanceMeters / 1000.0,
                 totalDistanceMeters = totalDistanceMeters,
-                totalTilesConquered = user.totalTilesConquered
+                totalQuadrasConquered = user.totalQuadrasConquered
             )
             }
         }

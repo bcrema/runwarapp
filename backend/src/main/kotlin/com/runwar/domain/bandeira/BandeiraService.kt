@@ -23,7 +23,7 @@ class BandeiraService(
         val logoUrl: String?,
         val description: String?,
         val memberCount: Int,
-        val totalTiles: Int,
+        val totalQuadras: Int,
         val createdById: UUID,
         val createdByUsername: String
     ) {
@@ -37,7 +37,7 @@ class BandeiraService(
                 logoUrl = bandeira.logoUrl,
                 description = bandeira.description,
                 memberCount = bandeira.memberCount,
-                totalTiles = bandeira.totalTiles,
+                totalQuadras = bandeira.totalQuadras,
                 createdById = bandeira.createdBy.id,
                 createdByUsername = bandeira.createdBy.username
             )
@@ -49,7 +49,7 @@ class BandeiraService(
         val username: String,
         val avatarUrl: String?,
         val role: String,
-        val totalTilesConquered: Int
+        val totalQuadrasConquered: Int
     )
     
     fun findAll(): List<BandeiraDto> {
@@ -71,7 +71,7 @@ class BandeiraService(
                 username = it.username,
                 avatarUrl = it.avatarUrl,
                 role = it.role.name,
-                totalTilesConquered = it.totalTilesConquered
+                totalQuadrasConquered = it.totalQuadrasConquered
             )
         }
     }
@@ -175,7 +175,7 @@ class BandeiraService(
     }
     
     fun getRankings(): List<BandeiraDto> {
-        return bandeiraRepository.findAllOrderByTotalTilesDesc().map { BandeiraDto.from(it) }
+        return bandeiraRepository.findAllOrderByTotalQuadrasDesc().map { BandeiraDto.from(it) }
     }
     
     fun search(query: String): List<BandeiraDto> {
