@@ -7,6 +7,7 @@ import jakarta.validation.constraints.Size
 import jakarta.servlet.http.HttpServletRequest
 import java.util.UUID
 import org.springframework.http.ResponseEntity
+import org.springframework.security.authentication.BadCredentialsException
 import org.springframework.security.core.annotation.AuthenticationPrincipal
 import org.springframework.web.bind.annotation.*
 import com.runwar.config.UserPrincipal
@@ -95,8 +96,24 @@ class UserController(
         @Valid @RequestBody request: LoginRequest,
         httpRequest: HttpServletRequest
     ): ResponseEntity<AuthResponse> {
-        enforceRateLimit("login", request.email, httpRequest)
-        val result = userService.login(request.email, request.password)
+        val ip = resolveClientIp(httpRequest)
+        val ipKey = "login:ip:$ip"
+        val emailKey = "login:email:${request.email.lowercase()}"
+
+        authRateLimiter.ensureAllowed(ipKey)
+        authRateLimiter.ensureAllowed(emailKey)
+
+        val result = try {
+            userService.login(request.email, request.password)
+        } catch (e: IllegalArgumentException) {
+            authRateLimiter.recordFailure(ipKey)
+            authRateLimiter.recordFailure(emailKey)
+            throw BadCredentialsException("Invalid credentials")
+        }
+
+        authRateLimiter.reset(ipKey)
+        authRateLimiter.reset(emailKey)
+
         return ResponseEntity.ok(
             AuthResponse(
                 user = toUserResponse(result.user),
