@@ -101,8 +101,14 @@ jobs:
           curl -fsSL https://storage.googleapis.com/cloud-sql-connectors/cloud-sql-proxy/v2.19.0/cloud-sql-proxy.linux.amd64 -o cloud-sql-proxy
           chmod +x cloud-sql-proxy
           ./cloud-sql-proxy ${{ env.DB_CONNECTION_NAME }} --port 5432 > /tmp/cloud-sql-proxy.log 2>&1 &
+          echo $! > /tmp/cloud-sql-proxy.pid
 
           for i in {1..30}; do
+            if ! kill -0 "$(cat /tmp/cloud-sql-proxy.pid)" >/dev/null 2>&1; then
+              echo "Cloud SQL Proxy process exited unexpectedly"
+              cat /tmp/cloud-sql-proxy.log
+              exit 1
+            fi
             if (echo > /dev/tcp/127.0.0.1/5432) >/dev/null 2>&1; then
               echo "Cloud SQL Proxy is ready."
               break
@@ -117,14 +123,34 @@ jobs:
 
       - name: Run Flyway migrations
         run: |
-          docker run --rm --network host \
-            -v "${{ github.workspace }}/backend/src/main/resources/db/migration:/flyway/sql" \
-            flyway/flyway:10.20.1 \
-            -url="jdbc:postgresql://127.0.0.1:5432/${{ env.DB_NAME }}" \
-            -user="${{ env.DB_USER }}" \
-            -password="${{ secrets.DB_PASSWORD }}" \
-            -locations="filesystem:/flyway/sql" \
-            migrate
+          set -euo pipefail
+
+          migrate() {
+            docker run --rm --add-host=host.docker.internal:host-gateway \
+              -v "${{ github.workspace }}/backend/src/main/resources/db/migration:/flyway/sql" \
+              flyway/flyway:10.20.1 \
+              -url="jdbc:postgresql://host.docker.internal:5432/${{ env.DB_NAME }}" \
+              -user="${{ env.DB_USER }}" \
+              -password="${{ secrets.DB_PASSWORD }}" \
+              -connectRetries=10 \
+              -locations="filesystem:/flyway/sql" \
+              migrate
+          }
+
+          for attempt in 1 2 3; do
+            if migrate; then
+              echo "Flyway migration succeeded on attempt ${attempt}."
+              exit 0
+            fi
+            echo "Flyway migration failed on attempt ${attempt}."
+            if [ "${attempt}" -lt 3 ]; then
+              sleep 5
+            fi
+          done
+
+          echo "Flyway migration failed after retries. Cloud SQL Proxy logs:"
+          cat /tmp/cloud-sql-proxy.log
+          exit 1
 
       - name: Build Docker image
         run: |
