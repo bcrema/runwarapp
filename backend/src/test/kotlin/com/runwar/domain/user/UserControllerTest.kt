@@ -100,4 +100,77 @@ class UserControllerTest {
             .andExpect(jsonPath("$.details.username").exists())
             .andExpect(jsonPath("$.details.password").exists())
     }
+
+    @Test
+    fun `login records failures only on invalid credentials`() {
+        every { userService.login("user@example.com", "wrong-password") } throws IllegalArgumentException("Invalid credentials")
+
+        val payload = objectMapper.writeValueAsString(
+            mapOf(
+                "email" to "user@example.com",
+                "password" to "wrong-password"
+            )
+        )
+
+        mockMvc.perform(
+            post("/api/auth/login")
+                .header("X-Forwarded-For", "1.2.3.4")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(payload)
+        )
+            .andExpect(status().isUnauthorized)
+            .andExpect(jsonPath("$.error").value("UNAUTHORIZED"))
+
+        verify(exactly = 1) { authRateLimiter.ensureAllowed("login:ip:1.2.3.4") }
+        verify(exactly = 1) { authRateLimiter.ensureAllowed("login:email:user@example.com") }
+        verify(exactly = 1) { authRateLimiter.recordFailure("login:ip:1.2.3.4") }
+        verify(exactly = 1) { authRateLimiter.recordFailure("login:email:user@example.com") }
+        verify(exactly = 0) { authRateLimiter.reset(any()) }
+    }
+
+    @Test
+    fun `login success resets rate limiter counters`() {
+        val result = UserService.AuthResult(
+            user = UserService.UserDto(
+                id = UUID.randomUUID(),
+                email = "user@example.com",
+                username = "user",
+                avatarUrl = null,
+                isPublic = true,
+                bandeiraId = null,
+                bandeiraName = null,
+                role = "MEMBER",
+                totalRuns = 0,
+                totalDistance = 0.0,
+                totalDistanceMeters = 0.0,
+                totalQuadrasConquered = 0
+            ),
+            accessToken = "access-token",
+            refreshToken = "refresh-token"
+        )
+        every { userService.login("user@example.com", "password") } returns result
+
+        val payload = objectMapper.writeValueAsString(
+            mapOf(
+                "email" to "user@example.com",
+                "password" to "password"
+            )
+        )
+
+        mockMvc.perform(
+            post("/api/auth/login")
+                .header("X-Forwarded-For", "1.2.3.4")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(payload)
+        )
+            .andExpect(status().isOk)
+            .andExpect(jsonPath("$.accessToken").value("access-token"))
+
+        verify(exactly = 1) { authRateLimiter.ensureAllowed("login:ip:1.2.3.4") }
+        verify(exactly = 1) { authRateLimiter.ensureAllowed("login:email:user@example.com") }
+        verify(exactly = 1) { authRateLimiter.reset("login:ip:1.2.3.4") }
+        verify(exactly = 1) { authRateLimiter.reset("login:email:user@example.com") }
+        verify(exactly = 0) { authRateLimiter.recordFailure("login:ip:1.2.3.4") }
+        verify(exactly = 0) { authRateLimiter.recordFailure("login:email:user@example.com") }
+    }
 }
