@@ -1,7 +1,7 @@
 import Foundation
 import CoreLocation
 
-struct AuthResponse: Codable {
+struct AuthResponse: Decodable {
     let user: User
     let token: String
     let refreshToken: String?
@@ -13,7 +13,7 @@ struct AuthResponse: Codable {
     }
 }
 
-struct TokenRefreshResponse: Codable {
+struct TokenRefreshResponse: Decodable {
     let token: String
     let refreshToken: String?
 
@@ -23,7 +23,7 @@ struct TokenRefreshResponse: Codable {
     }
 }
 
-struct User: Codable, Identifiable {
+struct User: Decodable, Identifiable {
     let id: String
     let email: String
     var username: String
@@ -35,6 +35,53 @@ struct User: Codable, Identifiable {
     var totalRuns: Int
     var totalDistance: Double
     var totalTilesConquered: Int
+
+    init(
+        id: String,
+        email: String,
+        username: String,
+        avatarUrl: String?,
+        isPublic: Bool,
+        bandeiraId: String?,
+        bandeiraName: String?,
+        role: String,
+        totalRuns: Int,
+        totalDistance: Double,
+        totalTilesConquered: Int
+    ) {
+        self.id = id
+        self.email = email
+        self.username = username
+        self.avatarUrl = avatarUrl
+        self.isPublic = isPublic
+        self.bandeiraId = bandeiraId
+        self.bandeiraName = bandeiraName
+        self.role = role
+        self.totalRuns = totalRuns
+        self.totalDistance = totalDistance
+        self.totalTilesConquered = totalTilesConquered
+    }
+
+    enum CodingKeys: String, CodingKey {
+        case id, email, username, avatarUrl, isPublic, bandeiraId, bandeiraName, role, totalRuns, totalDistance
+        case totalTilesConquered, totalQuadrasConquered
+    }
+
+    init(from decoder: Decoder) throws {
+        let container = try decoder.container(keyedBy: CodingKeys.self)
+        id = try container.decode(String.self, forKey: .id)
+        email = try container.decode(String.self, forKey: .email)
+        username = try container.decode(String.self, forKey: .username)
+        avatarUrl = try container.decodeIfPresent(String.self, forKey: .avatarUrl)
+        isPublic = try container.decode(Bool.self, forKey: .isPublic)
+        bandeiraId = try container.decodeIfPresent(String.self, forKey: .bandeiraId)
+        bandeiraName = try container.decodeIfPresent(String.self, forKey: .bandeiraName)
+        role = try container.decode(String.self, forKey: .role)
+        totalRuns = try container.decode(Int.self, forKey: .totalRuns)
+        totalDistance = try container.decode(Double.self, forKey: .totalDistance)
+        totalTilesConquered = try container.decodeIfPresent(Int.self, forKey: .totalTilesConquered)
+            ?? container.decode(Int.self, forKey: .totalQuadrasConquered)
+    }
 }
 
 struct UpdateProfileRequest: Codable {
@@ -73,12 +120,48 @@ struct Quadra: Codable, Identifiable {
 
 typealias Tile = Quadra
 
-struct QuadraStats: Codable {
+struct QuadraStats: Decodable {
     let totalTiles: Int
     let ownedTiles: Int
     let neutralTiles: Int
     let tilesInDispute: Int
     let disputePercentage: Double
+
+    init(
+        totalTiles: Int,
+        ownedTiles: Int,
+        neutralTiles: Int,
+        tilesInDispute: Int,
+        disputePercentage: Double
+    ) {
+        self.totalTiles = totalTiles
+        self.ownedTiles = ownedTiles
+        self.neutralTiles = neutralTiles
+        self.tilesInDispute = tilesInDispute
+        self.disputePercentage = disputePercentage
+    }
+
+    enum CodingKeys: String, CodingKey {
+        case totalTiles, ownedTiles, neutralTiles, tilesInDispute, disputePercentage
+        case totalQuadras, ownedQuadras, neutralQuadras, quadrasInDispute
+    }
+
+    init(from decoder: Decoder) throws {
+        let container = try decoder.container(keyedBy: CodingKeys.self)
+        totalTiles = try container.decodeIfPresent(Int.self, forKey: .totalTiles)
+            ?? container.decode(Int.self, forKey: .totalQuadras)
+        ownedTiles = try container.decodeIfPresent(Int.self, forKey: .ownedTiles)
+            ?? container.decode(Int.self, forKey: .ownedQuadras)
+        neutralTiles = try container.decodeIfPresent(Int.self, forKey: .neutralTiles)
+            ?? container.decode(Int.self, forKey: .neutralQuadras)
+        tilesInDispute = try container.decodeIfPresent(Int.self, forKey: .tilesInDispute)
+            ?? container.decode(Int.self, forKey: .quadrasInDispute)
+        if let intDispute = try container.decodeIfPresent(Int.self, forKey: .disputePercentage) {
+            disputePercentage = Double(intDispute)
+        } else {
+            disputePercentage = try container.decode(Double.self, forKey: .disputePercentage)
+        }
+    }
 }
 
 struct Run: Decodable, Identifiable {
@@ -246,7 +329,7 @@ struct DailyStatus: Codable {
     let bandeiraActionCap: Int?
 }
 
-struct Bandeira: Codable, Identifiable {
+struct Bandeira: Decodable, Identifiable {
     let id: String
     let name: String
     let slug: String
@@ -258,14 +341,89 @@ struct Bandeira: Codable, Identifiable {
     let totalTiles: Int
     let createdById: String
     let createdByUsername: String
+
+    init(
+        id: String,
+        name: String,
+        slug: String,
+        category: String,
+        color: String,
+        logoUrl: String?,
+        description: String?,
+        memberCount: Int,
+        totalTiles: Int,
+        createdById: String,
+        createdByUsername: String
+    ) {
+        self.id = id
+        self.name = name
+        self.slug = slug
+        self.category = category
+        self.color = color
+        self.logoUrl = logoUrl
+        self.description = description
+        self.memberCount = memberCount
+        self.totalTiles = totalTiles
+        self.createdById = createdById
+        self.createdByUsername = createdByUsername
+    }
+
+    enum CodingKeys: String, CodingKey {
+        case id, name, slug, category, color, logoUrl, description, memberCount, totalTiles, createdById, createdByUsername
+        case totalQuadras
+    }
+
+    init(from decoder: Decoder) throws {
+        let container = try decoder.container(keyedBy: CodingKeys.self)
+        id = try container.decode(String.self, forKey: .id)
+        name = try container.decode(String.self, forKey: .name)
+        slug = try container.decode(String.self, forKey: .slug)
+        category = try container.decode(String.self, forKey: .category)
+        color = try container.decode(String.self, forKey: .color)
+        logoUrl = try container.decodeIfPresent(String.self, forKey: .logoUrl)
+        description = try container.decodeIfPresent(String.self, forKey: .description)
+        memberCount = try container.decode(Int.self, forKey: .memberCount)
+        totalTiles = try container.decodeIfPresent(Int.self, forKey: .totalTiles)
+            ?? container.decode(Int.self, forKey: .totalQuadras)
+        createdById = try container.decode(String.self, forKey: .createdById)
+        createdByUsername = try container.decode(String.self, forKey: .createdByUsername)
+    }
 }
 
-struct BandeiraMember: Codable, Identifiable {
+struct BandeiraMember: Decodable, Identifiable {
     let id: String
     let username: String
     let avatarUrl: String?
     let role: String
     let totalTilesConquered: Int
+
+    init(
+        id: String,
+        username: String,
+        avatarUrl: String?,
+        role: String,
+        totalTilesConquered: Int
+    ) {
+        self.id = id
+        self.username = username
+        self.avatarUrl = avatarUrl
+        self.role = role
+        self.totalTilesConquered = totalTilesConquered
+    }
+
+    enum CodingKeys: String, CodingKey {
+        case id, username, avatarUrl, role, totalTilesConquered, totalQuadrasConquered
+    }
+
+    init(from decoder: Decoder) throws {
+        let container = try decoder.container(keyedBy: CodingKeys.self)
+        id = try container.decode(String.self, forKey: .id)
+        username = try container.decode(String.self, forKey: .username)
+        avatarUrl = try container.decodeIfPresent(String.self, forKey: .avatarUrl)
+        role = try container.decode(String.self, forKey: .role)
+        totalTilesConquered = try container.decodeIfPresent(Int.self, forKey: .totalTilesConquered)
+            ?? container.decode(Int.self, forKey: .totalQuadrasConquered)
+    }
 }
 
 struct CreateBandeiraRequest: Codable {

@@ -54,6 +54,7 @@
 		ED0C637E0C9439D0354ECD76 /* GeoUtilsTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 161FC3E3EB5EE89C8D12E9F0 /* GeoUtilsTests.swift */; };
 		EE4F5DC811D634C13E339735 /* LocationManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = B3E368A6F9923688C82AA9CD /* LocationManager.swift */; };
 		EF6C5942D98A6DED50ADAB26 /* AppEnvironment.swift in Sources */ = {isa = PBXBuildFile; fileRef = A561AC531A941CF1DC17B391 /* AppEnvironment.swift */; };
+		F85F4F195506DED983AB5E5A /* ApiModelsDecodingTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 593AC30F97D1F9B14155A887 /* ApiModelsDecodingTests.swift */; };
 		FBD50FC0BE2B5D6EA55F29E5 /* BandeirasViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 687A5818C9839BD446B9CCBA /* BandeirasViewModel.swift */; };
 /* End PBXBuildFile section */
 
@@ -86,6 +87,7 @@
 		4FCA68DFEAEAEFFEEA94FAC3 /* CompanionRunManagerTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CompanionRunManagerTests.swift; sourceTree = "<group>"; };
 		5120777A2B8A3D3C793D3036 /* CompanionRunManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CompanionRunManager.swift; sourceTree = "<group>"; };
 		5211D010B78B5D8BBF901EF3 /* QuadraEligibilityPolicyTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = QuadraEligibilityPolicyTests.swift; sourceTree = "<group>"; };
+		593AC30F97D1F9B14155A887 /* ApiModelsDecodingTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ApiModelsDecodingTests.swift; sourceTree = "<group>"; };
 		5F5D2B441C2DC5B52A3BAC8D /* RunSessionStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RunSessionStore.swift; sourceTree = "<group>"; };
 		687A5818C9839BD446B9CCBA /* BandeirasViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BandeirasViewModel.swift; sourceTree = "<group>"; };
 		68A46DA068E959FFAEE24347 /* AuthViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AuthViewModel.swift; sourceTree = "<group>"; };
@@ -288,6 +290,7 @@
 		FAA8B621927C5CBD2D1916A7 /* LigaRunTests */ = {
 			isa = PBXGroup;
 			children = (
+				593AC30F97D1F9B14155A887 /* ApiModelsDecodingTests.swift */,
 				D56C2F8711166F1582C2B3CA /* BandeirasViewModelTests.swift */,
 				4FCA68DFEAEAEFFEEA94FAC3 /* CompanionRunManagerTests.swift */,
 				EBC788670B9D532DE9FCAADA /* CompanionSyncStateTests.swift */,
@@ -418,6 +421,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				F85F4F195506DED983AB5E5A /* ApiModelsDecodingTests.swift in Sources */,
 				532970604BDC326CC3C445D7 /* BandeirasViewModelTests.swift in Sources */,
 				8D2DDA3FCD5B49B710C59212 /* CompanionRunManagerTests.swift in Sources */,
 				CC0630A644CF12E8A8FC05D6 /* CompanionSyncStateTests.swift in Sources */,
