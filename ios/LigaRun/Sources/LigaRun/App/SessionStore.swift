@@ -3,6 +3,13 @@ import OSLog
 
 @MainActor
 final class SessionStore: ObservableObject {
+    enum RootTab: Int, Hashable, Sendable {
+        case map = 0
+        case runs = 1
+        case bandeiras = 2
+        case profile = 3
+    }
+
     @Published var token: String?
     @Published private(set) var refreshToken: String?
     @Published var currentUser: User?
@@ -15,6 +22,11 @@ final class SessionStore: ObservableObject {
 
     private let keychain = KeychainStore(service: AppEnvironment.keychainService)
     private let logger = Logger(subsystem: AppEnvironment.keychainService, category: "SessionStore")
+
+    var selectedTab: RootTab {
+        get { RootTab(rawValue: selectedTabIndex) ?? .map }
+        set { selectedTabIndex = newValue.rawValue }
+    }
 
     lazy var api: APIClient = {
         APIClient(
@@ -58,6 +70,37 @@ final class SessionStore: ObservableObject {
         currentUser = try await api.updateProfile(request: request)
     }
 
+    func navigateToBandeiras(tab: BandeirasHubTab) {
+        activeBandeirasHubTab = tab
+        selectedTab = .bandeiras
+    }
+
+    func navigateToMap(
+        filter: MapOwnershipFilter? = nil,
+        focusContext: MapFocusContext? = nil
+    ) {
+        if let filter {
+            activeMapOwnershipFilter = filter
+        } else if let focusContext {
+            activeMapOwnershipFilter = defaultMapFilter(for: focusContext)
+        }
+
+        mapFocusContext = focusContext
+        selectedTab = .map
+    }
+
+    func consumeMapFocusContext() -> MapFocusContext? {
+        let focusContext = mapFocusContext
+        mapFocusContext = nil
+        return focusContext
+    }
+
+    func resetWaveV3SharedState() {
+        activeMapOwnershipFilter = .all
+        mapFocusContext = nil
+        activeBandeirasHubTab = .explore
+    }
+
     func logout() {
         let refreshToken = self.refreshToken
         Task { [refreshToken] in
@@ -66,6 +109,7 @@ final class SessionStore: ObservableObject {
         token = nil
         self.refreshToken = nil
         currentUser = nil
+        resetWaveV3SharedState()
         deleteToken(account: AppEnvironment.accessTokenKey)
         deleteToken(account: AppEnvironment.refreshTokenKey)
     }
@@ -73,6 +117,7 @@ final class SessionStore: ObservableObject {
     private func setSession(from auth: AuthResponse) {
         token = auth.token
         currentUser = auth.user
+        resetWaveV3SharedState()
         saveToken(auth.token, account: AppEnvironment.accessTokenKey)
         if let refreshToken = auth.refreshToken {
             self.refreshToken = refreshToken
@@ -122,6 +167,15 @@ final class SessionStore: ObservableObject {
             try keychain.delete(account: account)
         } catch {
             logger.error("Failed to delete keychain item for account '\(account)': \(error.localizedDescription)")
+        }
+    }
+
+    private func defaultMapFilter(for focusContext: MapFocusContext) -> MapOwnershipFilter {
+        switch focusContext {
+        case .user:
+            return .mine
+        case .bandeira:
+            return .myBandeira
         }
     }
 }
