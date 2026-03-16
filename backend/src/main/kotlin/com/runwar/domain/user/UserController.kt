@@ -16,7 +16,8 @@ import com.runwar.config.UserPrincipal
 @RequestMapping("/api")
 class UserController(
     private val userService: UserService,
-    private val authRateLimiter: AuthRateLimiter
+    private val authRateLimiter: AuthRateLimiter,
+    private val userContractsService: UserContractsService
 ) {
     
     // ===== Auth Endpoints (Public) =====
@@ -168,6 +169,28 @@ class UserController(
             request.isPublic
         )
         return ResponseEntity.ok(toUserResponse(updated))
+    }
+
+    @GetMapping("/users/rankings")
+    fun getUserRankings(
+        @AuthenticationPrincipal principal: UserPrincipal,
+        @RequestParam(defaultValue = "season") scope: String
+    ): ResponseEntity<UserContractsService.UserRankingResponse> {
+        return ResponseEntity.ok(userContractsService.getUserRankings(principal.user.id, scope))
+    }
+
+    @GetMapping("/users/me/badges")
+    fun getMyBadges(
+        @AuthenticationPrincipal principal: UserPrincipal
+    ): ResponseEntity<List<UserContractsService.BadgeResponse>> {
+        return ResponseEntity.ok(userContractsService.getMyBadges(principal.user.id))
+    }
+
+    @GetMapping("/users/me/missions/active")
+    fun getActiveMissions(
+        @AuthenticationPrincipal principal: UserPrincipal
+    ): ResponseEntity<List<UserContractsService.ActiveMissionResponse>> {
+        return ResponseEntity.ok(userContractsService.getActiveMissions(principal.user.id))
     }
 
     private fun enforceRateLimit(action: String, email: String, request: HttpServletRequest) {

@@ -60,10 +60,15 @@ docker run -p 8080:8080 --env-file .env runwar-backend
 ### Users
 - `GET /api/users/me` - Perfil do usuário atual
 - `PUT /api/users/me` - Atualizar perfil
+- `GET /api/users/rankings?scope=season` - Ranking solo da temporada ativa
+- `GET /api/users/me/badges` - Badges do usuário com progresso parcial
+- `GET /api/users/me/missions/active` - Missões ativas da semana corrente
 
 ### Bandeiras
 - `GET /api/bandeiras` - Listar todas
 - `GET /api/bandeiras/{id}` - Detalhes
+- `GET /api/bandeiras/{id}/members` - Membros da bandeira
+- `GET /api/bandeiras/{id}/presence?period=week` - Presença semanal agregada da bandeira
 - `POST /api/bandeiras` - Criar bandeira
 - `POST /api/bandeiras/{id}/join` - Entrar
 - `POST /api/bandeiras/leave` - Sair
@@ -104,6 +109,10 @@ docker run -p 8080:8080 --env-file .env runwar-backend
 ### Rankings
 - `GET /api/bandeiras/rankings` - Ranking de bandeiras
 
+### Notifications
+- `GET /api/notifications?cursor=&limit=20` - Inbox paginada do usuário autenticado
+- `POST /api/devices/push-token` - Registrar ou atualizar token push por device
+
 ## Swagger UI
 
 Acesse `http://localhost:8080/swagger-ui.html` para documentação interativa da API.
@@ -117,6 +126,38 @@ Para atualizar o arquivo, execute:
 ```bash
 ./backend/scripts/export-openapi.sh
 ```
+
+## Contratos GDS v3
+
+### Ranking solo
+
+- `GET /api/users/rankings?scope=season`
+- Retorna a temporada ativa, `generatedAt`, `entries[]` ordenadas por `totalPoints DESC` e `currentUserEntry` quando o usuário autenticado aparece no ranking.
+- O payload já inclui `username`, `avatarUrl`, `bandeiraId`, `bandeiraName`, `dailyPoints`, `clusterBonus` e `totalPoints`, sem necessidade de chamadas extras.
+
+### Presença semanal de bandeira
+
+- `GET /api/bandeiras/{id}/presence?period=week`
+- A janela semanal usa timezone `America/Sao_Paulo`, com início na segunda-feira `00:00` e fim no domingo `23:59:59.999`.
+- `summary` consolida membros ativos, total de membros, corridas e distância; `members[]` sempre inclui membros sem atividade com `presenceState=INACTIVE`.
+
+### Notificações e push token
+
+- `GET /api/notifications?cursor=<opaque>&limit=20`
+- O cursor é opaco e pagina por `createdAt DESC, id DESC`.
+- `POST /api/devices/push-token` é idempotente por par `userId + deviceId`; reenviar o mesmo device atualiza `token`, `platform`, `appVersion` e `updatedAt`.
+
+### Badges e missões
+
+- `GET /api/users/me/badges`
+- Cada badge retorna `earnedAt` e `progress` com `criteriaType`, `currentValue`, `targetValue`, `unit` e `completed`.
+- Critérios suportados hoje:
+  - `conquest`: usa `users.total_quadras_conquered`
+  - `attack`: usa quantidade de `territory_actions` com `action_type = ATTACK`
+  - `defense_dispute`: usa defesas com `shield_before < 70`
+  - `distance`: usa `users.total_distance` em metros
+  - `streak`: usa a melhor sequência de dias consecutivos com corrida no timezone `America/Sao_Paulo`
+- `GET /api/users/me/missions/active` retorna apenas as missões da semana corrente (`weekStart` da segunda-feira local) e cobre progresso parcial e empty state.
 
 ## Dados mock (opcional)
 
