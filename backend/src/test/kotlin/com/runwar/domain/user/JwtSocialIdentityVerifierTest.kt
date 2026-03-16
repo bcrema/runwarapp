@@ -110,6 +110,63 @@ class JwtSocialIdentityVerifierTest {
         }
     }
 
+
+    @Test
+    fun `verify uses emailHint when token email claim is absent`() {
+        val verifier = JwtSocialIdentityVerifier(
+            properties,
+            StaticSocialJwtDecoderFactory(
+                jwtFor(
+                    subject = "apple-subject",
+                    issuer = "https://appleid.apple.com",
+                    audience = listOf("com.runwar.ligarun"),
+                    claims = mapOf(
+                        "email_verified" to true,
+                        "name" to "Apple Runner"
+                    )
+                )
+            )
+        )
+
+        val result = verifier.verify(
+            SocialVerificationRequest(
+                provider = SocialAuthProvider.APPLE,
+                idToken = "token-123",
+                emailHint = "hint@example.com"
+            )
+        )
+
+        assertEquals("hint@example.com", result.email)
+    }
+
+    @Test
+    fun `verify prefers token email claim over emailHint`() {
+        val verifier = JwtSocialIdentityVerifier(
+            properties,
+            StaticSocialJwtDecoderFactory(
+                jwtFor(
+                    subject = "apple-subject",
+                    issuer = "https://appleid.apple.com",
+                    audience = listOf("com.runwar.ligarun"),
+                    claims = mapOf(
+                        "email" to "token@example.com",
+                        "email_verified" to true
+                    )
+                )
+            )
+        )
+
+        val result = verifier.verify(
+            SocialVerificationRequest(
+                provider = SocialAuthProvider.APPLE,
+                idToken = "token-123",
+                emailHint = "hint@example.com"
+            )
+        )
+
+        assertEquals("token@example.com", result.email)
+    }
+
     private fun jwtFor(
         subject: String,
         issuer: String,

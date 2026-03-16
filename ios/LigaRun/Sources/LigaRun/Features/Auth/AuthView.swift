@@ -490,12 +490,14 @@ struct AuthView: View {
             let givenName = credential.fullName?.givenName
             let familyName = credential.fullName?.familyName
 
+            let nonce = appleNonce
+
             Task {
                 await viewModel.handleSocialToken(
                     provider: .apple,
                     idToken: idToken,
                     authorizationCode: authorizationCode,
-                    nonce: appleNonce,
+                    nonce: nonce,
                     emailHint: email,
                     givenName: givenName,
                     familyName: familyName,

@@ -27,7 +27,9 @@ class JwtSocialIdentityVerifier(
         validateNonce(jwt, request.nonce)
 
         val subject = jwt.subject ?: throw UnauthorizedException("Invalid social token")
-        val email = jwt.getClaimAsString("email")?.trim()?.lowercase()
+        val email = (jwt.getClaimAsString("email") ?: request.emailHint)
+            ?.trim()
+            ?.lowercase()
         val displayName = buildDisplayName(
             explicitName = listOfNotNull(request.givenName, request.familyName)
                 .joinToString(" ")
