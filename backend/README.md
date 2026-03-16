@@ -145,7 +145,6 @@ Para atualizar o arquivo, execute:
 - Quando o email verificado do provedor já pertence a uma conta não vinculada, o endpoint responde `409 LINK_REQUIRED` com `linkToken`, `provider` e `emailMasked`.
 - `POST /api/auth/social/link/confirm` aceita `linkToken`, `email` e `password`; no sucesso, vincula a identidade social e retorna `AuthResponse`.
 - Usuários criados via login social recebem `username` automático e podem editar depois pelo fluxo normal de perfil.
-
 ## Contratos GDS v3
 
 ### Ranking solo

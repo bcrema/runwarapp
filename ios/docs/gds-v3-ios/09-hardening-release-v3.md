@@ -40,14 +40,14 @@
 
 ## Criterios de pronto
 1. Nenhuma regressao critica aberta na wave principal.
-2. Evidencia automatizada e manual centralizada na issue `09`.
+2. Evidencia automatizada e manual centralizada na issue `09`, reaproveitando a matriz e os comandos oficiais do passo `08`.
 3. Passos `03`,`04`,`05`,`06`,`08` fechados.
 4. Passo `07` corretamente isolado como dependente de backend.
 
 ## Plano de testes
 1. `cd ios/LigaRun && xcodegen generate`
-2. `cd ios/LigaRun && xcodebuild -project LigaRun.xcodeproj -scheme LigaRun -destination "platform=iOS Simulator,name=iPhone 17,OS=26.2" test`
-3. Smoke manual completo da wave.
+2. `cd ios/LigaRun && ./scripts/run-tests.sh`
+3. Reexecutar o smoke manual consolidado de `03`, `04`, `05` e `06` conforme `08-testes-qa-gates-v3.md`.
 
 ## Dependencias
 - Iniciar apos `03`,`04`,`05`,`06`,`08` concluidos.
@@ -57,5 +57,5 @@
   - resumo da release;
   - evidencias de teste;
   - pendencias remanescentes;
+  - referencia explicita a matriz final do passo `08`;
   - referencia explicita ao passo `07`.
-

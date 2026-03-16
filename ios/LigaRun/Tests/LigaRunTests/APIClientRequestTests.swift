@@ -94,7 +94,6 @@ final class APIClientRequestTests: XCTestCase {
         configuration.protocolClasses = [URLProtocolStub.self]
         return URLSession(configuration: configuration)
     }
-
     @MainActor
     func testExchangeSocialSendsExpectedPayload() async throws {
         URLProtocolStub.handler = { request in
@@ -230,7 +229,6 @@ private struct LinkPayload: Decodable {
     let email: String
     let password: String
 }
-
 private final class URLProtocolStub: URLProtocol, @unchecked Sendable {
     static var handler: ((URLRequest) throws -> HTTPStubResponse)?
 

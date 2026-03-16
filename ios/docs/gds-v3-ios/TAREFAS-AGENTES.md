@@ -14,6 +14,7 @@ Referencia oficial de delegacao por rodadas para a wave iOS orientada por GitHub
 5. Subagentes nao ganham issue propria; ficam no checklist da issue do passo.
 6. Se houver bloqueio, comentar na issue e pausar imediatamente.
 7. Nao fechar a issue sem testes executados e registrados.
+8. Passos `03`,`04`,`05`,`06` e `09` devem seguir a matriz e os gates definidos em `ios/docs/gds-v3-ios/08-testes-qa-gates-v3.md`.
 
 ## Labels sugeridas
 1. `gds-v3-ios`
@@ -60,6 +61,8 @@ Branch/worktree: <branch> em <path>
 Testes:
 - <comando> (<resultado>)
 - <comando> (<resultado>)
+Smoke manual:
+- <cenario/persona> (<resultado>)
 Bloqueios: nenhum.
 ```
 

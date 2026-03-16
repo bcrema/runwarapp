@@ -24,15 +24,32 @@ cd ios/LigaRun
 ./scripts/run-tests.sh
 ```
 
-Comando base do gate de merge:
+O script gera o projeto via `xcodegen`, fixa `DerivedData` e `SourcePackages` dentro da pasta do app, tenta selecionar um simulador iOS disponivel automaticamente e aceita overrides por variavel de ambiente.
+
+Comandos mais usados:
 ```bash
-# Descubra destinos disponíveis (simuladores / devices) com:
-# xcodebuild -scheme LigaRun -showdestinations
-#
-# Em CI, defina XCODE_DESTINATION para o destino desejado, por exemplo:
-# export XCODE_DESTINATION='platform=iOS Simulator,OS=latest,name=iPhone 15'
-xcodebuild -scheme LigaRun -destination "${XCODE_DESTINATION:-platform=iOS Simulator,OS=latest,name=iPhone 15}" test
+# Suite completa no destino padrao.
+./scripts/run-tests.sh
+
+# Suite especifica.
+XCODE_ONLY_TESTING=MapViewModelTests ./scripts/run-tests.sh
+
+# Multiplas suites.
+XCODE_ONLY_TESTING=MapViewModelTests,BandeirasViewModelTests ./scripts/run-tests.sh
+
+# Reaproveitar pacotes SPM ja resolvidos e evitar nova resolucao.
+XCODE_CLONED_SOURCE_PACKAGES_DIR_PATH=/path/to/SourcePackages \
+XCODE_DISABLE_AUTOMATIC_PACKAGE_RESOLUTION=1 \
+./scripts/run-tests.sh
 ```
+
+Variaveis suportadas:
+- `XCODE_DESTINATION`: override do destino do simulador/device.
+- `XCODE_ONLY_TESTING`: lista separada por virgula (`MapViewModelTests`, `LigaRunTests/MapViewModelTests` etc.).
+- `XCODE_DERIVED_DATA_PATH`: destino de `DerivedData`.
+- `XCODE_CLONED_SOURCE_PACKAGES_DIR_PATH`: cache/checkouts do SPM.
+- `XCODE_DISABLE_AUTOMATIC_PACKAGE_RESOLUTION=1`: usa apenas pacotes ja resolvidos.
+- `XCODE_SKIP_GENERATE=1`: pula `xcodegen generate` quando o projeto ja estiver atualizado.
 
 ## Estrutura
 - `project.yml`: definição do projeto (XcodeGen) com dependência Mapbox via SPM.

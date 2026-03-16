@@ -83,29 +83,16 @@ class NotificationContractsService(
     ): RegisterPushTokenResult {
         val normalizedPlatform = normalizePlatform(platform)
         val now = Instant.now()
-        val existing = notificationContractsRepository.findDevicePushToken(userId, deviceId)
-
-        if (existing == null) {
-            notificationContractsRepository.insertDevicePushToken(
-                id = UUID.randomUUID(),
-                userId = userId,
-                deviceId = deviceId,
-                platform = normalizedPlatform,
-                token = token,
-                appVersion = appVersion,
-                createdAt = now,
-                updatedAt = now
-            )
-        } else {
-            notificationContractsRepository.updateDevicePushToken(
-                userId = userId,
-                deviceId = deviceId,
-                platform = normalizedPlatform,
-                token = token,
-                appVersion = appVersion,
-                updatedAt = now
-            )
-        }
+        notificationContractsRepository.upsertDevicePushToken(
+            id = UUID.randomUUID(),
+            userId = userId,
+            deviceId = deviceId,
+            platform = normalizedPlatform,
+            token = token,
+            appVersion = appVersion,
+            createdAt = now,
+            updatedAt = now
+        )
 
         return RegisterPushTokenResult(
             platform = normalizedPlatform,

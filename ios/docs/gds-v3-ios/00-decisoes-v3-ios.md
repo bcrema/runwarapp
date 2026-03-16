@@ -22,7 +22,7 @@
 12. Passo `07` nao bloqueia a release principal.
 13. Gate automatizado da wave:
    - `cd ios/LigaRun && xcodegen generate`
-   - `cd ios/LigaRun && xcodebuild -project LigaRun.xcodeproj -scheme LigaRun -destination "platform=iOS Simulator,name=iPhone 17,OS=26.2" test`
+   - `cd ios/LigaRun && ./scripts/run-tests.sh`
 14. Gate manual da wave:
    - mapa com filtros;
    - ranking -> ver territorio;
@@ -40,4 +40,3 @@
 2. `ios/docs/gds-v1-ios/`
 3. `ios/docs/gds-v2-ios/`
 4. `ios/AGENTS.md`
-

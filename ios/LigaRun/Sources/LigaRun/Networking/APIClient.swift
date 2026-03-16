@@ -83,7 +83,6 @@ struct SocialLinkRequiredError: LocalizedError, Sendable {
         "Uma conta já existe com este email; confirme o link manualmente."
     }
 }
-
 @MainActor
 final class APIClient {
     private let baseURL: URL

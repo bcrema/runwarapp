@@ -31,7 +31,6 @@ struct SocialLinkRequiredResponse: Decodable, Sendable {
     let provider: SocialProvider
     let emailMasked: String?
 }
-
 enum MapFocusContext: Equatable, Sendable {
     case user(userId: String)
     case bandeira(bandeiraId: String)
