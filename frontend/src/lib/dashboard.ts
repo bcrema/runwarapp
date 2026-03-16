@@ -112,8 +112,8 @@ export function formatDateLabel(value: string | null): string {
 export function sortRunsByDate(runs: Run[]): Run[] {
     return [...runs].sort(
         (a, b) =>
-            new Date(b.createdAt || b.endTime).getTime() -
-            new Date(a.createdAt || a.endTime).getTime()
+            new Date(b.endTime || b.createdAt).getTime() -
+            new Date(a.endTime || a.createdAt).getTime()
     )
 }
 

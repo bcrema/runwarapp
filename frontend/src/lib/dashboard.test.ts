@@ -8,6 +8,7 @@ import {
     getCategoryLabel,
     getRunOutcomeLabel,
     getRunStatusLabel,
+    sortRunsByDate,
 } from './dashboard'
 
 describe('dashboard helpers', () => {
@@ -97,6 +98,38 @@ describe('dashboard helpers', () => {
         expect(formatPace(10000, 3000)).toBe('5:00/km')
         expect(getRunStatusLabel(baseRuns[0])).toBe('Validada')
         expect(getRunOutcomeLabel(baseRuns[2])).toBe('Fora de territorio')
+    })
+
+
+    test('sortRunsByDate prioritizes run endTime over ingestion createdAt', () => {
+        const runs: Run[] = [
+            {
+                ...baseRuns[0],
+                id: 'recent-run',
+                endTime: '2026-03-12T09:00:00.000Z',
+                createdAt: '2026-03-12T09:10:00.000Z',
+            },
+            {
+                ...baseRuns[1],
+                id: 'imported-old-run',
+                endTime: '2026-02-10T09:00:00.000Z',
+                createdAt: '2026-03-15T10:00:00.000Z',
+            },
+            {
+                ...baseRuns[2],
+                id: 'fallback-created-at',
+                endTime: '',
+                createdAt: '2026-03-10T10:00:00.000Z',
+            },
+        ]
+
+        const sorted = sortRunsByDate(runs)
+
+        expect(sorted.map((run) => run.id)).toEqual([
+            'recent-run',
+            'fallback-created-at',
+            'imported-old-run',
+        ])
     })
 
     test('buildRunnerSnapshot aggregates runner indicators', () => {
