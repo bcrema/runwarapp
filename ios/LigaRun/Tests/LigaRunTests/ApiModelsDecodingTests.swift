@@ -75,6 +75,29 @@ final class ApiModelsDecodingTests: XCTestCase {
         XCTAssertEqual(decoded.name, "Liga Azul")
     }
 
+    func testBandeiraDecodesCurrentTileFieldName() throws {
+        let json = """
+        {
+          "id": "b2",
+          "name": "Liga Verde",
+          "slug": "liga-verde",
+          "category": "running",
+          "color": "#22C55E",
+          "logoUrl": null,
+          "description": "Assessoria",
+          "memberCount": 12,
+          "totalTiles": 31,
+          "createdById": "u3",
+          "createdByUsername": "coach"
+        }
+        """
+
+        let decoded = try JSONDecoder().decode(Bandeira.self, from: Data(json.utf8))
+
+        XCTAssertEqual(decoded.totalTiles, 31)
+        XCTAssertEqual(decoded.createdByUsername, "coach")
+    }
+
     func testBandeiraMemberDecodesQuadraFieldName() throws {
         let json = """
         {

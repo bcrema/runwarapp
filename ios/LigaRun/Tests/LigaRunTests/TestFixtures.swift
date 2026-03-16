@@ -167,6 +167,19 @@ func makeBandeiraFixture(id: String = "b1", name: String = "Liga Azul") -> Bande
     )
 }
 
+func makeMapFocusContextFixture(
+    bandeiraId: String = "b1"
+) -> MapFocusContext {
+    .bandeira(bandeiraId: bandeiraId)
+}
+
+func makeUpdateBandeiraMemberRoleRequestFixture(
+    userId: String = "u1",
+    role: String = "ADMIN"
+) -> UpdateBandeiraMemberRoleRequest {
+    UpdateBandeiraMemberRoleRequest(userId: userId, role: role)
+}
+
 func makeTrackPointFixture(
     lat: Double,
     lng: Double,

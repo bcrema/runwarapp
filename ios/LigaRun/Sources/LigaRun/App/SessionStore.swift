@@ -6,6 +6,9 @@ final class SessionStore: ObservableObject {
     @Published var token: String?
     @Published private(set) var refreshToken: String?
     @Published var currentUser: User?
+    @Published var activeMapOwnershipFilter: MapOwnershipFilter = .all
+    @Published var mapFocusContext: MapFocusContext?
+    @Published var activeBandeirasHubTab: BandeirasHubTab = .explore
     @Published var selectedTabIndex: Int = 0
     @Published var mapFocusQuadraId: String?
     @Published var pendingSubmissionResult: RunSubmissionResult?
