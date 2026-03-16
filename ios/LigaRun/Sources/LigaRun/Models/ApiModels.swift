@@ -1,6 +1,24 @@
 import Foundation
 import CoreLocation
 
+enum MapOwnershipFilter: String, Codable, CaseIterable, Sendable {
+    case all
+    case disputed
+    case mine
+    case myBandeira
+}
+
+enum BandeirasHubTab: String, Codable, CaseIterable, Sendable {
+    case explore
+    case ranking
+    case myTeam
+}
+
+enum MapFocusContext: Equatable, Sendable {
+    case user(userId: String)
+    case bandeira(bandeiraId: String)
+}
+
 struct AuthResponse: Decodable {
     let user: User
     let token: String
@@ -431,6 +449,11 @@ struct CreateBandeiraRequest: Codable {
     let category: String
     let color: String
     let description: String?
+}
+
+struct UpdateBandeiraMemberRoleRequest: Codable, Equatable, Sendable {
+    let userId: String
+    let role: String
 }
 
 extension Run {

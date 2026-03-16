@@ -180,6 +180,14 @@ private final class MapAPISpy: MapAPIProviding {
         try disputedQuadrasResult.get()
     }
 
+    func getQuadrasByUser(userId: String) async throws -> [Tile] {
+        try quadrasResult.get()
+    }
+
+    func getQuadrasByBandeira(bandeiraId: String) async throws -> [Tile] {
+        try quadrasResult.get()
+    }
+
     func getQuadra(id: String) async throws -> Tile {
         try quadraResult.get()
     }

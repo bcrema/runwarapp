@@ -9,6 +9,8 @@ protocol RunSubmissionAPIProviding: Sendable {
 protocol MapAPIProviding: Sendable {
     func getQuadras(bounds: (minLat: Double, minLng: Double, maxLat: Double, maxLng: Double)) async throws -> [Quadra]
     func getDisputedQuadras() async throws -> [Quadra]
+    func getQuadrasByUser(userId: String) async throws -> [Quadra]
+    func getQuadrasByBandeira(bandeiraId: String) async throws -> [Quadra]
     func getQuadra(id: String) async throws -> Quadra
 }
 
@@ -19,6 +21,7 @@ protocol BandeirasAPIProviding: Sendable {
     func createBandeira(request: CreateBandeiraRequest) async throws -> Bandeira
     func joinBandeira(id: String) async throws -> Bandeira
     func leaveBandeira() async throws
+    func updateMemberRole(bandeiraId: String, request: UpdateBandeiraMemberRoleRequest) async throws -> Bool
 }
 
 struct APIError: LocalizedError, Codable {
@@ -48,6 +51,10 @@ private struct LogoutRequest: Encodable {
     let refreshToken: String?
 }
 
+private struct SuccessResponse: Decodable {
+    let success: Bool
+}
+
 @MainActor
 final class APIClient {
     private let baseURL: URL
@@ -60,12 +67,13 @@ final class APIClient {
     init(
         baseURL: URL,
         tokenProvider: @escaping () -> String?,
-        refreshHandler: (() async throws -> String?)? = nil
+        refreshHandler: (() async throws -> String?)? = nil,
+        session: URLSession = URLSession(configuration: .default)
     ) {
         self.baseURL = baseURL
         self.tokenProvider = tokenProvider
         self.refreshHandler = refreshHandler
-        self.session = URLSession(configuration: .default)
+        self.session = session
 
         decoder = JSONDecoder()
         decoder.dateDecodingStrategy = .iso8601
@@ -132,6 +140,14 @@ final class APIClient {
         try await request("/api/quadras/disputed")
     }
 
+    func getQuadrasByUser(userId: String) async throws -> [Quadra] {
+        try await request("/api/quadras/user/\(userId)")
+    }
+
+    func getQuadrasByBandeira(bandeiraId: String) async throws -> [Quadra] {
+        try await request("/api/quadras/bandeira/\(bandeiraId)")
+    }
+
     func submitRunGpx(fileURL: URL) async throws -> RunSubmissionResult {
         let data = try Data(contentsOf: fileURL)
         return try await multipartRequest(
@@ -177,6 +193,15 @@ final class APIClient {
 
     func leaveBandeira() async throws {
         _ = try await request("/api/bandeiras/leave", method: "POST") as EmptyResponse
+    }
+
+    func updateMemberRole(bandeiraId: String, request: UpdateBandeiraMemberRoleRequest) async throws -> Bool {
+        let response: SuccessResponse = try await self.request(
+            "/api/bandeiras/\(bandeiraId)/members/role",
+            method: "PUT",
+            body: request
+        )
+        return response.success
     }
 
     func getBandeiraRankings() async throws -> [Bandeira] {
