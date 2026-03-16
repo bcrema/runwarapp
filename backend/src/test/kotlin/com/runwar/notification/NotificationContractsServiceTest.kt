@@ -58,22 +58,15 @@ class NotificationContractsServiceTest {
     @Test
     fun `register push token updates existing device registration`() {
         val userId = UUID.fromString("11111111-1111-1111-1111-111111111111")
-        every { notificationContractsRepository.findDevicePushToken(userId, "device-1") } returns
-            NotificationContractsRepository.DevicePushTokenRow(
-                userId = userId,
-                deviceId = "device-1",
-                platform = "IOS",
-                token = "old-token",
-                appVersion = "0.9.0",
-                updatedAt = Instant.parse("2026-03-15T12:00:00Z")
-            )
         every {
-            notificationContractsRepository.updateDevicePushToken(
+            notificationContractsRepository.upsertDevicePushToken(
+                id = any(),
                 userId = userId,
                 deviceId = "device-1",
                 platform = "IOS",
                 token = "new-token",
                 appVersion = "1.0.0",
+                createdAt = any(),
                 updatedAt = any()
             )
         } returns Unit
@@ -83,12 +76,14 @@ class NotificationContractsServiceTest {
         assertEquals("IOS", result.platform)
         assertEquals("device-1", result.deviceId)
         verify(exactly = 1) {
-            notificationContractsRepository.updateDevicePushToken(
+            notificationContractsRepository.upsertDevicePushToken(
+                id = any(),
                 userId = userId,
                 deviceId = "device-1",
                 platform = "IOS",
                 token = "new-token",
                 appVersion = "1.0.0",
+                createdAt = any(),
                 updatedAt = any()
             )
         }

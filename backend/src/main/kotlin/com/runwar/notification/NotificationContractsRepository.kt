@@ -22,15 +22,6 @@ class NotificationContractsRepository(
         val createdAt: Instant
     )
 
-    data class DevicePushTokenRow(
-        val userId: UUID,
-        val deviceId: String,
-        val platform: String,
-        val token: String,
-        val appVersion: String?,
-        val updatedAt: Instant
-    )
-
     fun findNotifications(
         userId: UUID,
         cursorCreatedAt: Instant?,
@@ -88,31 +79,7 @@ class NotificationContractsRepository(
         }
     }
 
-    fun findDevicePushToken(userId: UUID, deviceId: String): DevicePushTokenRow? {
-        val sql =
-            """
-            SELECT user_id, device_id, platform, token, app_version, updated_at
-            FROM device_push_tokens
-            WHERE user_id = :userId
-              AND device_id = :deviceId
-            """.trimIndent()
-
-        return jdbcTemplate.query(
-            sql,
-            mapOf("userId" to userId, "deviceId" to deviceId)
-        ) { rs, _ ->
-            DevicePushTokenRow(
-                userId = rs.getObject("user_id", UUID::class.java),
-                deviceId = rs.getString("device_id"),
-                platform = rs.getString("platform"),
-                token = rs.getString("token"),
-                appVersion = rs.getString("app_version"),
-                updatedAt = rs.getTimestamp("updated_at").toInstant()
-            )
-        }.firstOrNull()
-    }
-
-    fun insertDevicePushToken(
+    fun upsertDevicePushToken(
         id: UUID,
         userId: UUID,
         deviceId: String,
@@ -129,6 +96,12 @@ class NotificationContractsRepository(
             ) VALUES (
                 :id, :userId, :deviceId, :platform, :token, :appVersion, :createdAt, :updatedAt
             )
+            ON CONFLICT (user_id, device_id)
+            DO UPDATE SET
+                platform = EXCLUDED.platform,
+                token = EXCLUDED.token,
+                app_version = EXCLUDED.app_version,
+                updated_at = EXCLUDED.updated_at
             """.trimIndent()
 
         val params = MapSqlParameterSource()
@@ -139,36 +112,6 @@ class NotificationContractsRepository(
             .addValue("token", token)
             .addValue("appVersion", appVersion)
             .addValue("createdAt", Timestamp.from(createdAt))
-            .addValue("updatedAt", Timestamp.from(updatedAt))
-
-        jdbcTemplate.update(sql, params)
-    }
-
-    fun updateDevicePushToken(
-        userId: UUID,
-        deviceId: String,
-        platform: String,
-        token: String,
-        appVersion: String?,
-        updatedAt: Instant
-    ) {
-        val sql =
-            """
-            UPDATE device_push_tokens
-            SET platform = :platform,
-                token = :token,
-                app_version = :appVersion,
-                updated_at = :updatedAt
-            WHERE user_id = :userId
-              AND device_id = :deviceId
-            """.trimIndent()
-
-        val params = MapSqlParameterSource()
-            .addValue("userId", userId)
-            .addValue("deviceId", deviceId)
-            .addValue("platform", platform)
-            .addValue("token", token)
-            .addValue("appVersion", appVersion)
             .addValue("updatedAt", Timestamp.from(updatedAt))
 
         jdbcTemplate.update(sql, params)
