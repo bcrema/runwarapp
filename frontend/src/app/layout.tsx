@@ -1,14 +1,49 @@
 import '@/styles/globals.css'
 import type { Metadata } from 'next'
+import { Fraunces, IBM_Plex_Mono, Space_Grotesk } from 'next/font/google'
+
+const fraunces = Fraunces({
+    subsets: ['latin'],
+    weight: ['600', '700'],
+    variable: '--font-display-ui',
+})
+
+const ibmPlexMono = IBM_Plex_Mono({
+    subsets: ['latin'],
+    weight: ['400', '500'],
+    variable: '--font-mono-ui',
+})
+
+const spaceGrotesk = Space_Grotesk({
+    subsets: ['latin'],
+    weight: ['400', '500', '700'],
+    variable: '--font-sans-ui',
+})
+
+const metadataBase =
+    process.env.NEXT_PUBLIC_SITE_URL != null &&
+    process.env.NEXT_PUBLIC_SITE_URL.trim().length > 0
+        ? new URL(process.env.NEXT_PUBLIC_SITE_URL)
+        : new URL('http://localhost:3000')
 
 export const metadata: Metadata = {
-    title: 'LigaRun - Conquiste Territórios Correndo',
-    description: 'Um jogo de conquista territorial no mundo real para corredores. Conquiste, ataque e defenda tiles hexagonais com suas corridas.',
-    keywords: ['corrida', 'GPS', 'território', 'jogo', 'running', 'fitness'],
+    metadataBase,
+    title: 'LigaRun | Painel do Corredor e da Bandeira',
+    description:
+        'Painel analitico para corredores, grupos e assessorias acompanharem performance, territorio e crescimento da comunidade.',
+    keywords: [
+        'corrida',
+        'painel do corredor',
+        'bandeira',
+        'assessoria esportiva',
+        'grupo de corrida',
+        'analytics running',
+    ],
     authors: [{ name: 'LigaRun' }],
     openGraph: {
-        title: 'LigaRun - Conquiste Territórios Correndo',
-        description: 'Um jogo de conquista territorial no mundo real para corredores.',
+        title: 'LigaRun | Painel do Corredor e da Bandeira',
+        description:
+            'Controle corridas, territorio, consistencia e crescimento da sua bandeira em um painel unico.',
         type: 'website',
     },
 }
@@ -21,18 +56,16 @@ export default function RootLayout({
     return (
         <html lang="pt-BR">
             <head>
-                <link rel="preconnect" href="https://fonts.googleapis.com" />
-                <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
-                <link
-                    href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap"
-                    rel="stylesheet"
-                />
                 <link
                     href="https://api.mapbox.com/mapbox-gl-js/v3.0.1/mapbox-gl.css"
                     rel="stylesheet"
                 />
             </head>
-            <body>{children}</body>
+            <body
+                className={`${fraunces.variable} ${ibmPlexMono.variable} ${spaceGrotesk.variable}`}
+            >
+                {children}
+            </body>
         </html>
     )
 }

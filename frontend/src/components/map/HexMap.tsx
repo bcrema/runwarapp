@@ -18,10 +18,10 @@ interface HexMapProps {
 const CURITIBA_CENTER: [number, number] = [-49.27, -25.43]
 
 const PALETTE = {
-    neutral: '#6b7280',
-    solo: '#3b82f6',
-    bandeiraFallback: '#22c55e',
-    dispute: '#f59e0b',
+    neutral: '#9a9488',
+    solo: '#2f6e8b',
+    bandeiraFallback: '#1f7a5c',
+    dispute: '#c59435',
 } as const
 
 const TILE_OPACITY = {
@@ -87,7 +87,7 @@ export default function HexMap({ onTileClick, className }: HexMapProps) {
 
         map.current = new mapboxgl.Map({
             container: mapContainer.current,
-            style: 'mapbox://styles/mapbox/dark-v11',
+            style: 'mapbox://styles/mapbox/light-v11',
             center: CURITIBA_CENTER,
             zoom: 13,
             minZoom: 10,

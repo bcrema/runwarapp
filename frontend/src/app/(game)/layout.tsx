@@ -1,10 +1,19 @@
 'use client'
 
 import { useEffect } from 'react'
-import { useRouter, usePathname } from 'next/navigation'
 import Link from 'next/link'
+import { usePathname, useRouter } from 'next/navigation'
 import { useAuth } from '@/lib/auth'
+import { formatDistance, getRoleLabel } from '@/lib/dashboard'
 import styles from './layout.module.css'
+
+const navItems = [
+    { href: '/map', label: 'Painel' },
+    { href: '/run', label: 'Sessoes' },
+    { href: '/rankings', label: 'Radar' },
+    { href: '/bandeira', label: 'Bandeira' },
+    { href: '/profile', label: 'Perfil' },
+]
 
 export default function GameLayout({
     children,
@@ -28,8 +37,8 @@ export default function GameLayout({
     if (isLoading) {
         return (
             <div className={styles.loading}>
-                <div className={styles.spinner}></div>
-                <span>Carregando...</span>
+                <div className="spinner"></div>
+                <span>Carregando seu painel...</span>
             </div>
         )
     }
@@ -38,50 +47,70 @@ export default function GameLayout({
         return null
     }
 
-    const navItems = [
-        { href: '/map', label: '🗺️ Mapa', icon: '🗺️' },
-        { href: '/run', label: '🏃 Corrida', icon: '🏃' },
-        { href: '/rankings', label: '🏆 Rankings', icon: '🏆' },
-        { href: '/bandeira', label: '🚩 Bandeira', icon: '🚩' },
-        { href: '/profile', label: '👤 Perfil', icon: '👤' },
-    ]
-
     return (
         <div className={styles.layout}>
-            {/* Top Header */}
             <header className={styles.header}>
-                <Link href="/map" className={styles.logo}>
-                    <span className={styles.logoAccent}>Run</span>War
-                </Link>
+                <div className={styles.headerInner}>
+                    <div className={styles.brandBlock}>
+                        <Link href="/map" className={styles.logo}>
+                            <span className={styles.logoAccent}>Liga</span>Run
+                        </Link>
+                        <div className={styles.brandCopy}>
+                            <span className={styles.brandEyebrow}>Control Center</span>
+                            <p>Corredor, bandeira e expansao local no mesmo painel.</p>
+                        </div>
+                    </div>
 
-                <div className={styles.userInfo}>
-                    {user?.bandeiraName && (
-                        <span className={styles.bandeira}>
-                            🚩 {user.bandeiraName}
-                        </span>
-                    )}
-                    <span className={styles.username}>{user?.username}</span>
-                    <button onClick={logout} className={styles.logoutBtn}>
-                        Sair
-                    </button>
+                    <nav className={styles.desktopNav} aria-label="Navegacao principal">
+                        {navItems.map((item) => (
+                            <Link
+                                key={item.href}
+                                href={item.href}
+                                className={`${styles.navLink} ${
+                                    pathname === item.href ? styles.navLinkActive : ''
+                                }`}
+                            >
+                                {item.label}
+                            </Link>
+                        ))}
+                    </nav>
+
+                    <div className={styles.userRail}>
+                        <div className={styles.userCard}>
+                            <span className={styles.userLabel}>Corredor</span>
+                            <strong>{user?.username}</strong>
+                            <span className={styles.userMeta}>
+                                {formatDistance(user?.totalDistance ?? 0)} no historico
+                            </span>
+                        </div>
+
+                        <div className={styles.userCard}>
+                            <span className={styles.userLabel}>Bandeira</span>
+                            <strong>{user?.bandeiraName ?? 'Sem bandeira'}</strong>
+                            <span className={styles.userMeta}>{getRoleLabel(user?.role ?? 'MEMBER')}</span>
+                        </div>
+
+                        <button onClick={logout} className="btn btn-secondary btn-sm">
+                            Sair
+                        </button>
+                    </div>
                 </div>
             </header>
 
-            {/* Main Content */}
             <main className={styles.main}>
-                {children}
+                <div className="page-shell">{children}</div>
             </main>
 
-            {/* Bottom Navigation (Mobile) */}
-            <nav className={styles.bottomNav}>
+            <nav className={styles.bottomNav} aria-label="Navegacao mobile">
                 {navItems.map((item) => (
                     <Link
                         key={item.href}
                         href={item.href}
-                        className={`${styles.navItem} ${pathname === item.href ? styles.navItemActive : ''}`}
+                        className={`${styles.bottomNavItem} ${
+                            pathname === item.href ? styles.bottomNavItemActive : ''
+                        }`}
                     >
-                        <span className={styles.navIcon}>{item.icon}</span>
-                        <span className={styles.navLabel}>{item.label.split(' ')[1]}</span>
+                        {item.label}
                     </Link>
                 ))}
             </nav>

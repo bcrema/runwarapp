@@ -31,63 +31,91 @@ export default function LoginPage() {
 
     return (
         <main className={styles.main}>
-            <div className={styles.container}>
-                <div className={styles.header}>
-                    <Link href="/" className={styles.logo}>
-                        <span className={styles.logoAccent}>Liga</span>Run
-                    </Link>
-                    <h1>Entrar</h1>
-                    <p>Bem-vindo de volta, corredor!</p>
-                </div>
+            <div className={styles.shell}>
+                <aside className={styles.aside}>
+                    <div className={styles.asideTop}>
+                        <Link href="/" className={styles.logo}>
+                            <span className={styles.logoAccent}>Liga</span>Run
+                        </Link>
+                        <span className={styles.eyebrow}>Painel Analitico</span>
+                        <h2 className={styles.asideTitle}>
+                            Volte para o comando da sua rotina.
+                        </h2>
+                        <p className={styles.asideCopy}>
+                            A web concentra desempenho, bandeira, comunidade e
+                            oportunidades para grupos e assessorias.
+                        </p>
+                    </div>
 
-                <form onSubmit={handleSubmit} className={styles.form}>
-                    {error && (
-                        <div className={styles.error}>
-                            {error}
+                    <div className={styles.asideList}>
+                        <div className={styles.asideItem}>
+                            <strong>Visao do corredor</strong>
+                            <span>Distancia, ritmo, consistencia e impacto territorial.</span>
                         </div>
-                    )}
+                        <div className={styles.asideItem}>
+                            <strong>Visao da bandeira</strong>
+                            <span>Membros ativos, ranking e presenca por categoria.</span>
+                        </div>
+                        <div className={styles.asideItem}>
+                            <strong>Visao de crescimento</strong>
+                            <span>Um funil claro para atrair novos grupos, crews e assessorias.</span>
+                        </div>
+                    </div>
+                </aside>
 
-                    <div className="form-group">
-                        <label className="label" htmlFor="email">Email</label>
-                        <input
-                            type="email"
-                            id="email"
-                            className="input"
-                            value={email}
-                            onChange={(e) => setEmail(e.target.value)}
-                            placeholder="seu@email.com"
-                            required
-                        />
+                <div className={styles.container}>
+                    <div className={styles.header}>
+                        <h1>Entrar</h1>
+                        <p>Abra o painel do corredor e da bandeira.</p>
                     </div>
 
-                    <div className="form-group">
-                        <label className="label" htmlFor="password">Senha</label>
-                        <input
-                            type="password"
-                            id="password"
-                            className="input"
-                            value={password}
-                            onChange={(e) => setPassword(e.target.value)}
-                            placeholder="••••••••"
-                            required
-                        />
+                    <form onSubmit={handleSubmit} className={styles.form}>
+                        {error && <div className={styles.error}>{error}</div>}
+
+                        <div className="form-group">
+                            <label className="label" htmlFor="email">
+                                Email
+                            </label>
+                            <input
+                                type="email"
+                                id="email"
+                                className="input"
+                                value={email}
+                                onChange={(e) => setEmail(e.target.value)}
+                                placeholder="seu@email.com"
+                                required
+                            />
+                        </div>
+
+                        <div className="form-group">
+                            <label className="label" htmlFor="password">
+                                Senha
+                            </label>
+                            <input
+                                type="password"
+                                id="password"
+                                className="input"
+                                value={password}
+                                onChange={(e) => setPassword(e.target.value)}
+                                placeholder="********"
+                                required
+                            />
+                        </div>
+
+                        <button
+                            type="submit"
+                            className="btn btn-primary btn-lg"
+                            disabled={isLoading}
+                        >
+                            {isLoading ? 'Entrando...' : 'Entrar'}
+                        </button>
+                    </form>
+
+                    <div className={styles.footer}>
+                        <p>
+                            Nao tem uma conta? <Link href="/register">Criar conta</Link>
+                        </p>
                     </div>
-
-                    <button
-                        type="submit"
-                        className="btn btn-primary btn-lg"
-                        disabled={isLoading}
-                        style={{ width: '100%' }}
-                    >
-                        {isLoading ? 'Entrando...' : 'Entrar'}
-                    </button>
-                </form>
-
-                <div className={styles.footer}>
-                    <p>
-                        Não tem uma conta?{' '}
-                        <Link href="/register">Criar conta</Link>
-                    </p>
                 </div>
             </div>
         </main>
