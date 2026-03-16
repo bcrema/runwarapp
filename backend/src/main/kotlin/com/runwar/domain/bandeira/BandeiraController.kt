@@ -13,7 +13,10 @@ import java.util.*
 
 @RestController
 @RequestMapping("/api/bandeiras")
-class BandeiraController(private val bandeiraService: BandeiraService) {
+class BandeiraController(
+    private val bandeiraService: BandeiraService,
+    private val bandeiraPresenceService: BandeiraPresenceService
+) {
     
     @GetMapping
     fun listAll(): ResponseEntity<List<BandeiraService.BandeiraDto>> {
@@ -40,6 +43,14 @@ class BandeiraController(private val bandeiraService: BandeiraService) {
     @GetMapping("/{id}/members")
     fun getMembers(@PathVariable id: UUID): ResponseEntity<List<BandeiraService.BandeiraMemberDto>> {
         return ResponseEntity.ok(bandeiraService.getMembers(id))
+    }
+
+    @GetMapping("/{id}/presence")
+    fun getPresence(
+        @PathVariable id: UUID,
+        @RequestParam(defaultValue = "week") period: String
+    ): ResponseEntity<BandeiraPresenceService.WeeklyPresenceResponse> {
+        return ResponseEntity.ok(bandeiraPresenceService.getPresence(id, period))
     }
     
     data class CreateBandeiraRequest(
