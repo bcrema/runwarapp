@@ -10,12 +10,15 @@ import org.springframework.http.ResponseEntity
 import org.springframework.security.authentication.BadCredentialsException
 import org.springframework.security.core.annotation.AuthenticationPrincipal
 import org.springframework.web.bind.annotation.*
+import com.runwar.config.SocialLinkRequiredException
+import com.runwar.config.UnauthorizedException
 import com.runwar.config.UserPrincipal
 
 @RestController
 @RequestMapping("/api")
 class UserController(
     private val userService: UserService,
+    private val socialAuthService: SocialAuthService,
     private val authRateLimiter: AuthRateLimiter,
     private val userContractsService: UserContractsService
 ) {
@@ -41,6 +44,36 @@ class UserController(
         @field:NotBlank
         val email: String,
         
+        @field:NotBlank
+        val password: String
+    )
+
+    data class SocialExchangeRequest(
+        @field:NotBlank
+        val provider: String,
+
+        @field:NotBlank
+        val idToken: String,
+
+        val authorizationCode: String? = null,
+        val nonce: String? = null,
+
+        @field:Email
+        val emailHint: String? = null,
+
+        val givenName: String? = null,
+        val familyName: String? = null,
+        val avatarUrl: String? = null
+    )
+
+    data class SocialLinkConfirmRequest(
+        @field:NotBlank
+        val linkToken: String,
+
+        @field:Email
+        @field:NotBlank
+        val email: String,
+
         @field:NotBlank
         val password: String
     )
@@ -115,6 +148,78 @@ class UserController(
         authRateLimiter.reset(ipKey)
         authRateLimiter.reset(emailKey)
 
+        return ResponseEntity.ok(
+            AuthResponse(
+                user = toUserResponse(result.user),
+                accessToken = result.accessToken,
+                refreshToken = result.refreshToken
+            )
+        )
+    }
+
+    @PostMapping("/auth/social/exchange")
+    fun socialExchange(
+        @Valid @RequestBody request: SocialExchangeRequest,
+        httpRequest: HttpServletRequest
+    ): ResponseEntity<AuthResponse> {
+        val ip = resolveClientIp(httpRequest)
+        val ipKey = "social-exchange:ip:$ip"
+
+        authRateLimiter.ensureAllowed(ipKey)
+
+        val result = try {
+            socialAuthService.exchange(
+                SocialAuthService.SocialExchangePayload(
+                    provider = request.provider,
+                    idToken = request.idToken,
+                    authorizationCode = request.authorizationCode,
+                    nonce = request.nonce,
+                    emailHint = request.emailHint,
+                    givenName = request.givenName,
+                    familyName = request.familyName,
+                    avatarUrl = request.avatarUrl
+                )
+            )
+        } catch (e: SocialLinkRequiredException) {
+            authRateLimiter.reset(ipKey)
+            throw e
+        } catch (e: UnauthorizedException) {
+            authRateLimiter.recordFailure(ipKey)
+            throw e
+        }
+
+        authRateLimiter.reset(ipKey)
+        return ResponseEntity.ok(
+            AuthResponse(
+                user = toUserResponse(result.user),
+                accessToken = result.accessToken,
+                refreshToken = result.refreshToken
+            )
+        )
+    }
+
+    @PostMapping("/auth/social/link/confirm")
+    fun confirmSocialLink(
+        @Valid @RequestBody request: SocialLinkConfirmRequest,
+        httpRequest: HttpServletRequest
+    ): ResponseEntity<AuthResponse> {
+        val ip = resolveClientIp(httpRequest)
+        val ipKey = "social-link:ip:$ip"
+        val emailKey = "social-link:email:${request.email.trim().lowercase()}"
+
+        authRateLimiter.ensureAllowed(ipKey)
+        authRateLimiter.ensureAllowed(emailKey)
+
+        val result = try {
+            socialAuthService.confirmLink(request.linkToken, request.email, request.password)
+        } catch (e: UnauthorizedException) {
+            authRateLimiter.recordFailure(ipKey)
+            authRateLimiter.recordFailure(emailKey)
+            throw BadCredentialsException("Invalid credentials")
+        }
+
+        authRateLimiter.reset(ipKey)
+        authRateLimiter.reset(emailKey)
         return ResponseEntity.ok(
             AuthResponse(
                 user = toUserResponse(result.user),

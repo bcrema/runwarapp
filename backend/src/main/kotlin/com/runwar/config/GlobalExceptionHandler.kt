@@ -46,6 +46,19 @@ class GlobalExceptionHandler {
         )
     }
 
+    @ExceptionHandler(SocialLinkRequiredException::class)
+    fun handleSocialLinkRequired(e: SocialLinkRequiredException): ResponseEntity<SocialLinkRequiredResponse> {
+        return ResponseEntity.status(HttpStatus.CONFLICT).body(
+            SocialLinkRequiredResponse(
+                error = "LINK_REQUIRED",
+                message = e.message ?: "Account linking required",
+                linkToken = e.linkToken,
+                provider = e.provider,
+                emailMasked = e.emailMasked
+            )
+        )
+    }
+
     @ExceptionHandler(RateLimitExceededException::class)
     fun handleRateLimitExceeded(e: RateLimitExceededException): ResponseEntity<ApiErrorResponse> {
         return ResponseEntity.status(HttpStatus.TOO_MANY_REQUESTS).body(
@@ -92,3 +105,11 @@ class GlobalExceptionHandler {
         )
     }
 }
+
+data class SocialLinkRequiredResponse(
+    val error: String,
+    val message: String,
+    val linkToken: String,
+    val provider: String,
+    val emailMasked: String
+)

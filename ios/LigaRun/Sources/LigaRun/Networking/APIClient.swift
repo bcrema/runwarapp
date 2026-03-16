@@ -55,6 +55,34 @@ private struct SuccessResponse: Decodable {
     let success: Bool
 }
 
+private struct SocialExchangeRequest: Encodable {
+    let provider: SocialProvider
+    let idToken: String
+    let authorizationCode: String?
+    let nonce: String?
+    let emailHint: String?
+    let givenName: String?
+    let familyName: String?
+    let avatarUrl: String?
+}
+
+private struct SocialLinkConfirmRequest: Encodable {
+    let linkToken: String
+    let email: String
+    let password: String
+}
+
+struct SocialLinkRequiredError: LocalizedError, Sendable {
+    let response: SocialLinkRequiredResponse
+
+    var linkToken: String { response.linkToken }
+    var provider: SocialProvider { response.provider }
+    var emailMasked: String? { response.emailMasked }
+
+    var errorDescription: String? {
+        "Uma conta já existe com este email; confirme o link manualmente."
+    }
+}
 @MainActor
 final class APIClient {
     private let baseURL: URL
@@ -90,6 +118,34 @@ final class APIClient {
 
     func register(email: String, username: String, password: String) async throws -> AuthResponse {
         try await request("/api/auth/register", method: "POST", body: ["email": email, "username": username, "password": password])
+    }
+
+    func exchangeSocial(
+        provider: SocialProvider,
+        idToken: String,
+        authorizationCode: String? = nil,
+        nonce: String? = nil,
+        emailHint: String? = nil,
+        givenName: String? = nil,
+        familyName: String? = nil,
+        avatarUrl: String? = nil
+    ) async throws -> AuthResponse {
+        let payload = SocialExchangeRequest(
+            provider: provider,
+            idToken: idToken,
+            authorizationCode: authorizationCode,
+            nonce: nonce,
+            emailHint: emailHint,
+            givenName: givenName,
+            familyName: familyName,
+            avatarUrl: avatarUrl
+        )
+        return try await request("/api/auth/social/exchange", method: "POST", body: payload)
+    }
+
+    func confirmSocialLink(linkToken: String, email: String, password: String) async throws -> AuthResponse {
+        let payload = SocialLinkConfirmRequest(linkToken: linkToken, email: email, password: password)
+        return try await request("/api/auth/social/link/confirm", method: "POST", body: payload)
     }
 
     func refreshToken(_ refreshToken: String) async throws -> TokenRefreshResponse {
@@ -361,6 +417,10 @@ final class APIClient {
                 return empty
             }
             return try decoder.decode(T.self, from: data)
+        }
+
+        if httpResponse.statusCode == 409, let linkInfo = try? decoder.decode(SocialLinkRequiredResponse.self, from: data) {
+            throw SocialLinkRequiredError(response: linkInfo)
         }
 
         if let apiError = try? decoder.decode(APIError.self, from: data) {

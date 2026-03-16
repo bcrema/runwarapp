@@ -94,6 +94,123 @@ final class APIClientRequestTests: XCTestCase {
         configuration.protocolClasses = [URLProtocolStub.self]
         return URLSession(configuration: configuration)
     }
+    @MainActor
+    func testExchangeSocialSendsExpectedPayload() async throws {
+        URLProtocolStub.handler = { request in
+            XCTAssertEqual(request.httpMethod, "POST")
+            XCTAssertEqual(request.url?.path, "/api/auth/social/exchange")
+            XCTAssertEqual(request.value(forHTTPHeaderField: "Content-Type"), "application/json")
+
+            let body = try XCTUnwrap(request.httpBodyData)
+            let decoded = try JSONDecoder().decode(SocialPayload.self, from: body)
+            XCTAssertEqual(decoded.provider, .google)
+            XCTAssertEqual(decoded.idToken, "token-xyz")
+            XCTAssertEqual(decoded.authorizationCode, "code-123")
+
+            let response = """
+            {
+                "user": {
+                    "id": "user-id",
+                    "email": "user@example.com",
+                    "username": "user",
+                    "avatarUrl": null,
+                    "isPublic": true,
+                    "bandeiraId": null,
+                    "bandeiraName": null,
+                    "role": "MEMBER",
+                    "totalRuns": 0,
+                    "totalDistance": 0,
+                    "totalTilesConquered": 0
+                },
+                "accessToken": "t1",
+                "refreshToken": "r1"
+            }
+            """.data(using: .utf8)!
+
+            return HTTPStubResponse(statusCode: 200, body: response)
+        }
+
+        let client = makeClient()
+        let response = try await client.exchangeSocial(
+            provider: .google,
+            idToken: "token-xyz",
+            authorizationCode: "code-123",
+            nonce: nil,
+            emailHint: "hint@example.com",
+            givenName: nil,
+            familyName: nil,
+            avatarUrl: nil
+        )
+
+        XCTAssertEqual(response.token, "t1")
+        XCTAssertEqual(response.refreshToken, "r1")
+    }
+
+    @MainActor
+    func testExchangeSocialThrowsLinkRequired() async throws {
+        URLProtocolStub.handler = { request in
+            XCTAssertEqual(request.url?.path, "/api/auth/social/exchange")
+            let response = #"{"error":"LINK_REQUIRED","message":"Linking needed","linkToken":"token","provider":"apple","emailMasked":"u***"}"#.data(using: .utf8)!
+            return HTTPStubResponse(statusCode: 409, body: response)
+        }
+
+        let client = makeClient()
+        do {
+            _ = try await client.exchangeSocial(
+                provider: .apple,
+                idToken: "token",
+                authorizationCode: nil,
+                nonce: nil,
+                emailHint: nil,
+                givenName: nil,
+                familyName: nil,
+                avatarUrl: nil
+            )
+            XCTFail("Expected SocialLinkRequiredError")
+        } catch {
+            XCTAssertTrue(error is SocialLinkRequiredError)
+        }
+    }
+
+    @MainActor
+    func testConfirmSocialLinkPostsExpectedPayload() async throws {
+        URLProtocolStub.handler = { request in
+            XCTAssertEqual(request.httpMethod, "POST")
+            XCTAssertEqual(request.url?.path, "/api/auth/social/link/confirm")
+
+            let body = try XCTUnwrap(request.httpBodyData)
+            let decoded = try JSONDecoder().decode(LinkPayload.self, from: body)
+            XCTAssertEqual(decoded.linkToken, "link-1")
+            XCTAssertEqual(decoded.email, "user@example.com")
+
+            let response = """
+            {
+                "user": {
+                    "id": "user-id",
+                    "email": "user@example.com",
+                    "username": "user",
+                    "avatarUrl": null,
+                    "isPublic": true,
+                    "bandeiraId": null,
+                    "bandeiraName": null,
+                    "role": "MEMBER",
+                    "totalRuns": 0,
+                    "totalDistance": 0,
+                    "totalTilesConquered": 0
+                },
+                "accessToken": "access",
+                "refreshToken": "refresh"
+            }
+            """.data(using: .utf8)!
+
+            return HTTPStubResponse(statusCode: 200, body: response)
+        }
+
+        let client = makeClient()
+        let auth = try await client.confirmSocialLink(linkToken: "link-1", email: "user@example.com", password: "secret")
+        XCTAssertEqual(auth.token, "access")
+        XCTAssertEqual(auth.refreshToken, "refresh")
+    }
 }
 
 private struct HTTPStubResponse {
@@ -101,6 +218,17 @@ private struct HTTPStubResponse {
     let body: Data
 }
 
+private struct SocialPayload: Decodable {
+    let provider: SocialProvider
+    let idToken: String
+    let authorizationCode: String?
+}
+
+private struct LinkPayload: Decodable {
+    let linkToken: String
+    let email: String
+    let password: String
+}
 private final class URLProtocolStub: URLProtocol, @unchecked Sendable {
     static var handler: ((URLRequest) throws -> HTTPStubResponse)?
 

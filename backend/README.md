@@ -29,7 +29,10 @@ export DATABASE_PASSWORD=postgres
 export JWT_SECRET=sua-chave-secreta-256-bits-minimo
 export JWT_REFRESH_EXPIRATION=2592000000
 export JWT_EXPIRATION=900000
+export JWT_SOCIAL_LINK_EXPIRATION=600000
 export CORS_ORIGINS=http://localhost:3000
+export AUTH_SOCIAL_GOOGLE_CLIENT_IDS=google-web-client-id,google-ios-client-id
+export AUTH_SOCIAL_APPLE_CLIENT_IDS=com.runwar.ligarun,com.runwar.web.signin
 export RUNWAR_SEED_ENABLED=true # opcional: insere dados mock para testes
 ```
 
@@ -54,6 +57,8 @@ docker run -p 8080:8080 --env-file .env runwar-backend
 ### Auth (Público)
 - `POST /api/auth/signup` - Registrar novo usuário
 - `POST /api/auth/login` - Login
+- `POST /api/auth/social/exchange` - Exchange de `Google`/`Apple` por sessão própria
+- `POST /api/auth/social/link/confirm` - Vincular login social a conta existente
 - `POST /api/auth/refresh` - Renovar access token
 - `POST /api/auth/logout` - Logout (revoga refresh token)
 
@@ -127,6 +132,19 @@ Para atualizar o arquivo, execute:
 ./backend/scripts/export-openapi.sh
 ```
 
+## Auth social
+
+- Provedores suportados hoje: `google` e `apple`.
+- O backend valida `issuer`, `audience` e assinatura do `idToken` via JWKS oficial do provedor antes de emitir `accessToken` e `refreshToken` próprios.
+- `POST /api/auth/social/exchange` aceita:
+  - `provider`
+  - `idToken`
+  - `authorizationCode` opcional
+  - `nonce` opcional
+  - `emailHint`, `givenName`, `familyName` e `avatarUrl` opcionais
+- Quando o email verificado do provedor já pertence a uma conta não vinculada, o endpoint responde `409 LINK_REQUIRED` com `linkToken`, `provider` e `emailMasked`.
+- `POST /api/auth/social/link/confirm` aceita `linkToken`, `email` e `password`; no sucesso, vincula a identidade social e retorna `AuthResponse`.
+- Usuários criados via login social recebem `username` automático e podem editar depois pelo fluxo normal de perfil.
 ## Contratos GDS v3
 
 ### Ranking solo

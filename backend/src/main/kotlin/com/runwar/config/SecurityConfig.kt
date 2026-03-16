@@ -14,7 +14,7 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 @Configuration
 @EnableWebSecurity
 @EnableMethodSecurity
-@EnableConfigurationProperties(JwtProperties::class, GameProperties::class)
+@EnableConfigurationProperties(JwtProperties::class, GameProperties::class, SocialAuthProperties::class)
 class SecurityConfig(
         private val jwtAuthFilter: JwtAuthenticationFilter,
         private val authenticationProvider: AuthenticationProvider
