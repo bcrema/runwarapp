@@ -29,7 +29,7 @@ class UserServiceTest {
         val refreshTokenRepository = mockk<RefreshTokenRepository>()
         val jwtProperties = JwtProperties(refreshExpiration = 3_600_000)
 
-        every { userRepository.existsByEmail("user@example.com") } returns true
+        every { userRepository.existsByEmailIgnoreCase("user@example.com") } returns true
 
         val service = UserService(
             userRepository,
@@ -54,7 +54,7 @@ class UserServiceTest {
         val refreshTokenRepository = mockk<RefreshTokenRepository>()
         val jwtProperties = JwtProperties(refreshExpiration = 3_600_000)
 
-        every { userRepository.existsByEmail(any()) } returns false
+        every { userRepository.existsByEmailIgnoreCase(any()) } returns false
         every { userRepository.existsByUsername(any()) } returns false
         every { passwordEncoder.encode("password") } returns "encoded"
         every { jwtService.generateToken(any(), any()) } returns "access-token"
@@ -118,7 +118,7 @@ class UserServiceTest {
             bandeira = bandeira
         )
 
-        every { userRepository.findWithBandeiraByEmail(user.email) } returns user
+        every { userRepository.findWithBandeiraByEmailIgnoreCase(user.email) } returns user
         every { passwordEncoder.matches("password", "encoded") } returns true
         every { jwtService.generateToken(user.id, user.email) } returns "access-token"
         every { refreshTokenRepository.save(any()) } answers { firstArg() }
@@ -135,7 +135,7 @@ class UserServiceTest {
 
         assertEquals(bandeira.id, result.user.bandeiraId)
         assertEquals("Alpha Team", result.user.bandeiraName)
-        verify(exactly = 1) { userRepository.findWithBandeiraByEmail(user.email) }
+        verify(exactly = 1) { userRepository.findWithBandeiraByEmailIgnoreCase(user.email) }
     }
 
     @Test

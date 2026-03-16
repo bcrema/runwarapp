@@ -6,9 +6,12 @@ jest.mock('./api', () => ({
     api: {
         login: jest.fn(),
         register: jest.fn(),
-        setToken: jest.fn(),
+        socialExchange: jest.fn(),
+        socialLinkConfirm: jest.fn(),
+        logout: jest.fn(),
         getToken: jest.fn(),
         getMe: jest.fn(),
+        resetTokens: jest.fn(),
     },
 }))
 
@@ -16,9 +19,12 @@ describe('useAuth store', () => {
     const mockApi = api as unknown as {
         login: jest.Mock
         register: jest.Mock
-        setToken: jest.Mock
+        socialExchange: jest.Mock
+        socialLinkConfirm: jest.Mock
+        logout: jest.Mock
         getToken: jest.Mock
         getMe: jest.Mock
+        resetTokens: jest.Mock
     }
 
     const user: User = {
@@ -40,28 +46,28 @@ describe('useAuth store', () => {
         useAuth.setState({ user: null, isLoading: true, isAuthenticated: false })
     })
 
-    test('login sets token and user', async () => {
+    test('login updates auth state', async () => {
         mockApi.login.mockResolvedValueOnce({ accessToken: 't1', refreshToken: 'r1', user })
 
         await useAuth.getState().login('user@example.com', 'secret')
 
         expect(mockApi.login).toHaveBeenCalledWith('user@example.com', 'secret')
-        expect(mockApi.setToken).toHaveBeenCalledWith('t1')
         expect(useAuth.getState().user).toEqual(user)
         expect(useAuth.getState().isAuthenticated).toBe(true)
     })
 
-    test('logout clears token and auth state', () => {
+    test('logout clears state and calls api.logout', async () => {
         useAuth.setState({ user, isAuthenticated: true })
+        mockApi.logout.mockResolvedValueOnce(undefined)
 
-        useAuth.getState().logout()
+        await useAuth.getState().logout()
 
-        expect(mockApi.setToken).toHaveBeenCalledWith(null)
+        expect(mockApi.logout).toHaveBeenCalled()
         expect(useAuth.getState().user).toBe(null)
         expect(useAuth.getState().isAuthenticated).toBe(false)
     })
 
-    test('loadUser with no token clears loading and leaves unauthenticated', async () => {
+    test('loadUser without token leaves unauthenticated', async () => {
         mockApi.getToken.mockReturnValueOnce(null)
 
         await useAuth.getState().loadUser()
@@ -72,7 +78,7 @@ describe('useAuth store', () => {
         expect(useAuth.getState().isAuthenticated).toBe(false)
     })
 
-    test('loadUser with token loads user', async () => {
+    test('loadUser with token populates user', async () => {
         mockApi.getToken.mockReturnValueOnce('t1')
         mockApi.getMe.mockResolvedValueOnce(user)
 
@@ -80,19 +86,44 @@ describe('useAuth store', () => {
 
         expect(mockApi.getMe).toHaveBeenCalledTimes(1)
         expect(useAuth.getState().isLoading).toBe(false)
-        expect(useAuth.getState().user).toEqual(user)
         expect(useAuth.getState().isAuthenticated).toBe(true)
+        expect(useAuth.getState().user).toEqual(user)
     })
 
-    test('loadUser clears token on error', async () => {
+    test('loadUser error resets stored tokens', async () => {
         mockApi.getToken.mockReturnValueOnce('t1')
-        mockApi.getMe.mockRejectedValueOnce(new Error('nope'))
+        mockApi.getMe.mockRejectedValueOnce(new Error('fail'))
 
         await useAuth.getState().loadUser()
 
-        expect(mockApi.setToken).toHaveBeenCalledWith(null)
-        expect(useAuth.getState().isLoading).toBe(false)
+        expect(mockApi.resetTokens).toHaveBeenCalled()
         expect(useAuth.getState().user).toBe(null)
         expect(useAuth.getState().isAuthenticated).toBe(false)
+    })
+
+    test('socialAuthenticate sets user', async () => {
+        mockApi.socialExchange.mockResolvedValueOnce({ accessToken: 't1', refreshToken: 'r1', user })
+
+        await useAuth.getState().socialAuthenticate({ provider: 'google' })
+
+        expect(mockApi.socialExchange).toHaveBeenCalledWith({ provider: 'google' })
+        expect(useAuth.getState().user).toEqual(user)
+    })
+
+    test('linkSocialAccount sets user', async () => {
+        mockApi.socialLinkConfirm.mockResolvedValueOnce({ accessToken: 't1', refreshToken: 'r1', user })
+
+        await useAuth.getState().linkSocialAccount({
+            linkToken: 'link',
+            email: 'user@example.com',
+            password: 'secret',
+        })
+
+        expect(mockApi.socialLinkConfirm).toHaveBeenCalledWith({
+            linkToken: 'link',
+            email: 'user@example.com',
+            password: 'secret',
+        })
+        expect(useAuth.getState().user).toEqual(user)
     })
 })

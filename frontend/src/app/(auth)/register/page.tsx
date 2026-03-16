@@ -1,20 +1,87 @@
 'use client'
 
 import { useState } from 'react'
+import type { FormEvent } from 'react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import { useAuth } from '@/lib/auth'
+import SocialAuthButtons from '@/components/social-auth/SocialAuthButtons'
+import socialStyles from '@/components/social-auth/social-auth.module.css'
+import { LinkRequiredError, LinkRequiredPayload, SocialExchangeRequest } from '@/lib/api'
 import styles from '../auth.module.css'
 
 export default function RegisterPage() {
     const router = useRouter()
-    const { register } = useAuth()
+    const { register, socialAuthenticate, linkSocialAccount } = useAuth()
     const [email, setEmail] = useState('')
     const [username, setUsername] = useState('')
     const [password, setPassword] = useState('')
     const [confirmPassword, setConfirmPassword] = useState('')
     const [error, setError] = useState('')
     const [isLoading, setIsLoading] = useState(false)
+    const [socialError, setSocialError] = useState('')
+    const [linkContext, setLinkContext] = useState<LinkRequiredPayload | null>(null)
+    const [linkState, setLinkState] = useState({
+        email: '',
+        password: '',
+        error: '',
+        isLoading: false,
+    })
+
+    const handleSocialSuccess = () => {
+        router.push('/map')
+    }
+
+    const handleSocialError = (err: Error) => {
+        if (err instanceof LinkRequiredError) {
+            setLinkContext(err.payload)
+            setLinkState((prev) => ({
+                ...prev,
+                email: '',
+                password: '',
+                error: '',
+                isLoading: false,
+            }))
+            return
+        }
+        setSocialError(err.message || 'Erro ao autenticar com redes sociais.')
+    }
+
+    const handleSocialSignIn = async (payload: SocialExchangeRequest) => {
+        setSocialError('')
+        try {
+            await socialAuthenticate(payload)
+            handleSocialSuccess()
+        } catch (err: any) {
+            handleSocialError(err)
+        }
+    }
+
+    const handleLinkSubmit = async (event: FormEvent) => {
+        event.preventDefault()
+        if (!linkContext) return
+        setLinkState((prev) => ({ ...prev, isLoading: true, error: '' }))
+        try {
+            await linkSocialAccount({
+                linkToken: linkContext.linkToken,
+                email: linkState.email,
+                password: linkState.password,
+            })
+            handleSocialSuccess()
+        } catch (err: any) {
+            setLinkState((prev) => ({
+                ...prev,
+                error: err?.message || 'Erro ao vincular conta.',
+            }))
+        } finally {
+            setLinkState((prev) => ({ ...prev, isLoading: false }))
+        }
+    }
+
+    const handleLinkCancel = () => {
+        setLinkContext(null)
+        setLinkState({ email: '', password: '', error: '', isLoading: false })
+    }
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault()
@@ -86,6 +153,61 @@ export default function RegisterPage() {
                     <div className={styles.header}>
                         <h1>Criar conta</h1>
                         <p>Monte seu acesso ao painel da comunidade de corrida.</p>
+                    </div>
+
+                    <div className={socialStyles.wrapper}>
+                        <SocialAuthButtons
+                            onSocialSignIn={handleSocialSignIn}
+                            onError={handleSocialError}
+                        />
+                        {socialError && <div className={styles.error}>{socialError}</div>}
+                        {linkContext && (
+                            <div className={socialStyles.linkBox}>
+                                <p>
+                                    Ja existe uma conta com {linkContext.emailMasked ?? 'este email'}.
+                                    Insira a senha existente para vincular a identidade.
+                                </p>
+                                {linkState.error && <p className={socialStyles.linkError}>{linkState.error}</p>}
+                                <form className={socialStyles.linkForm} onSubmit={handleLinkSubmit}>
+                                    <input
+                                        type="email"
+                                        className={socialStyles.linkInput}
+                                        placeholder="Email"
+                                        value={linkState.email}
+                                        onChange={(e) =>
+                                            setLinkState((prev) => ({ ...prev, email: e.target.value }))
+                                        }
+                                        required
+                                    />
+                                    <input
+                                        type="password"
+                                        className={socialStyles.linkInput}
+                                        placeholder="Senha"
+                                        value={linkState.password}
+                                        onChange={(e) =>
+                                            setLinkState((prev) => ({ ...prev, password: e.target.value }))
+                                        }
+                                        required
+                                    />
+                                    <div className={socialStyles.linkActions}>
+                                        <button
+                                            type="submit"
+                                            className="btn btn-primary btn-sm"
+                                            disabled={linkState.isLoading}
+                                        >
+                                            {linkState.isLoading ? 'Vinculando...' : 'Vincular conta'}
+                                        </button>
+                                        <button
+                                            type="button"
+                                            className="btn btn-secondary btn-sm"
+                                            onClick={handleLinkCancel}
+                                        >
+                                            Cancelar
+                                        </button>
+                                    </div>
+                                </form>
+                            </div>
+                        )}
                     </div>
 
                     <form onSubmit={handleSubmit} className={styles.form}>

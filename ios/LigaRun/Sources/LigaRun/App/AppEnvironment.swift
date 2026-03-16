@@ -29,4 +29,24 @@ enum AppEnvironment {
 
     static let accessTokenKey = "runwar_access_token"
     static let refreshTokenKey = "runwar_refresh_token"
+
+    static var googleClientID: String? {
+        Bundle.main.object(forInfoDictionaryKey: "GOOGLE_CLIENT_ID") as? String
+    }
+
+    static var googleReversedClientID: String? {
+        Bundle.main.object(forInfoDictionaryKey: "GOOGLE_REVERSED_CLIENT_ID") as? String
+    }
+
+    static var appleAssociatedDomain: String? {
+        Bundle.main.object(forInfoDictionaryKey: "APPLE_ASSOCIATED_DOMAIN") as? String
+    }
+
+    static var appleServiceID: String? {
+        Bundle.main.object(forInfoDictionaryKey: "APPLE_SERVICE_ID") as? String
+    }
+
+    static var appleTeamID: String? {
+        Bundle.main.object(forInfoDictionaryKey: "APPLE_TEAM_ID") as? String
+    }
 }

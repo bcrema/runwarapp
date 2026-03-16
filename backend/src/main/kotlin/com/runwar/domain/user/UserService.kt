@@ -74,14 +74,15 @@ class UserService(
     }
     
     override fun loadUserByUsername(email: String): UserDetails {
-        val user = userRepository.findByEmail(email)
+        val user = userRepository.findByEmailIgnoreCase(normalizeEmail(email))
             ?: throw UsernameNotFoundException("User not found with email: $email")
         return UserPrincipal(user)
     }
     
     @Transactional
     fun register(email: String, username: String, password: String): AuthResult {
-        if (userRepository.existsByEmail(email)) {
+        val normalizedEmail = normalizeEmail(email)
+        if (userRepository.existsByEmailIgnoreCase(normalizedEmail)) {
             throw IllegalArgumentException("Email already registered")
         }
         if (userRepository.existsByUsername(username)) {
@@ -89,7 +90,7 @@ class UserService(
         }
         
         val user = User(
-            email = email,
+            email = normalizedEmail,
             username = username,
             passwordHash = passwordEncoder.encode(password)
         )
@@ -101,7 +102,7 @@ class UserService(
     }
     
     fun login(email: String, password: String): AuthResult {
-        val user = userRepository.findWithBandeiraByEmail(email)
+        val user = userRepository.findWithBandeiraByEmailIgnoreCase(normalizeEmail(email))
             ?: throw IllegalArgumentException("Invalid credentials")
         
         if (!passwordEncoder.matches(password, user.passwordHash)) {
@@ -263,5 +264,7 @@ class UserService(
 
     companion object {
         private val secureRandom = SecureRandom()
+
+        private fun normalizeEmail(email: String): String = email.trim().lowercase()
     }
 }

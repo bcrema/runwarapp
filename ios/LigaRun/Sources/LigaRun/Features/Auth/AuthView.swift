@@ -1,9 +1,14 @@
 import SwiftUI
 import Combine
+import AuthenticationServices
+import CryptoKit
+import GoogleSignIn
+import UIKit
 
 struct AuthView: View {
     @StateObject private var viewModel: AuthViewModel
     @State private var activeIndex = 0
+    @State private var appleNonce: String?
     private let timer = Timer.publish(every: 6, on: .main, in: .common).autoconnect()
 
     private let slides: [Slide] = [
@@ -32,7 +37,7 @@ struct AuthView: View {
 
     private let palette = Palette()
 
-    init(session: SessionStore) {
+    init(session: any SessionManaging) {
         _viewModel = StateObject(wrappedValue: AuthViewModel(session: session))
     }
 
@@ -43,11 +48,15 @@ struct AuthView: View {
                 carouselSection
                 benefitSection
                 formSection
+                socialSection
                 finalCTA
             }
             .padding(.bottom, 32)
         }
         .background(appBackground)
+        .sheet(item: $viewModel.socialLinkChallenge) { challenge in
+            linkSheet(challenge: challenge)
+        }
         .onReceive(timer) { _ in
             withAnimation(.spring(response: 0.5, dampingFraction: 0.9)) {
                 activeIndex = activeIndex >= slides.count - 1 ? 0 : activeIndex + 1
@@ -238,6 +247,47 @@ struct AuthView: View {
         .padding(.horizontal)
     }
 
+    private var socialSection: some View {
+        VStack(alignment: .leading, spacing: 16) {
+            Text("Continuar com")
+                .font(.headline)
+                .foregroundColor(palette.textPrimary)
+                .padding(.horizontal)
+
+            HStack(spacing: 12) {
+                SignInWithAppleButton(.signIn, onRequest: configureAppleRequest, onCompletion: handleAppleCompletion)
+                    .signInWithAppleButtonStyle(.whiteOutline)
+                    .frame(height: 48)
+                    .clipShape(RoundedRectangle(cornerRadius: 14))
+                    .overlay(
+                        RoundedRectangle(cornerRadius: 14)
+                            .stroke(palette.border, lineWidth: 1)
+                    )
+                    .disabled(viewModel.socialLoading)
+
+                Button {
+                    handleGoogleSignIn()
+                } label: {
+                    HStack {
+                        Image(systemName: "globe")
+                            .font(.headline)
+                        Text("Google")
+                            .fontWeight(.semibold)
+                    }
+                    .frame(maxWidth: .infinity, minHeight: 48)
+                    .foregroundColor(palette.textPrimary)
+                    .background(palette.bgTertiary)
+                    .overlay(
+                        RoundedRectangle(cornerRadius: 14)
+                            .stroke(palette.border, lineWidth: 1)
+                    )
+                }
+                .disabled(viewModel.socialLoading)
+            }
+            .padding(.horizontal)
+        }
+    }
+
     private var finalCTA: some View {
         VStack(spacing: 8) {
             Text("Pronto para correr com propósito?")
@@ -353,6 +403,188 @@ struct AuthView: View {
             .overlay(RoundedRectangle(cornerRadius: 12).stroke(palette.border, lineWidth: 1))
             .clipShape(RoundedRectangle(cornerRadius: 12))
             .accentColor(palette.accentPrimary) // Cursor color
+    }
+
+    private func linkSheet(challenge: AuthViewModel.SocialLinkChallenge) -> some View {
+        NavigationStack {
+            VStack(spacing: 16) {
+                Text("\(challenge.provider.displayName) já está vinculado")
+                    .font(.headline)
+                    .foregroundColor(palette.textPrimary)
+
+                Text("Confirme sua conta \(challenge.emailMasked ?? "") para vincular o provedor social.")
+                    .font(.subheadline)
+                    .foregroundColor(palette.textSecondary)
+                    .multilineTextAlignment(.center)
+
+                VStack(spacing: 12) {
+                    textField("Email", text: $viewModel.linkEmail, keyboard: .emailAddress)
+                    secureField("Senha", text: $viewModel.linkPassword)
+                }
+
+                if let linkError = viewModel.linkError, !linkError.isEmpty {
+                    Text(linkError)
+                        .foregroundColor(.red)
+                        .font(.footnote)
+                        .multilineTextAlignment(.center)
+                }
+
+                Button {
+                    Task {
+                        await viewModel.confirmLink()
+                    }
+                } label: {
+                    HStack {
+                        if viewModel.socialLoading {
+                            ProgressView()
+                                .progressViewStyle(.circular)
+                        }
+                        Text("Confirmar vínculo")
+                            .fontWeight(.semibold)
+                    }
+                    .frame(maxWidth: .infinity)
+                    .padding()
+                    .background(LinearGradient(colors: [palette.accentPrimary, palette.accentSecondary],
+                                               startPoint: .topLeading,
+                                               endPoint: .bottomTrailing))
+                    .foregroundColor(.white)
+                    .clipShape(RoundedRectangle(cornerRadius: 14))
+                }
+                .disabled(viewModel.socialLoading)
+            }
+            .padding()
+            .background(palette.bgPrimary)
+            .presentationDetents([.medium])
+            .toolbar {
+                ToolbarItem(placement: .cancellationAction) {
+                    Button("Cancelar") {
+                        viewModel.socialLinkChallenge = nil
+                    }
+                }
+            }
+        }
+    }
+
+    private func configureAppleRequest(_ request: ASAuthorizationAppleIDRequest) {
+        let nonce = randomNonceString()
+        appleNonce = nonce
+        request.requestedScopes = [.fullName, .email]
+        request.nonce = sha256(nonce)
+    }
+
+    private func handleAppleCompletion(_ result: Result<ASAuthorization, Error>) {
+        switch result {
+        case .success(let auth):
+            guard
+                let credential = auth.credential as? ASAuthorizationAppleIDCredential,
+                let tokenData = credential.identityToken,
+                let idToken = String(data: tokenData, encoding: .utf8)
+            else {
+                viewModel.errorMessage = "Não foi possível recuperar o token Apple."
+                appleNonce = nil
+                return
+            }
+
+            let authorizationCode = credential.authorizationCode.flatMap { String(data: $0, encoding: .utf8) }
+            let email = credential.email
+            let givenName = credential.fullName?.givenName
+            let familyName = credential.fullName?.familyName
+
+            Task {
+                await viewModel.handleSocialToken(
+                    provider: .apple,
+                    idToken: idToken,
+                    authorizationCode: authorizationCode,
+                    nonce: appleNonce,
+                    emailHint: email,
+                    givenName: givenName,
+                    familyName: familyName,
+                    avatarUrl: nil
+                )
+            }
+        case .failure(let error):
+            viewModel.errorMessage = error.localizedDescription
+        }
+
+        appleNonce = nil
+    }
+
+    private func handleGoogleSignIn() {
+        guard let clientID = AppEnvironment.googleClientID else {
+            viewModel.errorMessage = "Configuração do Google Sign-In ausente."
+            return
+        }
+        guard let controller = rootViewController() else {
+            viewModel.errorMessage = "Não foi possível abrir o Google Sign-In."
+            return
+        }
+
+        let configuration = GIDConfiguration(clientID: clientID)
+        GIDSignIn.sharedInstance.configuration = configuration
+
+        Task {
+            do {
+                let result = try await GIDSignIn.sharedInstance.signIn(withPresenting: controller)
+                guard let idToken = result.user.idToken?.tokenString else {
+                    throw URLError(.badServerResponse)
+                }
+
+                let avatar = result.user.profile?.imageURL(withDimension: 120)?.absoluteString
+                let email = result.user.profile?.email
+                let givenName = result.user.profile?.givenName
+                let familyName = result.user.profile?.familyName
+
+                await viewModel.handleSocialToken(
+                    provider: .google,
+                    idToken: idToken,
+                    authorizationCode: nil,
+                    nonce: nil,
+                    emailHint: email,
+                    givenName: givenName,
+                    familyName: familyName,
+                    avatarUrl: avatar
+                )
+                } catch {
+                    viewModel.errorMessage = error.localizedDescription
+                }
+        }
+    }
+
+    private func rootViewController() -> UIViewController? {
+        UIApplication.shared.connectedScenes
+            .compactMap { $0 as? UIWindowScene }
+            .flatMap { $0.windows }
+            .first { $0.isKeyWindow }?
+            .rootViewController
+    }
+
+    private func randomNonceString(length: Int = 32) -> String {
+        precondition(length > 0)
+        let charset: [Character] = Array("0123456789ABCDEFGHIJKLMNOPQRSTUVXYZabcdefghijklmnopqrstuvwxyz-._")
+        var result = ""
+        var remainingLength = length
+
+        while remainingLength > 0 {
+            let randoms = (0..<16).map { _ in UInt8.random(in: 0...255) }
+            randoms.forEach { random in
+                if remainingLength == 0 {
+                    return
+                }
+
+                if random < charset.count {
+                    result.append(charset[Int(random)])
+                    remainingLength -= 1
+                }
+            }
+        }
+
+        return result
+    }
+
+    private func sha256(_ input: String) -> String {
+        let data = Data(input.utf8)
+        let hashed = SHA256.hash(data: data)
+        return hashed.compactMap { String(format: "%02x", $0) }.joined()
     }
 }
 

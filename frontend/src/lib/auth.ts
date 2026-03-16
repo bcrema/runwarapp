@@ -1,17 +1,18 @@
 import { create } from 'zustand'
-import { api, User } from './api'
+import { api, SocialExchangeRequest, SocialLinkConfirmRequest, User } from './api'
 
-interface AuthState {
+export interface AuthState {
     user: User | null
     isLoading: boolean
     isAuthenticated: boolean
 
-    // Actions
     login: (email: string, password: string) => Promise<void>
     register: (email: string, username: string, password: string) => Promise<void>
-    logout: () => void
+    logout: () => Promise<void>
     loadUser: () => Promise<void>
     updateUser: (user: Partial<User>) => void
+    socialAuthenticate: (payload: SocialExchangeRequest) => Promise<void>
+    linkSocialAccount: (payload: SocialLinkConfirmRequest) => Promise<void>
 }
 
 export const useAuth = create<AuthState>((set, get) => ({
@@ -21,19 +22,30 @@ export const useAuth = create<AuthState>((set, get) => ({
 
     login: async (email: string, password: string) => {
         const response = await api.login(email, password)
-        api.setToken(response.accessToken)
         set({ user: response.user, isAuthenticated: true })
     },
 
     register: async (email: string, username: string, password: string) => {
         const response = await api.register(email, username, password)
-        api.setToken(response.accessToken)
         set({ user: response.user, isAuthenticated: true })
     },
 
-    logout: () => {
-        api.setToken(null)
-        set({ user: null, isAuthenticated: false })
+    socialAuthenticate: async (payload: SocialExchangeRequest) => {
+        const response = await api.socialExchange(payload)
+        set({ user: response.user, isAuthenticated: true })
+    },
+
+    linkSocialAccount: async (payload: SocialLinkConfirmRequest) => {
+        const response = await api.socialLinkConfirm(payload)
+        set({ user: response.user, isAuthenticated: true })
+    },
+
+    logout: async () => {
+        try {
+            await api.logout()
+        } finally {
+            set({ user: null, isAuthenticated: false })
+        }
     },
 
     loadUser: async () => {
@@ -48,7 +60,7 @@ export const useAuth = create<AuthState>((set, get) => ({
             const user = await api.getMe()
             set({ user, isAuthenticated: true, isLoading: false })
         } catch (error) {
-            api.setToken(null)
+            api.resetTokens()
             set({ user: null, isAuthenticated: false, isLoading: false })
         }
     },

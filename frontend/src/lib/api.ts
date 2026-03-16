@@ -6,6 +6,46 @@ const API_URL =
             ? window.location.origin
             : 'http://localhost:8080'
 
+const ACCESS_TOKEN_KEY = 'runwar_token'
+const REFRESH_TOKEN_KEY = 'runwar_refresh_token'
+
+export interface SocialExchangeRequest {
+    provider: string
+    idToken?: string
+    authorizationCode?: string
+    nonce?: string
+    emailHint?: string
+    givenName?: string
+    familyName?: string
+    avatarUrl?: string
+}
+
+export interface SocialLinkConfirmRequest {
+    linkToken: string
+    email: string
+    password: string
+}
+
+export interface LinkRequiredPayload {
+    linkToken: string
+    provider: string
+    emailMasked?: string
+}
+
+interface RefreshRequest {
+    refreshToken: string
+}
+
+export class LinkRequiredError extends Error {
+    readonly payload: LinkRequiredPayload
+
+    constructor(payload: LinkRequiredPayload, message: string) {
+        super(message)
+        this.name = 'LinkRequiredError'
+        this.payload = payload
+    }
+}
+
 interface ApiError {
     error: string
     message: string
@@ -14,31 +54,54 @@ interface ApiError {
 
 class ApiClient {
     private token: string | null = null
+    private refreshToken: string | null = null
 
     setToken(token: string | null) {
-        this.token = token
-        if (token) {
-            if (typeof window !== 'undefined') {
-                localStorage.setItem('runwar_token', token)
-            }
-        } else {
-            if (typeof window !== 'undefined') {
-                localStorage.removeItem('runwar_token')
-            }
-        }
+        this.storeTokens(token, token ? this.refreshToken : null)
     }
 
     getToken(): string | null {
         if (this.token) return this.token
         if (typeof window !== 'undefined') {
-            this.token = localStorage.getItem('runwar_token')
+            this.token = localStorage.getItem(ACCESS_TOKEN_KEY)
         }
         return this.token
     }
 
+    private getRefreshToken(): string | null {
+        if (this.refreshToken) return this.refreshToken
+        if (typeof window !== 'undefined') {
+            this.refreshToken = localStorage.getItem(REFRESH_TOKEN_KEY)
+        }
+        return this.refreshToken
+    }
+
+    private storeTokens(accessToken: string | null, refreshToken: string | null) {
+        this.token = accessToken
+        this.refreshToken = refreshToken
+        if (typeof window === 'undefined') return
+
+        if (accessToken) {
+            localStorage.setItem(ACCESS_TOKEN_KEY, accessToken)
+        } else {
+            localStorage.removeItem(ACCESS_TOKEN_KEY)
+        }
+
+        if (refreshToken) {
+            localStorage.setItem(REFRESH_TOKEN_KEY, refreshToken)
+        } else {
+            localStorage.removeItem(REFRESH_TOKEN_KEY)
+        }
+    }
+
+    private clearTokens() {
+        this.storeTokens(null, null)
+    }
+
     private async request<T>(
         endpoint: string,
-        options: RequestInit = {}
+        options: RequestInit = {},
+        allowRetry = true
     ): Promise<T> {
         const token = this.getToken()
 
@@ -59,34 +122,121 @@ class ApiClient {
             headers,
         })
 
-        if (!response.ok) {
-            const error: ApiError = await response.json().catch(() => ({
-                error: 'UNKNOWN',
-                message: 'An error occurred',
-            }))
-            throw new Error(error.message)
+        if (response.status === 401 && allowRetry) {
+            const refreshed = await this.tryRefreshAuth()
+            if (refreshed) {
+                return this.request(endpoint, options, false)
+            }
         }
 
-        // Handle empty responses
+        if (!response.ok) {
+            await this.handleError(response)
+        }
+
         const text = await response.text()
         if (!text) return {} as T
 
         return JSON.parse(text)
     }
 
+    private async handleError(response: Response): Promise<never> {
+        const error: ApiError = await response.json().catch(() => ({
+            error: 'UNKNOWN',
+            message: 'An error occurred',
+        }))
+
+        if (response.status === 409 && error.error === 'LINK_REQUIRED') {
+            const details = error.details ?? ({} as Record<string, string>)
+            const linkPayload: LinkRequiredPayload = {
+                linkToken: (details as any).linkToken ?? (error as any).linkToken ?? '',
+                provider: (details as any).provider ?? (error as any).provider ?? '',
+                emailMasked: (details as any).emailMasked ?? (error as any).emailMasked,
+            }
+            throw new LinkRequiredError(linkPayload, error.message)
+        }
+
+        throw new Error(error.message)
+    }
+
+    private async tryRefreshAuth(): Promise<boolean> {
+        const refreshToken = this.getRefreshToken()
+        if (!refreshToken) {
+            return false
+        }
+
+        try {
+            const response = await fetch(`${API_URL}/api/auth/refresh`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ refreshToken }),
+            })
+            if (!response.ok) {
+                this.clearTokens()
+                return false
+            }
+
+            const auth = (await response.json()) as AuthResponse
+            this.handleAuthResponse(auth)
+            return true
+        } catch {
+            this.clearTokens()
+            return false
+        }
+    }
+
+    private handleAuthResponse(response: AuthResponse): AuthResponse {
+        this.storeTokens(response.accessToken, response.refreshToken)
+        return response
+    }
+
     // Auth
     async register(email: string, username: string, password: string) {
-        return this.request<AuthResponse>('/api/auth/register', {
+        const response = await this.request<AuthResponse>('/api/auth/register', {
             method: 'POST',
             body: JSON.stringify({ email, username, password }),
         })
+        return this.handleAuthResponse(response)
     }
 
     async login(email: string, password: string) {
-        return this.request<AuthResponse>('/api/auth/login', {
+        const response = await this.request<AuthResponse>('/api/auth/login', {
             method: 'POST',
             body: JSON.stringify({ email, password }),
         })
+        return this.handleAuthResponse(response)
+    }
+
+    async socialExchange(payload: SocialExchangeRequest) {
+        const response = await this.request<AuthResponse>('/api/auth/social/exchange', {
+            method: 'POST',
+            body: JSON.stringify(payload),
+        })
+        return this.handleAuthResponse(response)
+    }
+
+    async socialLinkConfirm(payload: SocialLinkConfirmRequest) {
+        const response = await this.request<AuthResponse>('/api/auth/social/link/confirm', {
+            method: 'POST',
+            body: JSON.stringify(payload),
+        })
+        return this.handleAuthResponse(response)
+    }
+
+    async logout() {
+        const refreshToken = this.getRefreshToken()
+        try {
+            await fetch(`${API_URL}/api/auth/logout`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ refreshToken }),
+            })
+        } finally {
+            this.clearTokens()
+        }
+    }
+
+    resetTokens() {
+        this.clearTokens()
     }
 
     // User
