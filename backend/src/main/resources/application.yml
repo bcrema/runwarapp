@@ -34,6 +34,18 @@ jwt:
   secret: ${JWT_SECRET:your-256-bit-secret-key-for-development-only-change-in-production}
   expiration: 900000 # 15 minutes in milliseconds
   refresh-expiration: 2592000000 # 30 days in milliseconds
+  social-link-expiration: 600000 # 10 minutes in milliseconds
+
+auth:
+  social:
+    google:
+      client-ids: ${AUTH_SOCIAL_GOOGLE_CLIENT_IDS:}
+      jwk-set-uri: ${AUTH_SOCIAL_GOOGLE_JWK_SET_URI:https://www.googleapis.com/oauth2/v3/certs}
+      issuers: ${AUTH_SOCIAL_GOOGLE_ISSUERS:https://accounts.google.com,accounts.google.com}
+    apple:
+      client-ids: ${AUTH_SOCIAL_APPLE_CLIENT_IDS:}
+      jwk-set-uri: ${AUTH_SOCIAL_APPLE_JWK_SET_URI:https://appleid.apple.com/auth/keys}
+      issuers: ${AUTH_SOCIAL_APPLE_ISSUERS:https://appleid.apple.com}
 
 # RunWar Game Parameters
 runwar:

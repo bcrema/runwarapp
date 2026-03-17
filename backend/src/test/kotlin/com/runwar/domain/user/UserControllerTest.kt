@@ -1,6 +1,7 @@
 package com.runwar.domain.user
 
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
+import com.runwar.config.SocialLinkRequiredException
 import com.runwar.config.GlobalExceptionHandler
 import com.runwar.config.UserPrincipal
 import io.mockk.every
@@ -30,6 +31,7 @@ class UserControllerTest {
 
     private val objectMapper = jacksonObjectMapper().findAndRegisterModules()
     private val userService = mockk<UserService>()
+    private val socialAuthService = mockk<SocialAuthService>()
     private val authRateLimiter = mockk<AuthRateLimiter>(relaxed = true)
     private val userContractsService = mockk<UserContractsService>()
     private lateinit var mockMvc: MockMvc
@@ -37,7 +39,7 @@ class UserControllerTest {
     @BeforeEach
     fun setUp() {
         val validator = LocalValidatorFactoryBean().apply { afterPropertiesSet() }
-        mockMvc = MockMvcBuilders.standaloneSetup(UserController(userService, authRateLimiter, userContractsService))
+        mockMvc = MockMvcBuilders.standaloneSetup(UserController(userService, socialAuthService, authRateLimiter, userContractsService))
             .setControllerAdvice(GlobalExceptionHandler())
             .setMessageConverters(MappingJackson2HttpMessageConverter(objectMapper))
             .setValidator(validator)
@@ -188,6 +190,121 @@ class UserControllerTest {
         verify(exactly = 1) { authRateLimiter.reset("login:email:user@example.com") }
         verify(exactly = 0) { authRateLimiter.recordFailure("login:ip:1.2.3.4") }
         verify(exactly = 0) { authRateLimiter.recordFailure("login:email:user@example.com") }
+    }
+
+    @Test
+    fun `social exchange success resets rate limiter and returns auth response`() {
+        val result = UserService.AuthResult(
+            user = UserService.UserDto(
+                id = UUID.randomUUID(),
+                email = "user@example.com",
+                username = "runner",
+                avatarUrl = null,
+                isPublic = true,
+                bandeiraId = null,
+                bandeiraName = null,
+                role = "MEMBER",
+                totalRuns = 0,
+                totalDistance = 0.0,
+                totalDistanceMeters = 0.0,
+                totalQuadrasConquered = 0
+            ),
+            accessToken = "access-token",
+            refreshToken = "refresh-token"
+        )
+        every {
+            socialAuthService.exchange(
+                SocialAuthService.SocialExchangePayload(
+                    provider = "google",
+                    idToken = "token-123",
+                    authorizationCode = null,
+                    nonce = null,
+                    emailHint = null,
+                    givenName = null,
+                    familyName = null,
+                    avatarUrl = null
+                )
+            )
+        } returns result
+
+        val payload = objectMapper.writeValueAsString(
+            mapOf(
+                "provider" to "google",
+                "idToken" to "token-123"
+            )
+        )
+
+        mockMvc.perform(
+            post("/api/auth/social/exchange")
+                .header("X-Forwarded-For", "1.2.3.4")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(payload)
+        )
+            .andExpect(status().isOk)
+            .andExpect(jsonPath("$.accessToken").value("access-token"))
+            .andExpect(jsonPath("$.user.username").value("runner"))
+
+        verify(exactly = 1) { authRateLimiter.ensureAllowed("social-exchange:ip:1.2.3.4") }
+        verify(exactly = 1) { authRateLimiter.reset("social-exchange:ip:1.2.3.4") }
+    }
+
+    @Test
+    fun `social exchange returns link required conflict payload`() {
+        every {
+            socialAuthService.exchange(any())
+        } throws SocialLinkRequiredException(
+            linkToken = "link-token-123",
+            provider = "google",
+            emailMasked = "u***r@example.com"
+        )
+
+        val payload = objectMapper.writeValueAsString(
+            mapOf(
+                "provider" to "google",
+                "idToken" to "token-123"
+            )
+        )
+
+        mockMvc.perform(
+            post("/api/auth/social/exchange")
+                .header("X-Forwarded-For", "1.2.3.4")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(payload)
+        )
+            .andExpect(status().isConflict)
+            .andExpect(jsonPath("$.error").value("LINK_REQUIRED"))
+            .andExpect(jsonPath("$.linkToken").value("link-token-123"))
+            .andExpect(jsonPath("$.provider").value("google"))
+            .andExpect(jsonPath("$.emailMasked").value("u***r@example.com"))
+    }
+
+    @Test
+    fun `social link confirm invalid credentials records failure`() {
+        every {
+            socialAuthService.confirmLink("link-token-123", "user@example.com", "wrong")
+        } throws com.runwar.config.UnauthorizedException("Invalid link credentials")
+
+        val payload = objectMapper.writeValueAsString(
+            mapOf(
+                "linkToken" to "link-token-123",
+                "email" to "user@example.com",
+                "password" to "wrong"
+            )
+        )
+
+        mockMvc.perform(
+            post("/api/auth/social/link/confirm")
+                .header("X-Forwarded-For", "1.2.3.4")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(payload)
+        )
+            .andExpect(status().isUnauthorized)
+            .andExpect(jsonPath("$.error").value("UNAUTHORIZED"))
+
+        verify(exactly = 1) { authRateLimiter.ensureAllowed("social-link:ip:1.2.3.4") }
+        verify(exactly = 1) { authRateLimiter.ensureAllowed("social-link:email:user@example.com") }
+        verify(exactly = 1) { authRateLimiter.recordFailure("social-link:ip:1.2.3.4") }
+        verify(exactly = 1) { authRateLimiter.recordFailure("social-link:email:user@example.com") }
     }
 
     @Test

@@ -3,7 +3,6 @@ package com.runwar.config
 import org.springframework.boot.context.properties.EnableConfigurationProperties
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
-import org.springframework.security.authentication.AuthenticationProvider
 import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity
 import org.springframework.security.config.annotation.web.builders.HttpSecurity
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity
@@ -14,10 +13,9 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 @Configuration
 @EnableWebSecurity
 @EnableMethodSecurity
-@EnableConfigurationProperties(JwtProperties::class, GameProperties::class)
+@EnableConfigurationProperties(JwtProperties::class, GameProperties::class, SocialAuthProperties::class)
 class SecurityConfig(
-        private val jwtAuthFilter: JwtAuthenticationFilter,
-        private val authenticationProvider: AuthenticationProvider
+        private val jwtAuthFilter: JwtAuthenticationFilter
 ) {
 
     @Bean
@@ -40,7 +38,6 @@ class SecurityConfig(
                             .authenticated()
                 }
                 .sessionManagement { it.sessionCreationPolicy(SessionCreationPolicy.STATELESS) }
-                .authenticationProvider(authenticationProvider)
                 .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter::class.java)
 
         return http.build()

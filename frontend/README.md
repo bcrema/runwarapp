@@ -123,3 +123,6 @@ npx vercel
 Variáveis necessárias:
 - `NEXT_PUBLIC_API_URL`: URL do backend em produção
 - `NEXT_PUBLIC_MAPBOX_TOKEN`: Token do Mapbox
+- `NEXT_PUBLIC_GOOGLE_CLIENT_ID`: Client ID para Google Identity Services
+- `NEXT_PUBLIC_APPLE_CLIENT_ID`: Identificador do App ID/Service ID do Apple Sign In
+- `NEXT_PUBLIC_APPLE_REDIRECT_URI`: URI de redirecionamento configurada no Apple Developer

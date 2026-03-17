@@ -38,7 +38,10 @@ final class SessionStore: ObservableObject {
         )
     }()
 
-    init() {
+    init(api: APIClient? = nil) {
+        self.keychain = KeychainStore(service: AppEnvironment.keychainService)
+        self.logger = Logger(subsystem: AppEnvironment.keychainService, category: "SessionStore")
+        self.injectedAPI = api
         self.token = readToken(account: AppEnvironment.accessTokenKey)
         self.refreshToken = readToken(account: AppEnvironment.refreshTokenKey)
     }
@@ -59,6 +62,34 @@ final class SessionStore: ObservableObject {
 
     func register(email: String, username: String, password: String) async throws {
         let auth = try await api.register(email: email, username: username, password: password)
+        setSession(from: auth)
+    }
+
+    func exchangeSocial(
+        provider: SocialProvider,
+        idToken: String,
+        authorizationCode: String? = nil,
+        nonce: String? = nil,
+        emailHint: String? = nil,
+        givenName: String? = nil,
+        familyName: String? = nil,
+        avatarUrl: String? = nil
+    ) async throws {
+        let auth = try await api.exchangeSocial(
+            provider: provider,
+            idToken: idToken,
+            authorizationCode: authorizationCode,
+            nonce: nonce,
+            emailHint: emailHint,
+            givenName: givenName,
+            familyName: familyName,
+            avatarUrl: avatarUrl
+        )
+        setSession(from: auth)
+    }
+
+    func confirmSocialLink(linkToken: String, email: String, password: String) async throws {
+        let auth = try await api.confirmSocialLink(linkToken: linkToken, email: email, password: password)
         setSession(from: auth)
     }
 
@@ -190,3 +221,5 @@ enum SessionError: LocalizedError {
         }
     }
 }
+
+extension SessionStore: SessionManaging {}

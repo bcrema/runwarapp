@@ -23,14 +23,31 @@ import { useRouter } from 'next/navigation'
 import { useAuth } from '@/lib/auth'
 import LoginPage from './page'
 
+jest.mock('@/components/social-auth/SocialAuthButtons', () => ({
+    __esModule: true,
+    default: ({ onSocialSignIn }: any) => (
+        <div data-testid="social-buttons">
+            <button type="button" onClick={() => onSocialSignIn({ provider: 'google' })}>
+                Google Stub
+            </button>
+        </div>
+    ),
+}))
+
 describe('LoginPage', () => {
     const mockLogin = jest.fn()
+    const mockSocialAuthenticate = jest.fn()
+    const mockLinkSocialAccount = jest.fn()
     const mockPush = jest.fn()
 
     beforeEach(() => {
         jest.clearAllMocks()
         ;(useRouter as unknown as jest.Mock).mockReturnValue({ push: mockPush })
-        ;(useAuth as unknown as jest.Mock).mockReturnValue({ login: mockLogin })
+        ;(useAuth as unknown as jest.Mock).mockReturnValue({
+            login: mockLogin,
+            socialAuthenticate: mockSocialAuthenticate,
+            linkSocialAccount: mockLinkSocialAccount,
+        })
     })
 
     test('renders form fields', () => {

@@ -14,6 +14,23 @@ enum BandeirasHubTab: String, Codable, CaseIterable, Sendable {
     case myTeam
 }
 
+enum SocialProvider: String, Codable, Sendable {
+    case google = "google"
+    case apple = "apple"
+
+    var displayName: String {
+        switch self {
+        case .google: return "Google"
+        case .apple: return "Apple"
+        }
+    }
+}
+
+struct SocialLinkRequiredResponse: Decodable, Sendable {
+    let linkToken: String
+    let provider: SocialProvider
+    let emailMasked: String?
+}
 enum MapFocusContext: Equatable, Sendable {
     case user(userId: String)
     case bandeira(bandeiraId: String)
