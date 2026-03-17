@@ -17,6 +17,7 @@ protocol MapAPIProviding: Sendable {
 @MainActor
 protocol BandeirasAPIProviding: Sendable {
     func getBandeiras() async throws -> [Bandeira]
+    func getBandeiraMembers(id: String) async throws -> [BandeiraMember]
     func searchBandeiras(query: String) async throws -> [Bandeira]
     func createBandeira(request: CreateBandeiraRequest) async throws -> Bandeira
     func joinBandeira(id: String) async throws -> Bandeira

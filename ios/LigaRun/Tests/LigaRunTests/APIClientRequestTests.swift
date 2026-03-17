@@ -52,6 +52,25 @@ final class APIClientRequestTests: XCTestCase {
     }
 
     @MainActor
+    func testGetBandeiraMembersRequestsExpectedEndpoint() async throws {
+        let client = makeClient()
+        URLProtocolStub.handler = { request in
+            XCTAssertEqual(request.httpMethod, "GET")
+            XCTAssertEqual(request.url?.path, "/api/bandeiras/band-456/members")
+            XCTAssertEqual(request.value(forHTTPHeaderField: "Authorization"), "Bearer token-123")
+
+            return HTTPStubResponse(
+                statusCode: 200,
+                body: Data("[]".utf8)
+            )
+        }
+
+        let members = try await client.getBandeiraMembers(id: "band-456")
+
+        XCTAssertTrue(members.isEmpty)
+    }
+
+    @MainActor
     func testUpdateMemberRoleSendsExpectedPayload() async throws {
         let client = makeClient()
         let expectedRequest = UpdateBandeiraMemberRoleRequest(userId: "user-789", role: "ADMIN")

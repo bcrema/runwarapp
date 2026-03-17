@@ -82,7 +82,7 @@ struct BandeirasView: View {
         case .ranking:
             rankingContent
         case .myTeam:
-            myTeamPlaceholderContent
+            myTeamContent
         }
     }
 
@@ -223,22 +223,109 @@ struct BandeirasView: View {
         }
     }
 
-    private var myTeamPlaceholderContent: some View {
-        Section("Minha equipe") {
-            VStack(alignment: .leading, spacing: 12) {
-                Label("Superficie reservada para o passo 05", systemImage: "person.3.fill")
-                    .font(.headline)
-
-                Text(myTeamPlaceholderMessage)
-                    .font(.subheadline)
-                    .foregroundColor(.secondary)
-
-                Button(viewModel.currentBandeiraId == nil ? "Ir para Explorar" : "Ver ranking atual") {
-                    session.activeBandeirasHubTab = viewModel.currentBandeiraId == nil ? .explore : .ranking
+    private var myTeamContent: some View {
+        Group {
+            if viewModel.currentBandeiraId == nil {
+                surfaceMessageSection(
+                    title: "Entre em uma bandeira para montar sua equipe",
+                    message: "Use Explorar para entrar em uma bandeira e habilitar roster, top contribuidores e administracao de roles.",
+                    symbol: "person.3.sequence.fill",
+                    tint: .secondary,
+                    actionTitle: "Ir para Explorar"
+                ) {
+                    session.activeBandeirasHubTab = .explore
                 }
-                .buttonStyle(.bordered)
+            } else {
+                Section("Minha equipe") {
+                    VStack(alignment: .leading, spacing: 12) {
+                        HStack(alignment: .top) {
+                            VStack(alignment: .leading, spacing: 6) {
+                                Text(viewModel.currentBandeiraName ?? "Minha equipe")
+                                    .font(.headline)
+                                Text("Gerencie contribuidores, acompanhe o roster e ajuste roles sem sair do hub.")
+                                    .font(.subheadline)
+                                    .foregroundColor(.secondary)
+                            }
+
+                            Spacer()
+
+                            tag(
+                                viewModel.canManageTeamRoles ? "Admin" : "Membro",
+                                tint: viewModel.canManageTeamRoles ? .orange : .secondary
+                            )
+                        }
+
+                        HStack(spacing: 12) {
+                            Label("\(viewModel.teamMembers.count) membros", systemImage: "person.3.fill")
+                            Label("\(viewModel.teamTotalConquests) quadras", systemImage: "map.fill")
+                            Label("\(viewModel.teamAdminCount) admins", systemImage: "crown.fill")
+                        }
+                        .font(.caption)
+                        .foregroundColor(.secondary)
+
+                        HStack {
+                            Button("Ver territorio") {
+                                viewModel.requestMapFocusForCurrentTeam()
+                            }
+                            .buttonStyle(.borderedProminent)
+
+                            Button("Abrir ranking") {
+                                session.activeBandeirasHubTab = .ranking
+                            }
+                            .buttonStyle(.bordered)
+                        }
+                    }
+                    .padding(.vertical, 4)
+                }
+
+                if let errorMessage = viewModel.teamErrorMessage {
+                    surfaceMessageSection(
+                        title: "Nao foi possivel carregar sua equipe",
+                        message: errorMessage,
+                        symbol: "person.3.sequence.fill",
+                        tint: .orange,
+                        actionTitle: "Recarregar equipe"
+                    ) {
+                        await viewModel.loadMyTeam()
+                    }
+                }
+
+                if viewModel.isTeamLoading && viewModel.teamMembers.isEmpty {
+                    Section {
+                        ProgressView("Carregando equipe...")
+                            .frame(maxWidth: .infinity, alignment: .center)
+                            .padding(.vertical, 12)
+                    }
+                }
+
+                if viewModel.shouldShowTeamEmptyState {
+                    surfaceMessageSection(
+                        title: viewModel.teamEmptyStateTitle,
+                        message: viewModel.teamEmptyStateMessage,
+                        symbol: "person.crop.circle.badge.exclamationmark",
+                        tint: .secondary,
+                        actionTitle: "Atualizar equipe"
+                    ) {
+                        await viewModel.loadMyTeam()
+                    }
+                } else {
+                    if !viewModel.topContributors.isEmpty {
+                        Section("Top contribuidores") {
+                            ForEach(Array(viewModel.topContributors.enumerated()), id: \.element.id) { index, member in
+                                contributorHighlightRow(for: member, position: index + 1)
+                            }
+                        }
+                    }
+
+                    if !viewModel.sortedTeamMembers.isEmpty {
+                        Section("Roster completo") {
+                            ForEach(viewModel.sortedTeamMembers) { member in
+                                teamMemberRow(for: member)
+                            }
+                        }
+                    }
+                }
             }
-            .padding(.vertical, 8)
         }
     }
 
@@ -343,6 +430,86 @@ struct BandeirasView: View {
         .padding(.vertical, 6)
     }
 
+    private func contributorHighlightRow(for member: BandeiraMember, position: Int) -> some View {
+        VStack(alignment: .leading, spacing: 10) {
+            HStack(alignment: .top, spacing: 12) {
+                ZStack {
+                    Circle()
+                        .fill(highlightColor(for: position).opacity(0.18))
+                    Image(systemName: highlightSymbol(for: position))
+                        .foregroundColor(highlightColor(for: position))
+                }
+                .frame(width: 38, height: 38)
+
+                VStack(alignment: .leading, spacing: 6) {
+                    HStack {
+                        Text(member.username)
+                            .font(.headline)
+                        if member.id == viewModel.currentUserId {
+                            tag("Voce", tint: .blue)
+                        }
+                        tag(viewModel.roleBadgeText(for: member), tint: roleTint(for: member))
+                    }
+
+                    Text("\(member.totalTilesConquered) quadras conquistadas")
+                        .font(.caption)
+                        .foregroundColor(.secondary)
+                }
+
+                Spacer()
+            }
+        }
+        .padding(.vertical, 4)
+    }
+
+    private func teamMemberRow(for member: BandeiraMember) -> some View {
+        VStack(alignment: .leading, spacing: 10) {
+            HStack(alignment: .top, spacing: 12) {
+                ZStack {
+                    Circle()
+                        .fill(Color.accentColor.opacity(0.14))
+                    Text(member.username.prefix(1).uppercased())
+                        .font(.headline.weight(.semibold))
+                        .foregroundColor(.accentColor)
+                }
+                .frame(width: 38, height: 38)
+
+                VStack(alignment: .leading, spacing: 6) {
+                    HStack {
+                        Text(member.username)
+                            .font(.headline)
+                        if member.id == viewModel.currentUserId {
+                            tag("Voce", tint: .blue)
+                        }
+                        tag(viewModel.roleBadgeText(for: member), tint: roleTint(for: member))
+                    }
+
+                    Text("\(member.totalTilesConquered) quadras conquistadas")
+                        .font(.caption)
+                        .foregroundColor(.secondary)
+                }
+
+                Spacer()
+
+                if viewModel.roleMutationMemberId == member.id {
+                    ProgressView()
+                        .controlSize(.small)
+                }
+            }
+
+            if let actionTitle = viewModel.roleActionTitle(for: member) {
+                Button(actionTitle) {
+                    Task {
+                        await viewModel.updateRole(for: member)
+                    }
+                }
+                .buttonStyle(.bordered)
+                .disabled(viewModel.roleMutationMemberId != nil)
+            }
+        }
+        .padding(.vertical, 4)
+    }
+
     private func surfaceMessageSection(
         title: String,
         message: String,
@@ -388,15 +555,8 @@ struct BandeirasView: View {
         case .ranking:
             return "Use o ranking para abrir o mapa com o foco territorial correto."
         case .myTeam:
-            return "Gancho reservado para membros e roles na proxima etapa."
+            return "Acompanhe o roster, destaque top contribuidores e gerencie roles quando voce for admin."
         }
-    }
-
-    private var myTeamPlaceholderMessage: String {
-        if viewModel.currentBandeiraId == nil {
-            return "Entre em uma bandeira em Explorar para habilitar o roster e os controles de equipe no passo 05."
-        }
-        return "Sua equipe sera carregada aqui no passo 05, incluindo membros e roles, sem alterar o hub atual."
     }
 
     private var createBandeiraSheet: some View {
@@ -441,6 +601,32 @@ struct BandeirasView: View {
                 }
             }
         }
+    }
+
+    private func highlightColor(for position: Int) -> Color {
+        switch position {
+        case 1:
+            return .yellow
+        case 2:
+            return .gray
+        default:
+            return .brown
+        }
+    }
+
+    private func highlightSymbol(for position: Int) -> String {
+        switch position {
+        case 1:
+            return "crown.fill"
+        case 2:
+            return "medal.fill"
+        default:
+            return "star.fill"
+        }
+    }
+
+    private func roleTint(for member: BandeiraMember) -> Color {
+        viewModel.roleBadgeText(for: member) == "Admin" ? .orange : .secondary
     }
 
     @ViewBuilder

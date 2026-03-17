@@ -16,11 +16,13 @@ struct BandeirasMapIntent: Equatable {
 @MainActor
 protocol BandeirasServiceProtocol {
     func getBandeiras() async throws -> [Bandeira]
+    func getBandeiraMembers(id: String) async throws -> [BandeiraMember]
     func getBandeiraRankings() async throws -> [Bandeira]
     func searchBandeiras(query: String) async throws -> [Bandeira]
     func createBandeira(request: CreateBandeiraRequest) async throws -> Bandeira
     func joinBandeira(id: String) async throws -> Bandeira
     func leaveBandeira() async throws
+    func updateMemberRole(bandeiraId: String, request: UpdateBandeiraMemberRoleRequest) async throws -> Bool
 }
 
 @MainActor
@@ -33,6 +35,10 @@ final class BandeirasService: BandeirasServiceProtocol {
 
     func getBandeiras() async throws -> [Bandeira] {
         try await apiClient.getBandeiras()
+    }
+
+    func getBandeiraMembers(id: String) async throws -> [BandeiraMember] {
+        try await apiClient.getBandeiraMembers(id: id)
     }
 
     func getBandeiraRankings() async throws -> [Bandeira] {
@@ -54,12 +60,17 @@ final class BandeirasService: BandeirasServiceProtocol {
     func leaveBandeira() async throws {
         try await apiClient.leaveBandeira()
     }
+
+    func updateMemberRole(bandeiraId: String, request: UpdateBandeiraMemberRoleRequest) async throws -> Bool {
+        try await apiClient.updateMemberRole(bandeiraId: bandeiraId, request: request)
+    }
 }
 
 @MainActor
 final class BandeirasViewModel: ObservableObject {
     @Published var bandeiras: [Bandeira] = []
     @Published var rankingBandeiras: [Bandeira] = []
+    @Published var teamMembers: [BandeiraMember] = []
     @Published var searchQuery: String = ""
     @Published var isMutating = false
     @Published var isCreating = false
@@ -73,13 +84,16 @@ final class BandeirasViewModel: ObservableObject {
     @Published private(set) var currentBandeiraId: String?
     @Published private(set) var exploreStatus: BandeirasSurfaceStatus = .idle
     @Published private(set) var rankingStatus: BandeirasSurfaceStatus = .idle
+    @Published private(set) var teamStatus: BandeirasSurfaceStatus = .idle
     @Published private(set) var pendingMapIntent: BandeirasMapIntent?
+    @Published private(set) var roleMutationMemberId: String?
 
     private let service: BandeirasServiceProtocol
     private let currentUserProvider: () -> User?
     private let refreshUserAction: () async throws -> Void
     private var hasLoadedExplore = false
     private var hasLoadedRanking = false
+    private var hasLoadedTeam = false
 
     init(
         session: SessionStore,
@@ -114,6 +128,10 @@ final class BandeirasViewModel: ObservableObject {
         rankingStatus == .loading
     }
 
+    var isTeamLoading: Bool {
+        teamStatus == .loading
+    }
+
     var exploreErrorMessage: String? {
         message(for: exploreStatus)
     }
@@ -122,12 +140,20 @@ final class BandeirasViewModel: ObservableObject {
         message(for: rankingStatus)
     }
 
+    var teamErrorMessage: String? {
+        message(for: teamStatus)
+    }
+
     var shouldShowExploreEmptyState: Bool {
         exploreStatus == .empty
     }
 
     var shouldShowRankingEmptyState: Bool {
         rankingStatus == .empty
+    }
+
+    var shouldShowTeamEmptyState: Bool {
+        currentBandeiraId != nil && teamStatus == .empty
     }
 
     var exploreEmptyStateTitle: String {
@@ -149,6 +175,49 @@ final class BandeirasViewModel: ObservableObject {
         "Quando houver bandeiras com territorio contabilizado, o ranking aparecera aqui."
     }
 
+    var currentBandeiraName: String? {
+        currentUserProvider()?.bandeiraName
+    }
+
+    var currentUserId: String? {
+        currentUserProvider()?.id
+    }
+
+    var canManageTeamRoles: Bool {
+        normalizedRole(currentUserProvider()?.role) == "ADMIN"
+    }
+
+    var sortedTeamMembers: [BandeiraMember] {
+        teamMembers.sorted { lhs, rhs in
+            if lhs.totalTilesConquered != rhs.totalTilesConquered {
+                return lhs.totalTilesConquered > rhs.totalTilesConquered
+            }
+            return lhs.username.localizedCaseInsensitiveCompare(rhs.username) == .orderedAscending
+        }
+    }
+
+    var topContributors: [BandeiraMember] {
+        Array(sortedTeamMembers.prefix(3))
+    }
+
+    var teamAdminCount: Int {
+        teamMembers.filter { normalizedRole($0.role) == "ADMIN" }.count
+    }
+
+    var teamTotalConquests: Int {
+        teamMembers.reduce(into: 0) { partialResult, member in
+            partialResult += member.totalTilesConquered
+        }
+    }
+
+    var teamEmptyStateTitle: String {
+        "Nenhum membro encontrado"
+    }
+
+    var teamEmptyStateMessage: String {
+        "Sua bandeira ainda nao retornou membros ativos. Atualize a equipe ou confira o backend antes de seguir."
+    }
+
     func activate(tab: BandeirasHubTab) async {
         syncCurrentBandeiraFromSession()
 
@@ -160,7 +229,8 @@ final class BandeirasViewModel: ObservableObject {
             guard !hasLoadedRanking else { return }
             await loadRanking()
         case .myTeam:
-            break
+            guard !hasLoadedTeam else { return }
+            await loadMyTeam()
         }
     }
 
@@ -171,7 +241,7 @@ final class BandeirasViewModel: ObservableObject {
         case .ranking:
             await loadRanking()
         case .myTeam:
-            syncCurrentBandeiraFromSession()
+            await loadMyTeam()
         }
     }
 
@@ -300,6 +370,9 @@ final class BandeirasViewModel: ObservableObject {
             if hasLoadedRanking {
                 await loadRanking(syncFromSession: false)
             }
+            if hasLoadedTeam {
+                await loadMyTeam(syncFromSession: refreshed)
+            }
         } catch {
             errorMessage = makeUserFacingMessage(
                 for: error,
@@ -331,6 +404,9 @@ final class BandeirasViewModel: ObservableObject {
             if hasLoadedRanking {
                 await loadRanking(syncFromSession: false)
             }
+            if hasLoadedTeam {
+                await loadMyTeam(syncFromSession: refreshed)
+            }
         } catch {
             errorMessage = makeUserFacingMessage(
                 for: error,
@@ -355,6 +431,7 @@ final class BandeirasViewModel: ObservableObject {
             currentBandeiraId = nil
             let refreshed = await refreshUserState(fallbackBandeiraId: nil)
             await load(syncFromSession: refreshed)
+            resetTeamState()
             noticeMessage = "Voce saiu da bandeira. A partir da proxima corrida valida, as acoes voltam para sua conta."
             if !refreshed {
                 noticeMessage = "Voce saiu da bandeira. Atualize para sincronizar sua sessao local."
@@ -366,6 +443,89 @@ final class BandeirasViewModel: ObservableObject {
             errorMessage = makeUserFacingMessage(
                 for: error,
                 fallback: "Nao foi possivel sair da bandeira. Tente novamente."
+            )
+        }
+    }
+
+    func loadMyTeam(syncFromSession: Bool = true) async {
+        if syncFromSession {
+            syncCurrentBandeiraFromSession()
+        }
+
+        guard let currentBandeiraId else {
+            resetTeamState()
+            hasLoadedTeam = true
+            return
+        }
+
+        teamStatus = .loading
+        defer {
+            hasLoadedTeam = true
+        }
+
+        do {
+            teamMembers = try await service.getBandeiraMembers(id: currentBandeiraId)
+            teamStatus = teamMembers.isEmpty ? .empty : .loaded
+        } catch {
+            teamStatus = .failed(
+                makeUserFacingMessage(
+                    for: error,
+                    fallback: "Nao foi possivel carregar sua equipe. Tente novamente."
+                )
+            )
+        }
+    }
+
+    func requestMapFocusForCurrentTeam() {
+        guard let currentBandeiraId else { return }
+        pendingMapIntent = BandeirasMapIntent(
+            filter: .myBandeira,
+            focusContext: .bandeira(bandeiraId: currentBandeiraId)
+        )
+    }
+
+    func roleActionTitle(for member: BandeiraMember) -> String? {
+        guard canManageTeamRoles else { return nil }
+        return normalizedRole(member.role) == "ADMIN" ? "Tornar membro" : "Promover a admin"
+    }
+
+    func roleBadgeText(for member: BandeiraMember) -> String {
+        normalizedRole(member.role) == "ADMIN" ? "Admin" : "Membro"
+    }
+
+    func updateRole(for member: BandeiraMember) async {
+        guard canManageTeamRoles, let currentBandeiraId, roleMutationMemberId == nil else { return }
+
+        let targetRole = normalizedRole(member.role) == "ADMIN" ? "MEMBER" : "ADMIN"
+        errorMessage = nil
+        noticeMessage = nil
+        roleMutationMemberId = member.id
+        defer {
+            roleMutationMemberId = nil
+        }
+
+        do {
+            _ = try await service.updateMemberRole(
+                bandeiraId: currentBandeiraId,
+                request: UpdateBandeiraMemberRoleRequest(userId: member.id, role: targetRole)
+            )
+
+            let refreshed = await refreshUserState(fallbackBandeiraId: currentBandeiraId)
+            await loadMyTeam(syncFromSession: refreshed)
+
+            if targetRole == "ADMIN" {
+                noticeMessage = "\(member.username) agora pode gerenciar roles da equipe."
+            } else {
+                noticeMessage = "\(member.username) voltou para a role de membro."
+            }
+
+            if !refreshed {
+                noticeMessage = "\(noticeMessage ?? "Role atualizada.") Atualize para sincronizar sua sessao local."
+            }
+        } catch {
+            errorMessage = makeUserFacingMessage(
+                for: error,
+                fallback: "Nao foi possivel atualizar a role da equipe. Tente novamente."
             )
         }
     }
@@ -387,6 +547,12 @@ final class BandeirasViewModel: ObservableObject {
 
     private func syncCurrentBandeiraFromSession() {
         currentBandeiraId = currentUserProvider()?.bandeiraId
+    }
+
+    private func resetTeamState() {
+        teamMembers = []
+        teamStatus = .idle
+        roleMutationMemberId = nil
     }
 
     @discardableResult
@@ -434,6 +600,10 @@ final class BandeirasViewModel: ObservableObject {
         guard color.count == 7, color.hasPrefix("#") else { return false }
         let hexDigits = color.dropFirst()
         return hexDigits.allSatisfy { $0.isHexDigit }
+    }
+
+    private func normalizedRole(_ role: String?) -> String {
+        normalized(role ?? "").uppercased()
     }
 
     private func message(for status: BandeirasSurfaceStatus) -> String? {
