@@ -43,7 +43,7 @@ struct ActiveRunHUD: View {
                 showsUserLocation: true,
                 styleURI: .standard,
                 onVisibleRegionChanged: { bounds in
-                    Task { await mapViewModel.loadQuadras(bounds: bounds.toTuple) }
+                    Task { await mapViewModel.updateVisibleBounds(bounds.toTuple, filter: .all) }
                 }
             )
             .ignoresSafeArea()

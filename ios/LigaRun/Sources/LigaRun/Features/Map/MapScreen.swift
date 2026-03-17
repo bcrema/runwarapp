@@ -5,6 +5,7 @@ struct MapScreen: View {
     @ObservedObject private var session: SessionStore
     @StateObject private var viewModel: MapViewModel
     @State private var showingActiveRun = false
+    @State private var pendingFocusContext: MapFocusContext?
 
     init(session: SessionStore) {
         self.session = session
@@ -18,7 +19,13 @@ struct MapScreen: View {
                 quadras: viewModel.quadras,
                 focusCoordinate: viewModel.focusCoordinate,
                 onVisibleRegionChanged: { bounds in
-                    Task { await viewModel.loadQuadras(bounds: bounds.toTuple) }
+                    Task {
+                        await viewModel.updateVisibleBounds(
+                            bounds.toTuple,
+                            filter: session.activeMapOwnershipFilter,
+                            focusContext: session.mapFocusContext
+                        )
+                    }
                 },
                 onQuadraTapped: { quadra in
                     viewModel.selectedQuadra = quadra
@@ -27,29 +34,39 @@ struct MapScreen: View {
             .ignoresSafeArea()
 
             VStack(spacing: 16) {
-                HStack(alignment: .top) {
-                    quadraStateLegend
-                    Spacer()
-                    VStack(alignment: .trailing, spacing: 8) {
+                VStack(alignment: .leading, spacing: 12) {
+                    mapFilterBar
+
+                    HStack(alignment: .top) {
+                        quadraStateLegend
+                        Spacer()
                         if viewModel.isLoading {
                             ProgressView("Carregando quadras...")
                                 .padding(8)
                                 .background(.ultraThinMaterial, in: Capsule())
                         }
-
-                        Button {
-                            Task { await viewModel.refreshDisputedQuadras() }
-                        } label: {
-                            Label("Ver disputas", systemImage: "flame")
-                                .font(.subheadline.weight(.semibold))
-                                .padding(.horizontal, 12)
-                                .padding(.vertical, 8)
-                                .background(.thinMaterial, in: Capsule())
-                        }
                     }
                 }
                 .padding(.horizontal)
                 .padding(.top)
+
+                if let contextualMessage = viewModel.contextualMessage {
+                    inlineMessageCard(
+                        title: "Contexto do mapa",
+                        message: contextualMessage,
+                        systemImage: "scope"
+                    )
+                    .padding(.horizontal)
+                }
+
+                if let emptyState = viewModel.emptyState {
+                    inlineMessageCard(
+                        title: emptyState.title,
+                        message: emptyState.message,
+                        systemImage: "map"
+                    )
+                    .padding(.horizontal)
+                }
 
                 Spacer()
 
@@ -91,22 +108,33 @@ struct MapScreen: View {
         } message: {
             Text(viewModel.errorMessage ?? "")
         }
+        .task {
+            await applySharedMapState()
+        }
+        .onChange(of: session.activeMapOwnershipFilter) { _ in
+            Task {
+                await viewModel.selectFilter(
+                    session.activeMapOwnershipFilter,
+                    focusContext: consumePendingFocusContext()
+                )
+            }
+        }
         .onChange(of: session.mapFocusQuadraId) { newValue in
             guard let quadraId = newValue else { return }
             Task {
-                await viewModel.refreshVisibleQuadras()
+                await applySharedMapState()
                 await viewModel.focusOnQuadra(id: quadraId)
                 session.mapFocusQuadraId = nil
             }
         }
-        .onChange(of: session.mapFocusContext) { _ in
-            guard session.selectedTab == .map else { return }
+        .onChange(of: session.mapFocusContext) { newValue in
+            guard newValue != nil, session.selectedTabIndex == 0 else { return }
             Task {
                 await applySharedMapState()
             }
         }
-        .onChange(of: session.selectedTabIndex) { _ in
-            guard session.selectedTab == .map else { return }
+        .onChange(of: session.selectedTabIndex) { newValue in
+            guard newValue == 0 else { return }
             Task {
                 await applySharedMapState()
             }
@@ -118,17 +146,26 @@ struct MapScreen: View {
 
     @MainActor
     private func applySharedMapState() async {
-        if let focusContext = session.consumeMapFocusContext(),
-           session.activeMapOwnershipFilter == .all {
+        let focusContext = session.mapFocusContext
+        pendingFocusContext = focusContext
+        session.mapFocusContext = nil
+
+        if let focusContext, session.activeMapOwnershipFilter == .all {
             session.activeMapOwnershipFilter = defaultFilter(for: focusContext)
+            return
         }
 
-        switch session.activeMapOwnershipFilter {
-        case .disputed:
-            await viewModel.refreshDisputedQuadras()
-        case .all, .mine, .myBandeira:
-            await viewModel.refreshVisibleQuadras()
-        }
+        await viewModel.selectFilter(
+            session.activeMapOwnershipFilter,
+            focusContext: consumePendingFocusContext()
+        )
+    }
+
+    @MainActor
+    private func consumePendingFocusContext() -> MapFocusContext? {
+        let focusContext = pendingFocusContext
+        pendingFocusContext = nil
+        return focusContext
     }
 
     private func defaultFilter(for focusContext: MapFocusContext) -> MapOwnershipFilter {
@@ -154,6 +191,82 @@ struct MapScreen: View {
         .padding(.horizontal, 12)
         .padding(.vertical, 10)
         .background(.thinMaterial, in: RoundedRectangle(cornerRadius: 12, style: .continuous))
+    }
+
+    private var mapFilterBar: some View {
+        ScrollView(.horizontal, showsIndicators: false) {
+            HStack(spacing: 10) {
+                ForEach(MapOwnershipFilter.allCases, id: \.self) { filter in
+                    let isSelected = session.activeMapOwnershipFilter == filter
+                    Button {
+                        session.activeMapOwnershipFilter = filter
+                    } label: {
+                        Label(filterTitle(for: filter), systemImage: filterIcon(for: filter))
+                            .font(.subheadline.weight(.semibold))
+                            .padding(.horizontal, 14)
+                            .padding(.vertical, 10)
+                            .foregroundColor(isSelected ? .white : .primary)
+                            .background(
+                                RoundedRectangle(cornerRadius: 14, style: .continuous)
+                                    .fill(isSelected ? Color.accentColor : Color.white.opacity(0.18))
+                            )
+                    }
+                    .buttonStyle(.plain)
+                }
+            }
+            .padding(6)
+            .background(.ultraThinMaterial, in: RoundedRectangle(cornerRadius: 18, style: .continuous))
+        }
+    }
+
+    private func inlineMessageCard(
+        title: String,
+        message: String,
+        systemImage: String
+    ) -> some View {
+        HStack(alignment: .top, spacing: 12) {
+            Image(systemName: systemImage)
+                .foregroundColor(.accentColor)
+                .padding(.top, 2)
+
+            VStack(alignment: .leading, spacing: 4) {
+                Text(title)
+                    .font(.headline)
+                Text(message)
+                    .font(.subheadline)
+                    .foregroundColor(.secondary)
+            }
+
+            Spacer(minLength: 0)
+        }
+        .padding(14)
+        .background(.thinMaterial, in: RoundedRectangle(cornerRadius: 16, style: .continuous))
+    }
+
+    private func filterTitle(for filter: MapOwnershipFilter) -> String {
+        switch filter {
+        case .all:
+            return "Todas"
+        case .disputed:
+            return "Em disputa"
+        case .mine:
+            return "Minhas"
+        case .myBandeira:
+            return "Da minha bandeira"
+        }
+    }
+
+    private func filterIcon(for filter: MapOwnershipFilter) -> String {
+        switch filter {
+        case .all:
+            return "square.grid.2x2"
+        case .disputed:
+            return "flame.fill"
+        case .mine:
+            return "figure.run"
+        case .myBandeira:
+            return "flag.fill"
+        }
     }
 }
 
@@ -204,23 +317,138 @@ struct QuadraDetailView: View {
                     .tint(shieldColor(for: quadra.shield))
             }
 
-            if quadra.isInDispute {
-                Label("Quadra em disputa", systemImage: "flame.fill")
-                    .foregroundColor(.orange)
-            }
+            territoryDecisionCard
 
-            if quadra.isInCooldown {
-                Label("Em cooldown", systemImage: "lock.fill")
-                    .foregroundColor(.blue)
-            }
+            VStack(alignment: .leading, spacing: 10) {
+                detailRow(
+                    title: "Estado territorial",
+                    value: territorialStateLabel,
+                    systemImage: territorialStateIcon,
+                    tint: territorialStateColor
+                )
 
-            if let guardian = quadra.guardianName {
-                Label("Guardião: \(guardian)", systemImage: "shield.lefthalf.fill")
+                if let champion = quadra.championName {
+                    detailRow(
+                        title: "Campeao",
+                        value: champion,
+                        systemImage: "crown.fill",
+                        tint: .yellow
+                    )
+                }
+
+                if let guardian = quadra.guardianName {
+                    detailRow(
+                        title: "Guardiao",
+                        value: guardian,
+                        systemImage: "shield.lefthalf.fill",
+                        tint: .blue
+                    )
+                }
             }
 
             Spacer()
         }
         .padding()
+    }
+
+    private var territoryDecisionCard: some View {
+        VStack(alignment: .leading, spacing: 6) {
+            Text(decisionSummaryTitle)
+                .font(.headline)
+            Text(decisionSummaryMessage)
+                .font(.subheadline)
+                .foregroundColor(.secondary)
+        }
+        .padding(12)
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .background(Color.white.opacity(0.08), in: RoundedRectangle(cornerRadius: 14, style: .continuous))
+    }
+
+    private func detailRow(
+        title: String,
+        value: String,
+        systemImage: String,
+        tint: Color
+    ) -> some View {
+        HStack {
+            Label(title, systemImage: systemImage)
+                .foregroundColor(tint)
+            Spacer()
+            Text(value)
+                .multilineTextAlignment(.trailing)
+        }
+        .font(.subheadline)
+    }
+
+    private var territorialStateLabel: String {
+        if quadra.isInDispute {
+            return "Em disputa"
+        }
+        if quadra.isInCooldown {
+            return "Em cooldown"
+        }
+        if quadra.ownerType == nil {
+            return "Neutra"
+        }
+        return "Dominada"
+    }
+
+    private var territorialStateIcon: String {
+        if quadra.isInDispute {
+            return "flame.fill"
+        }
+        if quadra.isInCooldown {
+            return "lock.fill"
+        }
+        if quadra.ownerType == nil {
+            return "circle.dotted"
+        }
+        return "shield.fill"
+    }
+
+    private var territorialStateColor: Color {
+        if quadra.isInDispute {
+            return .orange
+        }
+        if quadra.isInCooldown {
+            return .blue
+        }
+        if quadra.ownerType == nil {
+            return .gray
+        }
+        return .green
+    }
+
+    private var decisionSummaryTitle: String {
+        if quadra.isInDispute {
+            return "Disputa aberta"
+        }
+        if quadra.ownerType == nil {
+            return "Janela de conquista"
+        }
+        if quadra.isInCooldown {
+            return "Territorio protegido"
+        }
+        if quadra.shield < 40 {
+            return "Defesa fragil"
+        }
+        return "Territorio estavel"
+    }
+
+    private var decisionSummaryMessage: String {
+        if quadra.isInDispute {
+            return "A quadra esta em disputa agora. Vale agir rapido para defender ou virar o controle."
+        }
+        if quadra.ownerType == nil {
+            return "Sem dono atual. Boa oportunidade para conquistar territorio sem perder contexto da camera."
+        }
+        if quadra.isInCooldown {
+            return "A quadra esta em cooldown. Planeje a proxima investida quando a janela territorial reabrir."
+        }
+        if quadra.shield < 40 {
+            return "O escudo esta baixo e o dominio pode virar rapido. Se a quadra for estrategica, vale competir."
+        }
+        return "O dominio esta consolidado. Vale defender se o ponto for critico ou buscar alvos mais frageis no entorno."
     }
 
     private func shieldColor(for value: Int) -> Color {
