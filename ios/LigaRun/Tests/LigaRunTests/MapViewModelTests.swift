@@ -72,7 +72,7 @@ final class MapViewModelTests: XCTestCase {
             viewportQuadrasResult: .success([]),
             disputedQuadrasResult: .success([]),
             userQuadrasResult: .success([]),
-            bandeiraQuadrasResult: .success([makeQuadraFixture(id: "band-quadra", ownerId: "band-ranking", ownerType: .bandeira)]),
+            bandeiraQuadrasResult: .success([makeQuadraFixture(id: "band-quadra", ownerType: .bandeira, ownerId: "band-ranking")]),
             quadraResult: .success(makeQuadraFixture())
         )
         let viewModel = MapViewModel(session: session, api: api)
