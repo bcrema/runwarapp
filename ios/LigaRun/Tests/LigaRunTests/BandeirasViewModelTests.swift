@@ -198,21 +198,177 @@ final class BandeirasViewModelTests: XCTestCase {
 
         XCTAssertNil(viewModel.pendingMapIntent)
     }
+
+    @MainActor
+    func testLoadMyTeamSortsContributorsByConquestsAndName() async {
+        let service = BandeirasServiceSpy()
+        service.members = [
+            makeBandeiraMemberFixture(id: "m3", username: "Bruno", role: "MEMBER", totalTilesConquered: 8),
+            makeBandeiraMemberFixture(id: "m2", username: "Ana", role: "ADMIN", totalTilesConquered: 12),
+            makeBandeiraMemberFixture(id: "m1", username: "Caio", role: "MEMBER", totalTilesConquered: 12),
+            makeBandeiraMemberFixture(id: "m4", username: "Duda", role: "MEMBER", totalTilesConquered: 2)
+        ]
+
+        let viewModel = BandeirasViewModel(
+            service: service,
+            currentUserProvider: {
+                makeUserFixture(
+                    id: "admin-1",
+                    bandeiraId: "band-1",
+                    bandeiraName: "Liga Centro",
+                    role: "ADMIN"
+                )
+            },
+            refreshUserAction: { () async throws in }
+        )
+
+        await viewModel.loadMyTeam()
+
+        XCTAssertEqual(viewModel.teamStatus, .loaded)
+        XCTAssertEqual(viewModel.sortedTeamMembers.map(\.id), ["m2", "m1", "m3", "m4"])
+        XCTAssertEqual(viewModel.topContributors.map(\.id), ["m2", "m1", "m3"])
+        XCTAssertEqual(viewModel.teamAdminCount, 1)
+        XCTAssertEqual(viewModel.teamTotalConquests, 34)
+    }
+
+    @MainActor
+    func testLoadMyTeamWithoutBandeiraResetsSurface() async {
+        let service = BandeirasServiceSpy()
+        service.members = [makeBandeiraMemberFixture()]
+        let viewModel = BandeirasViewModel(
+            service: service,
+            currentUserProvider: {
+                makeUserFixture(
+                    id: "runner-1",
+                    bandeiraId: nil,
+                    bandeiraName: nil,
+                    role: "USER"
+                )
+            },
+            refreshUserAction: { () async throws in }
+        )
+
+        await viewModel.loadMyTeam()
+
+        XCTAssertEqual(viewModel.teamStatus, .idle)
+        XCTAssertTrue(viewModel.teamMembers.isEmpty)
+        XCTAssertEqual(service.getMembersCalls, [])
+    }
+
+    @MainActor
+    func testUpdateRolePromotesMemberAndReloadsTeam() async {
+        let service = BandeirasServiceSpy()
+        service.members = [makeBandeiraMemberFixture(id: "member-1", username: "Pat", role: "MEMBER", totalTilesConquered: 3)]
+        service.updatedMembers = [makeBandeiraMemberFixture(id: "member-1", username: "Pat", role: "ADMIN", totalTilesConquered: 3)]
+
+        var refreshCalls = 0
+        let viewModel = BandeirasViewModel(
+            service: service,
+            currentUserProvider: {
+                makeUserFixture(
+                    id: "admin-1",
+                    bandeiraId: "band-1",
+                    bandeiraName: "Liga Centro",
+                    role: "ADMIN"
+                )
+            },
+            refreshUserAction: { () async throws in
+                refreshCalls += 1
+            }
+        )
+
+        await viewModel.loadMyTeam()
+        await viewModel.updateRole(for: service.members[0])
+
+        XCTAssertEqual(service.updatedRoleRequests.count, 1)
+        XCTAssertEqual(service.updatedRoleRequests.first?.bandeiraId, "band-1")
+        XCTAssertEqual(
+            service.updatedRoleRequests.first?.request,
+            UpdateBandeiraMemberRoleRequest(userId: "member-1", role: "ADMIN")
+        )
+        XCTAssertEqual(service.getMembersCalls, ["band-1", "band-1"])
+        XCTAssertEqual(viewModel.teamMembers.first?.role, "ADMIN")
+        XCTAssertEqual(viewModel.noticeMessage, "Pat agora pode gerenciar roles da equipe.")
+        XCTAssertEqual(refreshCalls, 1)
+        XCTAssertNil(viewModel.errorMessage)
+    }
+
+    @MainActor
+    func testUpdateRoleFailureSurfacesBackendMessage() async {
+        let service = BandeirasServiceSpy()
+        let member = makeBandeiraMemberFixture(id: "member-1", username: "Pat", role: "ADMIN", totalTilesConquered: 3)
+        service.members = [member]
+        service.updateRoleError = APIError(error: "LAST_ADMIN", message: "Voce nao pode remover o ultimo admin.", details: nil)
+
+        let viewModel = BandeirasViewModel(
+            service: service,
+            currentUserProvider: {
+                makeUserFixture(
+                    id: "admin-1",
+                    bandeiraId: "band-1",
+                    bandeiraName: "Liga Centro",
+                    role: "ADMIN"
+                )
+            },
+            refreshUserAction: { () async throws in }
+        )
+
+        await viewModel.loadMyTeam()
+        await viewModel.updateRole(for: member)
+
+        XCTAssertEqual(viewModel.errorMessage, "Voce nao pode remover o ultimo admin.")
+        XCTAssertEqual(viewModel.roleMutationMemberId, nil)
+        XCTAssertEqual(service.updatedRoleRequests.count, 1)
+    }
+
+    @MainActor
+    func testRoleActionTitleIsHiddenForNonAdminUser() async {
+        let member = makeBandeiraMemberFixture(id: "member-1", username: "Pat", role: "MEMBER", totalTilesConquered: 3)
+        let viewModel = BandeirasViewModel(
+            service: BandeirasServiceSpy(),
+            currentUserProvider: {
+                makeUserFixture(
+                    id: "runner-1",
+                    bandeiraId: "band-1",
+                    bandeiraName: "Liga Centro",
+                    role: "MEMBER"
+                )
+            },
+            refreshUserAction: { () async throws in }
+        )
+
+        XCTAssertFalse(viewModel.canManageTeamRoles)
+        XCTAssertNil(viewModel.roleActionTitle(for: member))
+    }
 }
 
 @MainActor
 private final class BandeirasServiceSpy: BandeirasServiceProtocol {
     var bandeiras: [Bandeira] = []
     var rankings: [Bandeira] = []
+    var members: [BandeiraMember] = []
+    var updatedMembers: [BandeiraMember]?
     var joinError: Error?
     var rankingsError: Error?
+    var membersError: Error?
+    var updateRoleError: Error?
     var rankingGate: AsyncGate?
     private(set) var createdRequests: [CreateBandeiraRequest] = []
     private(set) var joinCalls: [String] = []
+    private(set) var getMembersCalls: [String] = []
+    private(set) var updatedRoleRequests: [(bandeiraId: String, request: UpdateBandeiraMemberRoleRequest)] = []
     private(set) var leaveCalls = 0
 
     func getBandeiras() async throws -> [Bandeira] {
         bandeiras
+    }
+
+    func getBandeiraMembers(id: String) async throws -> [BandeiraMember] {
+        getMembersCalls.append(id)
+        if let membersError {
+            throw membersError
+        }
+        return members
     }
 
     func getBandeiraRankings() async throws -> [Bandeira] {
@@ -245,6 +401,17 @@ private final class BandeirasServiceSpy: BandeirasServiceProtocol {
     func leaveBandeira() async throws {
         leaveCalls += 1
     }
+
+    func updateMemberRole(bandeiraId: String, request: UpdateBandeiraMemberRoleRequest) async throws -> Bool {
+        updatedRoleRequests.append((bandeiraId: bandeiraId, request: request))
+        if let updateRoleError {
+            throw updateRoleError
+        }
+        if let updatedMembers {
+            members = updatedMembers
+        }
+        return true
+    }
 }
 
 private actor AsyncGate {
@@ -260,4 +427,40 @@ private actor AsyncGate {
         continuation?.resume()
         continuation = nil
     }
+}
+
+private func makeBandeiraMemberFixture(
+    id: String = "member-1",
+    username: String = "Runner",
+    role: String = "MEMBER",
+    totalTilesConquered: Int = 5
+) -> BandeiraMember {
+    BandeiraMember(
+        id: id,
+        username: username,
+        avatarUrl: nil,
+        role: role,
+        totalTilesConquered: totalTilesConquered
+    )
+}
+
+private func makeUserFixture(
+    id: String,
+    bandeiraId: String?,
+    bandeiraName: String?,
+    role: String
+) -> User {
+    User(
+        id: id,
+        email: "\(id)@example.com",
+        username: id,
+        avatarUrl: nil,
+        isPublic: true,
+        bandeiraId: bandeiraId,
+        bandeiraName: bandeiraName,
+        role: role,
+        totalRuns: 0,
+        totalDistance: 0,
+        totalTilesConquered: 0
+    )
 }
