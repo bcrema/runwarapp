@@ -99,14 +99,44 @@ struct MapScreen: View {
                 session.mapFocusQuadraId = nil
             }
         }
-        .onChange(of: session.selectedTabIndex) { newValue in
-            guard newValue == 0 else { return }
+        .onChange(of: session.mapFocusContext) { _ in
+            guard session.selectedTab == .map else { return }
             Task {
-                await viewModel.refreshVisibleQuadras()
+                await applySharedMapState()
+            }
+        }
+        .onChange(of: session.selectedTabIndex) { _ in
+            guard session.selectedTab == .map else { return }
+            Task {
+                await applySharedMapState()
             }
         }
         .fullScreenCover(isPresented: $showingActiveRun) {
             ActiveRunHUD(session: session)
+        }
+    }
+
+    @MainActor
+    private func applySharedMapState() async {
+        if let focusContext = session.consumeMapFocusContext(),
+           session.activeMapOwnershipFilter == .all {
+            session.activeMapOwnershipFilter = defaultFilter(for: focusContext)
+        }
+
+        switch session.activeMapOwnershipFilter {
+        case .disputed:
+            await viewModel.refreshDisputedQuadras()
+        case .all, .mine, .myBandeira:
+            await viewModel.refreshVisibleQuadras()
+        }
+    }
+
+    private func defaultFilter(for focusContext: MapFocusContext) -> MapOwnershipFilter {
+        switch focusContext {
+        case .user:
+            return .mine
+        case .bandeira:
+            return .myBandeira
         }
     }
 
