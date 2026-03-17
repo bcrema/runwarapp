@@ -6,6 +6,7 @@ import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import { useAuth } from '@/lib/auth'
 import SocialAuthButtons from '@/components/social-auth/SocialAuthButtons'
+import SocialLinkRequiredPanel from '@/components/social-auth/SocialLinkRequiredPanel'
 import { LinkRequiredError, LinkRequiredPayload, SocialExchangeRequest } from '@/lib/api'
 import styles from '../auth.module.css'
 import socialStyles from '@/components/social-auth/social-auth.module.css'
@@ -96,6 +97,13 @@ export default function LoginPage() {
         }
     }
 
+    const socialProviderLabel =
+        linkContext?.provider === 'apple'
+            ? 'Apple'
+            : linkContext?.provider === 'google'
+                ? 'Google'
+                : 'sua rede social'
+
     return (
         <main className={styles.main}>
             <div className={styles.shell}>
@@ -143,51 +151,19 @@ export default function LoginPage() {
                         />
                         {socialError && <div className={styles.error}>{socialError}</div>}
                         {linkContext && (
-                            <div className={socialStyles.linkBox}>
-                                <p>
-                                    Ja existe uma conta com {linkContext.emailMasked ?? 'este email'}.
-                                    Insira a senha para vincular as identidades.
-                                </p>
-                                {linkState.error && <p className={socialStyles.linkError}>{linkState.error}</p>}
-                                <form className={socialStyles.linkForm} onSubmit={handleLinkSubmit}>
-                                    <input
-                                        type="email"
-                                        className={socialStyles.linkInput}
-                                        placeholder="Email"
-                                        value={linkState.email}
-                                        onChange={(e) =>
-                                            setLinkState((prev) => ({ ...prev, email: e.target.value }))
-                                        }
-                                        required
-                                    />
-                                    <input
-                                        type="password"
-                                        className={socialStyles.linkInput}
-                                        placeholder="Senha"
-                                        value={linkState.password}
-                                        onChange={(e) =>
-                                            setLinkState((prev) => ({ ...prev, password: e.target.value }))
-                                        }
-                                        required
-                                    />
-                                    <div className={socialStyles.linkActions}>
-                                        <button
-                                            type="submit"
-                                            className="btn btn-primary btn-sm"
-                                            disabled={linkState.isLoading}
-                                        >
-                                            {linkState.isLoading ? 'Vinculando...' : 'Vincular conta'}
-                                        </button>
-                                        <button
-                                            type="button"
-                                            className="btn btn-secondary btn-sm"
-                                            onClick={handleLinkCancel}
-                                        >
-                                            Cancelar
-                                        </button>
-                                    </div>
-                                </form>
-                            </div>
+                            <SocialLinkRequiredPanel
+                                linkContext={linkContext}
+                                linkState={linkState}
+                                providerLabel={socialProviderLabel}
+                                onSubmit={handleLinkSubmit}
+                                onCancel={handleLinkCancel}
+                                onEmailChange={(email) =>
+                                    setLinkState((prev) => ({ ...prev, email }))
+                                }
+                                onPasswordChange={(password) =>
+                                    setLinkState((prev) => ({ ...prev, password }))
+                                }
+                            />
                         )}
                     </div>
 

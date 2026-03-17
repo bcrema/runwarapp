@@ -22,7 +22,7 @@ jest.mock('@/lib/auth', () => ({
 import { useRouter } from 'next/navigation'
 import { useAuth } from '@/lib/auth'
 import { LinkRequiredError } from '@/lib/api'
-import LoginPage from './page'
+import RegisterPage from './page'
 
 jest.mock('@/components/social-auth/SocialAuthButtons', () => ({
     __esModule: true,
@@ -35,8 +35,8 @@ jest.mock('@/components/social-auth/SocialAuthButtons', () => ({
     ),
 }))
 
-describe('LoginPage', () => {
-    const mockLogin = jest.fn()
+describe('RegisterPage', () => {
+    const mockRegister = jest.fn()
     const mockSocialAuthenticate = jest.fn()
     const mockLinkSocialAccount = jest.fn()
     const mockPush = jest.fn()
@@ -45,51 +45,30 @@ describe('LoginPage', () => {
         jest.clearAllMocks()
         ;(useRouter as unknown as jest.Mock).mockReturnValue({ push: mockPush })
         ;(useAuth as unknown as jest.Mock).mockReturnValue({
-            login: mockLogin,
+            register: mockRegister,
             socialAuthenticate: mockSocialAuthenticate,
             linkSocialAccount: mockLinkSocialAccount,
         })
     })
 
-    test('renders form fields', () => {
-        render(<LoginPage />)
-
-        expect(screen.getByRole('heading', { name: 'Entrar' })).toBeInTheDocument()
-        expect(screen.getByLabelText('Email')).toBeInTheDocument()
-        expect(screen.getByLabelText('Senha')).toBeInTheDocument()
-        expect(screen.getByRole('button', { name: 'Entrar' })).toBeInTheDocument()
-    })
-
     test('submits and redirects on success', async () => {
         const user = userEvent.setup()
-        mockLogin.mockResolvedValueOnce(undefined)
+        mockRegister.mockResolvedValueOnce(undefined)
 
-        render(<LoginPage />)
+        render(<RegisterPage />)
 
         await user.type(screen.getByLabelText('Email'), 'user@example.com')
-        await user.type(screen.getByLabelText('Senha'), 'secret')
-        await user.click(screen.getByRole('button', { name: 'Entrar' }))
+        await user.type(screen.getByLabelText('Nome de usuario'), 'runner')
+        await user.type(screen.getByLabelText('Senha'), 'secret1')
+        await user.type(screen.getByLabelText('Confirmar senha'), 'secret1')
+        await user.click(screen.getByRole('button', { name: 'Criar conta' }))
 
         await waitFor(() => {
-            expect(mockLogin).toHaveBeenCalledWith('user@example.com', 'secret')
+            expect(mockRegister).toHaveBeenCalledWith('user@example.com', 'runner', 'secret1')
         })
         await waitFor(() => {
             expect(mockPush).toHaveBeenCalledWith('/map')
         })
-    })
-
-    test('shows error on failure', async () => {
-        const user = userEvent.setup()
-        mockLogin.mockRejectedValueOnce(new Error('Credenciais inválidas'))
-
-        render(<LoginPage />)
-
-        await user.type(screen.getByLabelText('Email'), 'user@example.com')
-        await user.type(screen.getByLabelText('Senha'), 'wrong')
-        await user.click(screen.getByRole('button', { name: 'Entrar' }))
-
-        expect(await screen.findByText('Credenciais inválidas')).toBeInTheDocument()
-        expect(mockPush).not.toHaveBeenCalled()
     })
 
     test('highlights explicit linking flow when social auth requires account confirmation', async () => {
@@ -105,7 +84,7 @@ describe('LoginPage', () => {
             )
         )
 
-        render(<LoginPage />)
+        render(<RegisterPage />)
 
         await user.click(screen.getByRole('button', { name: 'Google Stub' }))
 
@@ -113,8 +92,8 @@ describe('LoginPage', () => {
             await screen.findByRole('heading', { name: 'Confirme sua conta para continuar com Google' })
         ).toBeInTheDocument()
         expect(screen.getByText('Acao necessaria')).toBeInTheDocument()
-        expect(screen.getByText('3. Clique em Vincular e entrar.')).toBeInTheDocument()
-        expect(screen.getByPlaceholderText('Email da conta existente')).toBeInTheDocument()
+        expect(screen.getByText('2. Informe a senha atual dessa conta.')).toBeInTheDocument()
+        expect(screen.getByPlaceholderText('Senha atual da conta')).toBeInTheDocument()
         expect(screen.getByRole('button', { name: 'Vincular e entrar' })).toBeInTheDocument()
     })
 })
