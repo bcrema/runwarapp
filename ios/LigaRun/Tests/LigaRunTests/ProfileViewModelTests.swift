@@ -95,6 +95,173 @@ final class ProfileViewModelTests: XCTestCase {
         XCTAssertEqual(viewModel.historyState, .failed("Offline"))
     }
 
+    @MainActor
+    func testSocialCardForMemberHighlightsBandeiraAndCrossNavigationCTAs() {
+        let session = SessionStore()
+        let user = User(
+            id: "user-1",
+            email: "runner@ligarun.app",
+            username: "runner",
+            avatarUrl: nil,
+            isPublic: true,
+            bandeiraId: "band-7",
+            bandeiraName: "Lobos da Serra",
+            role: "ADMIN",
+            totalRuns: 12,
+            totalDistance: 73.5,
+            totalTilesConquered: 9
+        )
+        let viewModel = ProfileViewModel(session: session, runService: ProfileRunServiceStub())
+
+        let card = viewModel.socialCard(for: user)
+
+        XCTAssertEqual(card.title, "Lobos da Serra")
+        XCTAssertEqual(card.badgeLabel, "Admin")
+        XCTAssertEqual(
+            card.actions,
+            [
+                ProfileSocialAction(
+                    title: "Ver ranking territorial",
+                    systemImage: "chart.bar.fill",
+                    style: .primary,
+                    destination: .bandeiras(.ranking)
+                ),
+                ProfileSocialAction(
+                    title: "Abrir minha equipe",
+                    systemImage: "person.3.fill",
+                    style: .secondary,
+                    destination: .bandeiras(.myTeam)
+                ),
+                ProfileSocialAction(
+                    title: "Mapa da minha bandeira",
+                    systemImage: "map.fill",
+                    style: .secondary,
+                    destination: .map(filter: .myBandeira, focusContext: .bandeira(bandeiraId: "band-7"))
+                )
+            ]
+        )
+    }
+
+    @MainActor
+    func testSocialCardForUserWithoutBandeiraReturnsUsefulEmptyState() {
+        let viewModel = ProfileViewModel(session: SessionStore(), runService: ProfileRunServiceStub())
+        let user = User(
+            id: "user-2",
+            email: "solo@ligarun.app",
+            username: "solo",
+            avatarUrl: nil,
+            isPublic: true,
+            bandeiraId: nil,
+            bandeiraName: nil,
+            role: "USER",
+            totalRuns: 3,
+            totalDistance: 12.0,
+            totalTilesConquered: 1
+        )
+
+        let card = viewModel.socialCard(for: user)
+
+        XCTAssertEqual(card.title, "Voce ainda nao faz parte de uma bandeira")
+        XCTAssertNil(card.badgeLabel)
+        XCTAssertEqual(
+            card.actions,
+            [
+                ProfileSocialAction(
+                    title: "Explorar bandeiras",
+                    systemImage: "flag.fill",
+                    style: .primary,
+                    destination: .bandeiras(.explore)
+                ),
+                ProfileSocialAction(
+                    title: "Ver ranking territorial",
+                    systemImage: "chart.bar.fill",
+                    style: .secondary,
+                    destination: .bandeiras(.ranking)
+                ),
+                ProfileSocialAction(
+                    title: "Mapa em disputa",
+                    systemImage: "map.fill",
+                    style: .secondary,
+                    destination: .map(filter: .disputed, focusContext: nil)
+                )
+            ]
+        )
+    }
+
+    @MainActor
+    func testPerformSocialActionRoutesToRankingInsideBandeirasHub() {
+        let session = SessionStore()
+        let viewModel = ProfileViewModel(session: session, runService: ProfileRunServiceStub())
+
+        viewModel.performSocialAction(
+            ProfileSocialAction(
+                title: "Ver ranking territorial",
+                systemImage: "chart.bar.fill",
+                style: .primary,
+                destination: .bandeiras(.ranking)
+            )
+        )
+
+        XCTAssertEqual(session.selectedTab, .bandeiras)
+        XCTAssertEqual(session.activeBandeirasHubTab, .ranking)
+    }
+
+    @MainActor
+    func testPerformSocialActionRoutesToMyTeamInsideBandeirasHub() {
+        let session = SessionStore()
+        let viewModel = ProfileViewModel(session: session, runService: ProfileRunServiceStub())
+
+        viewModel.performSocialAction(
+            ProfileSocialAction(
+                title: "Abrir minha equipe",
+                systemImage: "person.3.fill",
+                style: .secondary,
+                destination: .bandeiras(.myTeam)
+            )
+        )
+
+        XCTAssertEqual(session.selectedTab, .bandeiras)
+        XCTAssertEqual(session.activeBandeirasHubTab, .myTeam)
+    }
+
+    @MainActor
+    func testPerformSocialActionRoutesToMapWithSocialFilter() {
+        let session = SessionStore()
+        let viewModel = ProfileViewModel(session: session, runService: ProfileRunServiceStub())
+
+        viewModel.performSocialAction(
+            ProfileSocialAction(
+                title: "Mapa da minha bandeira",
+                systemImage: "map.fill",
+                style: .secondary,
+                destination: .map(filter: .myBandeira, focusContext: .bandeira(bandeiraId: "band-7"))
+            )
+        )
+
+        XCTAssertEqual(session.selectedTab, .map)
+        XCTAssertEqual(session.activeMapOwnershipFilter, .myBandeira)
+        XCTAssertEqual(session.mapFocusContext, .bandeira(bandeiraId: "band-7"))
+    }
+
+    @MainActor
+    func testPerformSocialActionRoutesToDisputedMapWhenUserHasNoBandeira() {
+        let session = SessionStore()
+        let viewModel = ProfileViewModel(session: session, runService: ProfileRunServiceStub())
+
+        viewModel.performSocialAction(
+            ProfileSocialAction(
+                title: "Mapa em disputa",
+                systemImage: "map.fill",
+                style: .secondary,
+                destination: .map(filter: .disputed, focusContext: nil)
+            )
+        )
+
+        XCTAssertEqual(session.selectedTab, .map)
+        XCTAssertEqual(session.activeMapOwnershipFilter, .disputed)
+        XCTAssertNil(session.mapFocusContext)
+    }
+
     private func makeRun(id: String) -> Run {
         let formatter = ISO8601DateFormatter()
         let date = Date()
