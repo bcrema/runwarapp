@@ -25,6 +25,35 @@ enum ProfileHistoryState: Equatable {
     case failed(String)
 }
 
+enum ProfileSocialDestination: Equatable {
+    case bandeiras(BandeirasHubTab)
+    case map(filter: MapOwnershipFilter, focusContext: MapFocusContext?)
+}
+
+enum ProfileSocialActionStyle: Equatable {
+    case primary
+    case secondary
+}
+
+struct ProfileSocialAction: Identifiable, Equatable {
+    let title: String
+    let systemImage: String
+    let style: ProfileSocialActionStyle
+    let destination: ProfileSocialDestination
+
+    var id: String {
+        "\(title)-\(systemImage)"
+    }
+}
+
+struct ProfileSocialCardContent: Equatable {
+    let title: String
+    let subtitle: String
+    let message: String
+    let badgeLabel: String?
+    let actions: [ProfileSocialAction]
+}
+
 @MainActor
 final class ProfileViewModel: ObservableObject {
     @Published private(set) var recentRuns: [Run] = []
@@ -32,14 +61,71 @@ final class ProfileViewModel: ObservableObject {
 
     private let runService: RunServiceProtocol
     private let historyLimit: Int
+    private let openBandeiras: (BandeirasHubTab) -> Void
+    private let openMap: (MapOwnershipFilter, MapFocusContext?) -> Void
 
     init(session: SessionStore, runService: RunServiceProtocol? = nil, historyLimit: Int = 10) {
         self.runService = runService ?? RunService(apiClient: session.api)
         self.historyLimit = historyLimit
+        self.openBandeiras = { tab in
+            session.navigateToBandeiras(tab: tab)
+        }
+        self.openMap = { filter, focusContext in
+            session.navigateToMap(filter: filter, focusContext: focusContext)
+        }
     }
 
     func stats(for user: User?) -> ProfileStats {
         ProfileStats.from(user: user)
+    }
+
+    func socialCard(for user: User?) -> ProfileSocialCardContent {
+        guard let user else {
+            return noBandeiraSocialCard()
+        }
+
+        let bandeiraName = user.bandeiraName?.trimmingCharacters(in: .whitespacesAndNewlines) ?? ""
+        let hasBandeira = !bandeiraName.isEmpty || user.bandeiraId != nil
+        guard hasBandeira else {
+            return noBandeiraSocialCard()
+        }
+
+        let mapFocusContext = user.bandeiraId.map { MapFocusContext.bandeira(bandeiraId: $0) }
+        return ProfileSocialCardContent(
+            title: bandeiraName.isEmpty ? "Sua bandeira" : bandeiraName,
+            subtitle: "Sua base social no jogo territorial",
+            message: "Abra o ranking, acompanhe sua equipe e veja no mapa onde vale defender ou atacar na próxima corrida.",
+            badgeLabel: roleLabel(for: user.role),
+            actions: [
+                ProfileSocialAction(
+                    title: "Ver ranking territorial",
+                    systemImage: "chart.bar.fill",
+                    style: .primary,
+                    destination: .bandeiras(.ranking)
+                ),
+                ProfileSocialAction(
+                    title: "Abrir minha equipe",
+                    systemImage: "person.3.fill",
+                    style: .secondary,
+                    destination: .bandeiras(.myTeam)
+                ),
+                ProfileSocialAction(
+                    title: "Mapa da minha bandeira",
+                    systemImage: "map.fill",
+                    style: .secondary,
+                    destination: .map(filter: .myBandeira, focusContext: mapFocusContext)
+                )
+            ]
+        )
+    }
+
+    func performSocialAction(_ action: ProfileSocialAction) {
+        switch action.destination {
+        case .bandeiras(let tab):
+            openBandeiras(tab)
+        case .map(let filter, let focusContext):
+            openMap(filter, focusContext)
+        }
     }
 
     func loadRecentRuns() async {
@@ -56,6 +142,44 @@ final class ProfileViewModel: ObservableObject {
             } else {
                 historyState = .failed(error.localizedDescription)
             }
+        }
+    }
+
+    private func noBandeiraSocialCard() -> ProfileSocialCardContent {
+        ProfileSocialCardContent(
+            title: "Voce ainda nao faz parte de uma bandeira",
+            subtitle: "Entre em uma equipe para disputar territorio em conjunto",
+            message: "Enquanto isso, voce pode explorar as bandeiras da comunidade, acompanhar o ranking e abrir o mapa ja focado nas quadras em disputa.",
+            badgeLabel: nil,
+            actions: [
+                ProfileSocialAction(
+                    title: "Explorar bandeiras",
+                    systemImage: "flag.fill",
+                    style: .primary,
+                    destination: .bandeiras(.explore)
+                ),
+                ProfileSocialAction(
+                    title: "Ver ranking territorial",
+                    systemImage: "chart.bar.fill",
+                    style: .secondary,
+                    destination: .bandeiras(.ranking)
+                ),
+                ProfileSocialAction(
+                    title: "Mapa em disputa",
+                    systemImage: "map.fill",
+                    style: .secondary,
+                    destination: .map(filter: .disputed, focusContext: nil)
+                )
+            ]
+        )
+    }
+
+    private func roleLabel(for role: String) -> String {
+        switch role.uppercased() {
+        case "ADMIN":
+            return "Admin"
+        default:
+            return "Membro"
         }
     }
 }
@@ -84,6 +208,12 @@ struct ProfileView: View {
             if let user = session.currentUser {
                 Section("Stats básicas") {
                     ProfileStatsSection(stats: viewModel.stats(for: user))
+                }
+
+                Section("Minha bandeira") {
+                    ProfileSocialCardSection(content: viewModel.socialCard(for: user)) { action in
+                        viewModel.performSocialAction(action)
+                    }
                 }
 
                 Section("Histórico recente") {
@@ -181,6 +311,64 @@ struct ProfileView: View {
             try await session.updateProfile(request: UpdateProfileRequest(username: username, avatarUrl: nil, isPublic: isPublic))
         } catch {
             errorMessage = error.localizedDescription
+        }
+    }
+}
+
+private struct ProfileSocialCardSection: View {
+    let content: ProfileSocialCardContent
+    let onAction: (ProfileSocialAction) -> Void
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 12) {
+            VStack(alignment: .leading, spacing: 6) {
+                HStack(alignment: .center, spacing: 8) {
+                    Text(content.title)
+                        .font(.headline)
+
+                    if let badgeLabel = content.badgeLabel {
+                        Text(badgeLabel)
+                            .font(.caption.weight(.semibold))
+                            .padding(.horizontal, 8)
+                            .padding(.vertical, 4)
+                            .background(Color(.tertiarySystemBackground), in: Capsule())
+                    }
+                }
+
+                Text(content.subtitle)
+                    .font(.subheadline.weight(.medium))
+                    .foregroundColor(.secondary)
+
+                Text(content.message)
+                    .font(.subheadline)
+                    .foregroundColor(.secondary)
+            }
+
+            ForEach(content.actions) { action in
+                actionButton(for: action)
+            }
+        }
+        .padding(.vertical, 4)
+    }
+
+    @ViewBuilder
+    private func actionButton(for action: ProfileSocialAction) -> some View {
+        if action.style == .primary {
+            Button {
+                onAction(action)
+            } label: {
+                Label(action.title, systemImage: action.systemImage)
+                    .frame(maxWidth: .infinity, alignment: .leading)
+            }
+            .buttonStyle(.borderedProminent)
+        } else {
+            Button {
+                onAction(action)
+            } label: {
+                Label(action.title, systemImage: action.systemImage)
+                    .frame(maxWidth: .infinity, alignment: .leading)
+            }
+            .buttonStyle(.bordered)
         }
     }
 }
