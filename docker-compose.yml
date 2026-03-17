@@ -31,6 +31,8 @@ services:
       DATABASE_PASSWORD: postgres
       JWT_SECRET: super-secret-key-for-development-only-256-bits-minimum
       CORS_ORIGINS: http://localhost:3000
+      AUTH_SOCIAL_GOOGLE_CLIENT_IDS: ${AUTH_SOCIAL_GOOGLE_CLIENT_IDS:-}
+      AUTH_SOCIAL_APPLE_CLIENT_IDS: ${AUTH_SOCIAL_APPLE_CLIENT_IDS:-}
       PORT: 8080
       RUNWAR_SEED_ENABLED: ${RUNWAR_SEED_ENABLED:-false}
     ports:
