@@ -54,7 +54,7 @@ export default function BandeiraPage() {
             else failedRequests += 1
 
             if (failedRequests > 0) {
-                setError('Parte da leitura de bandeiras nao carregou. O diretorio segue disponivel.')
+                setError('Parte da leitura de bandeiras não carregou. O diretório segue disponível.')
             }
 
             setLoading(false)
@@ -107,7 +107,7 @@ export default function BandeiraPage() {
             await loadUser()
             router.push('/map')
         } catch {
-            setError('Nao foi possivel entrar na bandeira agora.')
+            setError('Não foi possível entrar na bandeira agora.')
         } finally {
             setJoiningId(null)
         }
@@ -122,7 +122,7 @@ export default function BandeiraPage() {
             await loadUser()
             setMembers([])
         } catch {
-            setError('Nao foi possivel sair da bandeira agora.')
+            setError('Não foi possível sair da bandeira agora.')
         } finally {
             setLeaving(false)
         }
@@ -147,7 +147,7 @@ export default function BandeiraPage() {
                     </h1>
                     <p className="section-copy">
                         Aqui a bandeira deixa de ser um detalhe do jogo. Ela
-                        vira entidade de descoberta, posicionamento e expansao
+                        vira entidade de descoberta, posicionamento e expansão
                         para grupos e assessorias.
                     </p>
                 </div>
@@ -219,7 +219,7 @@ export default function BandeiraPage() {
                                     </span>
                                     <p>
                                         {currentBandeira.description ??
-                                            'Sua equipe ainda nao cadastrou uma descricao publica.'}
+                                            'Sua equipe ainda não cadastrou uma descrição pública.'}
                                     </p>
                                 </div>
 
@@ -236,10 +236,10 @@ export default function BandeiraPage() {
                                         ))
                                     ) : (
                                         <div className="empty-state">
-                                            <strong>Roster ainda nao carregado.</strong>
+                                            <strong>Roster ainda não carregado.</strong>
                                             <span>
                                                 Quando houver membros ativos,
-                                                eles aparecem aqui para leitura rapida.
+                                                eles aparecem aqui para leitura rápida.
                                             </span>
                                         </div>
                                     )}
@@ -251,7 +251,7 @@ export default function BandeiraPage() {
                     <article className="panel">
                         <div className={styles.directoryHeader}>
                             <div className="section-header">
-                                <span className="section-kicker">Diretorio</span>
+                                <span className="section-kicker">Diretório</span>
                                 <h2>Descubra comunidades por nome e categoria.</h2>
                             </div>
 
@@ -295,7 +295,7 @@ export default function BandeiraPage() {
 
                                     <p>
                                         {bandeira.description ??
-                                            'Descricao publica ainda nao cadastrada.'}
+                                            'Descrição pública ainda não cadastrada.'}
                                     </p>
 
                                     <div className={styles.cardMetrics}>
@@ -318,7 +318,7 @@ export default function BandeiraPage() {
                                             {joiningId === bandeira.id ? 'Entrando...' : 'Entrar na bandeira'}
                                         </button>
                                     ) : (
-                                        <span className="tag">Voce ja esta em uma bandeira</span>
+                                        <span className="tag">Você já está em uma bandeira</span>
                                     )}
                                 </article>
                             ))}
@@ -339,7 +339,7 @@ export default function BandeiraPage() {
                     <article className="panel">
                         <div className="section-header">
                             <span className="section-kicker">Mercado local</span>
-                            <h2>Onde estao as oportunidades.</h2>
+                            <h2>Onde estão as oportunidades.</h2>
                         </div>
 
                         <div className="list">
@@ -359,7 +359,7 @@ export default function BandeiraPage() {
 
                     <article className="panel panel-dark">
                         <div className="section-header">
-                            <span className="section-kicker">Atracao</span>
+                            <span className="section-kicker">Atração</span>
                             <h2>Como vender melhor a plataforma.</h2>
                         </div>
                         <div className="list">
@@ -367,7 +367,7 @@ export default function BandeiraPage() {
                                 <div>
                                     <div className="list-title">Assessoria</div>
                                     <div className="list-subtle">
-                                        Precisa de visao coletiva, marca e recorrencia.
+                                        Precisa de visão coletiva, marca e recorrência.
                                     </div>
                                 </div>
                             </div>

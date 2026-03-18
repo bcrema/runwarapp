@@ -84,6 +84,6 @@ describe('ProfilePage', () => {
 
         expect(screen.getByText('78.0 km')).toBeInTheDocument()
         expect(screen.getAllByText('Passada Forte')).toHaveLength(2)
-        expect(screen.getByText(/Como voce esta performando/i)).toBeInTheDocument()
+        expect(screen.getByText(/Como você está performando/i)).toBeInTheDocument()
     })
 })

@@ -30,7 +30,7 @@ export const metadata: Metadata = {
     metadataBase,
     title: 'LigaRun | Painel do Corredor e da Bandeira',
     description:
-        'Painel analitico para corredores, grupos e assessorias acompanharem performance, territorio e crescimento da comunidade.',
+        'Painel analítico para corredores, grupos e assessorias acompanharem performance, território e crescimento da comunidade.',
     keywords: [
         'corrida',
         'painel do corredor',
@@ -43,7 +43,7 @@ export const metadata: Metadata = {
     openGraph: {
         title: 'LigaRun | Painel do Corredor e da Bandeira',
         description:
-            'Controle corridas, territorio, consistencia e crescimento da sua bandeira em um painel unico.',
+            'Controle corridas, território, consistência e crescimento da sua bandeira em um painel único.',
         type: 'website',
     },
 }

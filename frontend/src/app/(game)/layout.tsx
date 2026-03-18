@@ -9,7 +9,7 @@ import styles from './layout.module.css'
 
 const navItems = [
     { href: '/map', label: 'Painel' },
-    { href: '/run', label: 'Sessoes' },
+    { href: '/run', label: 'Sessões' },
     { href: '/rankings', label: 'Radar' },
     { href: '/bandeira', label: 'Bandeira' },
     { href: '/profile', label: 'Perfil' },
@@ -57,11 +57,11 @@ export default function GameLayout({
                         </Link>
                         <div className={styles.brandCopy}>
                             <span className={styles.brandEyebrow}>Control Center</span>
-                            <p>Corredor, bandeira e expansao local no mesmo painel.</p>
+                            <p>Corredor, bandeira e expansão local no mesmo painel.</p>
                         </div>
                     </div>
 
-                    <nav className={styles.desktopNav} aria-label="Navegacao principal">
+                    <nav className={styles.desktopNav} aria-label="Navegação principal">
                         {navItems.map((item) => (
                             <Link
                                 key={item.href}
@@ -80,7 +80,7 @@ export default function GameLayout({
                             <span className={styles.userLabel}>Corredor</span>
                             <strong>{user?.username}</strong>
                             <span className={styles.userMeta}>
-                                {formatDistance(user?.totalDistance ?? 0)} no historico
+                                {formatDistance(user?.totalDistance ?? 0)} no histórico
                             </span>
                         </div>
 
@@ -101,7 +101,7 @@ export default function GameLayout({
                 <div className="page-shell">{children}</div>
             </main>
 
-            <nav className={styles.bottomNav} aria-label="Navegacao mobile">
+            <nav className={styles.bottomNav} aria-label="Navegação mobile">
                 {navItems.map((item) => (
                     <Link
                         key={item.href}

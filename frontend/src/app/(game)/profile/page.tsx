@@ -36,10 +36,10 @@ export default function ProfilePage() {
                 if (!isMounted) return
 
                 if (runsResult.status === 'fulfilled') setRuns(runsResult.value)
-                else setError('Nao foi possivel carregar todas as sessoes do perfil.')
+                else setError('Não foi possível carregar todas as sessões do perfil.')
 
                 if (dailyStatusResult.status === 'fulfilled') setDailyStatus(dailyStatusResult.value)
-                else setError('Nao foi possivel carregar todas as sessoes do perfil.')
+                else setError('Não foi possível carregar todas as sessões do perfil.')
             } finally {
                 if (isMounted) {
                     setLoadingData(false)
@@ -77,7 +77,7 @@ export default function ProfilePage() {
         return (
             <div className={styles.page}>
                 <div className="empty-state">
-                    <strong>Voce precisa estar logado para ver seu perfil.</strong>
+                    <strong>Você precisa estar logado para ver seu perfil.</strong>
                     <Link href="/login" className="btn btn-primary btn-sm">
                         Fazer login
                     </Link>
@@ -103,7 +103,7 @@ export default function ProfilePage() {
                                 {user.bandeiraName ?? 'Sem bandeira'}
                             </span>
                             <span className="tag">
-                                {user.isPublic ? 'Perfil publico' : 'Perfil privado'}
+                                {user.isPublic ? 'Perfil público' : 'Perfil privado'}
                             </span>
                         </div>
                     </div>
@@ -113,16 +113,16 @@ export default function ProfilePage() {
                     <span className="metric-label">Estado atual</span>
                     <strong className="metric-value">{snapshot.averagePace}</strong>
                     <span className="metric-detail">
-                        Ritmo medio das corridas validadas e {snapshot.activeDays} dias
-                        ativos na ultima semana.
+                        Ritmo médio das corridas validadas e {snapshot.activeDays} dias
+                        ativos na última semana.
                     </span>
                     <div className={styles.summaryRows}>
                         <div>
-                            <span>Acoes hoje</span>
+                            <span>Ações hoje</span>
                             <strong>{dailyStatus?.userActionsRemaining ?? 0}</strong>
                         </div>
                         <div>
-                            <span>Ultima corrida</span>
+                            <span>Última corrida</span>
                             <strong>{formatDateLabel(snapshot.lastRunAt)}</strong>
                         </div>
                     </div>
@@ -133,14 +133,14 @@ export default function ProfilePage() {
 
             <section className="metric-grid">
                 <article className="panel metric-card">
-                    <span className="metric-label">Distancia acumulada</span>
+                    <span className="metric-label">Distância acumulada</span>
                     <strong className="metric-value">{formatDistance(user.totalDistance)}</strong>
                     <span className="metric-detail">Base total consolidada da conta.</span>
                 </article>
                 <article className="panel metric-card">
                     <span className="metric-label">Corridas totais</span>
                     <strong className="metric-value">{user.totalRuns}</strong>
-                    <span className="metric-detail">Volume historico registrado.</span>
+                    <span className="metric-detail">Volume histórico registrado.</span>
                 </article>
                 <article className="panel metric-card">
                     <span className="metric-label">Tiles conquistados</span>
@@ -152,7 +152,7 @@ export default function ProfilePage() {
                     <strong className="metric-value">
                         {formatPercentage(snapshot.validatedRate)}
                     </strong>
-                    <span className="metric-detail">Leitura de consistencia dos seus envios.</span>
+                    <span className="metric-detail">Leitura de consistência dos seus envios.</span>
                 </article>
             </section>
 
@@ -160,28 +160,28 @@ export default function ProfilePage() {
                 <article className="panel">
                     <div className="section-header">
                         <span className="section-kicker">Leitura pessoal</span>
-                        <h2>Como voce esta performando.</h2>
+                        <h2>Como você está performando.</h2>
                     </div>
 
                     <div className="list">
                         <div className="list-item">
                             <div>
                                 <div className="list-title">Semana atual</div>
-                                <div className="list-subtle">Distancia acumulada nos ultimos 7 dias.</div>
+                                <div className="list-subtle">Distância acumulada nos últimos 7 dias.</div>
                             </div>
                             <strong>{formatDistance(snapshot.weeklyDistance)}</strong>
                         </div>
                         <div className="list-item">
                             <div>
-                                <div className="list-title">Maior sessao recente</div>
-                                <div className="list-subtle">Melhor distancia desta amostra.</div>
+                                <div className="list-title">Maior sessão recente</div>
+                                <div className="list-subtle">Melhor distância desta amostra.</div>
                             </div>
                             <strong>{formatDistance(snapshot.longestRun)}</strong>
                         </div>
                         <div className="list-item">
                             <div>
-                                <div className="list-title">Conversao territorial</div>
-                                <div className="list-subtle">Quanto das corridas validadas vira acao util.</div>
+                                <div className="list-title">Conversão territorial</div>
+                                <div className="list-subtle">Quanto das corridas validadas vira ação útil.</div>
                             </div>
                             <strong>{formatPercentage(snapshot.territoryConversion)}</strong>
                         </div>
@@ -190,8 +190,8 @@ export default function ProfilePage() {
 
                 <article className="panel">
                     <div className="section-header">
-                        <span className="section-kicker">Ultimas sessoes</span>
-                        <h2>Historico recente.</h2>
+                        <span className="section-kicker">Últimas sessões</span>
+                        <h2>Histórico recente.</h2>
                     </div>
 
                     {sortedRuns.length > 0 ? (
@@ -210,7 +210,7 @@ export default function ProfilePage() {
                         </div>
                     ) : (
                         <div className="empty-state">
-                            <strong>Sem sessoes recentes.</strong>
+                            <strong>Sem sessões recentes.</strong>
                             <span>Assim que corridas entrarem, o perfil organiza a leitura aqui.</span>
                         </div>
                     )}
@@ -235,7 +235,7 @@ export default function ProfilePage() {
                                     <div className="list-title">Visibilidade</div>
                                     <div className="list-subtle">Como o perfil aparece para a comunidade.</div>
                                 </div>
-                                <strong>{user.isPublic ? 'Publico' : 'Privado'}</strong>
+                                <strong>{user.isPublic ? 'Público' : 'Privado'}</strong>
                             </div>
                         </div>
                         <div className={styles.sideActions}>

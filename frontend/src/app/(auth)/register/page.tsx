@@ -89,7 +89,7 @@ export default function RegisterPage() {
         setError('')
 
         if (password !== confirmPassword) {
-            setError('As senhas nao coincidem')
+            setError('As senhas não coincidem')
             return
         }
 
@@ -99,7 +99,7 @@ export default function RegisterPage() {
         }
 
         if (username.length < 3) {
-            setError('O nome de usuario deve ter pelo menos 3 caracteres')
+            setError('O nome de usuário deve ter pelo menos 3 caracteres')
             return
         }
 
@@ -132,11 +132,11 @@ export default function RegisterPage() {
                         </Link>
                         <span className={styles.eyebrow}>Onboarding</span>
                         <h2 className={styles.asideTitle}>
-                            Leve sua corrida para uma camada mais estrategica.
+                            Leve sua corrida para uma camada mais estratégica.
                         </h2>
                         <p className={styles.asideCopy}>
-                            Crie seu acesso para acompanhar evolucao pessoal,
-                            descobrir bandeiras e abrir espaco para sua crew ou
+                            Crie seu acesso para acompanhar evolução pessoal,
+                            descobrir bandeiras e abrir espaço para sua crew ou
                             assessoria.
                         </p>
                     </div>
@@ -144,11 +144,11 @@ export default function RegisterPage() {
                     <div className={styles.asideList}>
                         <div className={styles.asideItem}>
                             <strong>Corredores</strong>
-                            <span>Centralize historico, metas e consistencia semanal.</span>
+                            <span>Centralize histórico, metas e consistência semanal.</span>
                         </div>
                         <div className={styles.asideItem}>
                             <strong>Grupos</strong>
-                            <span>Mostrem atividade, ranking e presenca territorial.</span>
+                            <span>Mostrem atividade, ranking e presença territorial.</span>
                         </div>
                         <div className={styles.asideItem}>
                             <strong>Assessorias</strong>
@@ -206,7 +206,7 @@ export default function RegisterPage() {
 
                         <div className="form-group">
                             <label className="label" htmlFor="username">
-                                Nome de usuario
+                                Nome de usuário
                             </label>
                             <input
                                 type="text"
@@ -263,7 +263,7 @@ export default function RegisterPage() {
 
                     <div className={styles.footer}>
                         <p>
-                            Ja tem uma conta? <Link href="/login">Entrar</Link>
+                            Já tem uma conta? <Link href="/login">Entrar</Link>
                         </p>
                     </div>
                 </div>

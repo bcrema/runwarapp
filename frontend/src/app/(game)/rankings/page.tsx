@@ -23,7 +23,7 @@ export default function RankingsPage() {
                 setBandeiras(data)
             } catch {
                 if (!isMounted) return
-                setError('Nao foi possivel carregar o radar competitivo agora.')
+                setError('Não foi possível carregar o radar competitivo agora.')
             } finally {
                 if (isMounted) {
                     setLoading(false)
@@ -61,23 +61,23 @@ export default function RankingsPage() {
                 <div className="section-header">
                     <span className="section-kicker">Radar competitivo</span>
                     <h1 className="section-title">
-                        O ranking agora serve para leitura e captacao, nao so
-                        para exibicao.
+                        O ranking agora serve para leitura e captação, não só
+                        para exibição.
                     </h1>
                     <p className="section-copy">
                         Compare peso territorial, densidade de membros e tipos
                         de comunidade mais ativos. Isso ajuda a contar melhor a
-                        historia da plataforma para novos grupos e assessorias.
+                        história da plataforma para novos grupos e assessorias.
                     </p>
                 </div>
 
                 <aside className={`${styles.leaderCard} panel panel-dark`}>
                     <span className="metric-label">Lider atual</span>
-                    <strong className="metric-value">{leader?.name ?? 'Sem lider'}</strong>
+                    <strong className="metric-value">{leader?.name ?? 'Sem líder'}</strong>
                     <span className="metric-detail">
                         {leader
                             ? `${getCategoryLabel(leader.category)} com ${leader.memberCount} membros`
-                            : 'Ainda nao ha bandeiras no ranking.'}
+                            : 'Ainda não há bandeiras no ranking.'}
                     </span>
                     {leader && (
                         <div className={styles.leaderMeta}>
@@ -100,7 +100,7 @@ export default function RankingsPage() {
                 <article className="panel metric-card">
                     <span className="metric-label">Bandeiras ranqueadas</span>
                     <strong className="metric-value">{bandeiras.length}</strong>
-                    <span className="metric-detail">Base atual de comunidades visiveis no radar.</span>
+                    <span className="metric-detail">Base atual de comunidades visíveis no radar.</span>
                 </article>
                 <article className="panel metric-card">
                     <span className="metric-label">Membros somados</span>
@@ -110,10 +110,10 @@ export default function RankingsPage() {
                 <article className="panel metric-card">
                     <span className="metric-label">Tiles somados</span>
                     <strong className="metric-value">{totalTiles}</strong>
-                    <span className="metric-detail">Presenca territorial acumulada das equipes.</span>
+                    <span className="metric-detail">Presença territorial acumulada das equipes.</span>
                 </article>
                 <article className="panel metric-card">
-                    <span className="metric-label">Categorias com tracao</span>
+                    <span className="metric-label">Categorias com tração</span>
                     <strong className="metric-value">{categoryBreakdown.length}</strong>
                     <span className="metric-detail">Categorias ativas para comunicar oferta do produto.</span>
                 </article>
@@ -158,7 +158,7 @@ export default function RankingsPage() {
                     <article className="panel">
                         <div className="section-header">
                             <span className="section-kicker">Leitura por categoria</span>
-                            <h2>Quais formatos estao puxando tracao.</h2>
+                        <h2>Quais formatos estão puxando tração.</h2>
                         </div>
 
                         <div className="list">
@@ -183,7 +183,7 @@ export default function RankingsPage() {
                         </div>
                         <p className="section-copy">
                             Ranking com contexto ajuda a vender o produto para
-                            novas assessorias: nao e so disputa, e densidade de
+                            novas assessorias: não é só disputa, é densidade de
                             comunidade com visibilidade.
                         </p>
                         <Link href="/bandeira" className="btn btn-primary">

@@ -7,12 +7,12 @@ const focusAreas = [
     {
         title: 'Painel do corredor',
         description:
-            'Distancia, consistencia, ritmo e impacto territorial ficam organizados numa visao pronta para decisao.',
+            'Distância, consistência, ritmo e impacto territorial ficam organizados numa visão pronta para decisão.',
     },
     {
         title: 'Painel da bandeira',
         description:
-            'Veja membros ativos, presenca da equipe e oportunidades de crescimento por categoria e regiao.',
+            'Veja membros ativos, presença da equipe e oportunidades de crescimento por categoria e região.',
     },
     {
         title: 'Painel de aquisicao',
@@ -24,30 +24,30 @@ const focusAreas = [
 const audiences = [
     {
         kicker: 'Para corredores',
-        title: 'Entenda o seu momento sem abrir varias telas.',
+        title: 'Entenda o seu momento sem abrir várias telas.',
         description:
-            'A web vira um cockpit: historico recente, tendencia semanal, bandeira atual e proximos movimentos.',
-        metrics: ['Consistencia semanal', 'Ritmo medio', 'Ultimas sessoes'],
+            'A web vira um cockpit: histórico recente, tendência semanal, bandeira atual e próximos movimentos.',
+        metrics: ['Consistência semanal', 'Ritmo médio', 'Últimas sessões'],
     },
     {
         kicker: 'Para grupos',
-        title: 'Mostre presenca e mantenha a crew engajada.',
+        title: 'Mostre presença e mantenha a crew engajada.',
         description:
-            'As bandeiras deixam de ser apenas um nome. Elas passam a ter narrativa, ranking, membros e crescimento visivel.',
-        metrics: ['Radar competitivo', 'Times em destaque', 'Distribuicao por categoria'],
+            'As bandeiras deixam de ser apenas um nome. Elas passam a ter narrativa, ranking, membros e crescimento visível.',
+        metrics: ['Radar competitivo', 'Times em destaque', 'Distribuição por categoria'],
     },
     {
         kicker: 'Para assessorias',
         title: 'Transforme alunos em comunidade acionavel.',
         description:
-            'A assessoria consegue apresentar performance coletiva, presenca territorial e valor de marca em uma camada unica.',
+            'A assessoria consegue apresentar performance coletiva, presença territorial e valor de marca em uma camada única.',
         metrics: ['Leads de comunidade', 'Narrativa de marca', 'Escala de membros'],
     },
 ]
 
 const productSteps = [
     'Sincronize os treinos no app e acompanhe tudo no painel web.',
-    'Leia o momento do corredor, da bandeira e do mapa com blocos analiticos.',
+    'Leia o momento do corredor, da bandeira e do mapa com blocos analíticos.',
     'Use o radar para atrair novos membros, crews e assessorias para a plataforma.',
 ]
 
@@ -79,8 +79,8 @@ export default function Home2() {
                         </h1>
                         <p className={styles.heroText}>
                             LigaRun passa a ser um painel de leitura,
-                            consistencia e crescimento. O app captura a corrida.
-                            A web organiza performance, comunidade e expansao.
+                            consistência e crescimento. O app captura a corrida.
+                            A web organiza performance, comunidade e expansão.
                         </p>
 
                         <div className={styles.heroActions}>
@@ -94,12 +94,12 @@ export default function Home2() {
 
                         <div className={styles.heroMetrics}>
                             <div className="panel metric-card">
-                                <span className="metric-label">Visao do corredor</span>
+                                <span className="metric-label">Visão do corredor</span>
                                 <strong className="metric-value">360</strong>
-                                <span className="metric-detail">Historico, ritmo e consistencia em uma leitura unica.</span>
+                                <span className="metric-detail">Histórico, ritmo e consistência em uma leitura única.</span>
                             </div>
                             <div className="panel metric-card">
-                                <span className="metric-label">Visao da bandeira</span>
+                                <span className="metric-label">Visão da bandeira</span>
                                 <strong className="metric-value">1 painel</strong>
                                 <span className="metric-detail">Membros, ranking, tiles e categorias lado a lado.</span>
                             </div>
@@ -113,27 +113,27 @@ export default function Home2() {
                                     <span className={styles.previewKicker}>Painel Central</span>
                                     <h2>Corredor + bandeira + crescimento</h2>
                                 </div>
-                                <span className="tag tag-accent">Analitico</span>
+                                <span className="tag tag-accent">Analítico</span>
                             </div>
 
                             <div className={styles.previewGrid}>
                                 <div className={styles.previewCard}>
                                     <span className="metric-label">Semana</span>
                                     <strong className="metric-value">28,4 km</strong>
-                                    <span className="metric-detail">4 dias ativos e ritmo estavel.</span>
+                                    <span className="metric-detail">4 dias ativos e ritmo estável.</span>
                                 </div>
                                 <div className={styles.previewCard}>
                                     <span className="metric-label">Bandeira</span>
                                     <strong className="metric-value">#2 no radar</strong>
-                                    <span className="metric-detail">42 membros, 118 tiles e alta recorrencia.</span>
+                                    <span className="metric-detail">42 membros, 118 tiles e alta recorrência.</span>
                                 </div>
                                 <div className={styles.previewCardWide}>
                                     <span className="metric-label">Oportunidade</span>
                                     <strong className={styles.previewOpportunity}>
-                                        Assessoria com boa escala, mas pouca presenca territorial.
+                                        Assessoria com boa escala, mas pouca presença territorial.
                                     </strong>
                                     <span className="metric-detail">
-                                        O web passa a gerar argumento para novas parcerias e novos usuarios.
+                                        O web passa a gerar argumento para novas parcerias e novos usuários.
                                     </span>
                                 </div>
                             </div>
@@ -148,12 +148,12 @@ export default function Home2() {
                         <span className="section-kicker">Reposicionamento</span>
                         <h2 className="section-title">
                             O produto deixa de pedir corrida no navegador e
-                            passa a entregar leitura de negocio e performance.
+                            passa a entregar leitura de negócio e performance.
                         </h2>
                         <p className="section-copy">
-                            O ganho aqui nao e so visual. E de clareza de uso:
-                            corredor entende sua evolucao, bandeira entende sua
-                            operacao, e a plataforma comunica melhor valor para
+                            O ganho aqui não é só visual. É de clareza de uso:
+                            corredor entende sua evolução, bandeira entende sua
+                            operação, e a plataforma comunica melhor valor para
                             grupos e assessorias.
                         </p>
                     </div>
@@ -172,7 +172,7 @@ export default function Home2() {
             <section className={styles.audienceSection}>
                 <div className="page-shell">
                     <div className={`${styles.audienceIntro} section-header`}>
-                        <span className="section-kicker">Publicos</span>
+                        <span className="section-kicker">Públicos</span>
                         <h2 className="section-title">Uma home que conversa com quem decide e com quem corre.</h2>
                     </div>
 
@@ -217,15 +217,15 @@ export default function Home2() {
                 <div className="page-shell">
                     <div className={`${styles.finalCard} panel panel-dark`}>
                         <div className="section-header">
-                            <span className="section-kicker">Proxima versao da marca</span>
+                            <span className="section-kicker">Próxima versão da marca</span>
                             <h2 className="section-title">
-                                Mais util para o corredor. Mais atraente para crews e assessorias.
+                                Mais útil para o corredor. Mais atraente para crews e assessorias.
                             </h2>
                             <p className="section-copy">
-                                Essa refatoracao web posiciona a plataforma como
+                                Essa refatoração web posiciona a plataforma como
                                 um centro de controle e relacionamento. E isso
-                                aumenta recorrencia, clareza e potencial de
-                                captacao.
+                                aumenta recorrência, clareza e potencial de
+                                captação.
                             </p>
                         </div>
 

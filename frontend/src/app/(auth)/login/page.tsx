@@ -112,7 +112,7 @@ export default function LoginPage() {
                         <Link href="/" className={styles.logo}>
                             <span className={styles.logoAccent}>Liga</span>Run
                         </Link>
-                        <span className={styles.eyebrow}>Painel Analitico</span>
+                        <span className={styles.eyebrow}>Painel Analítico</span>
                         <h2 className={styles.asideTitle}>
                             Volte para o comando da sua rotina.
                         </h2>
@@ -124,15 +124,15 @@ export default function LoginPage() {
 
                     <div className={styles.asideList}>
                         <div className={styles.asideItem}>
-                            <strong>Visao do corredor</strong>
-                            <span>Distancia, ritmo, consistencia e impacto territorial.</span>
+                            <strong>Visão do corredor</strong>
+                            <span>Distância, ritmo, consistência e impacto territorial.</span>
                         </div>
                         <div className={styles.asideItem}>
-                            <strong>Visao da bandeira</strong>
-                            <span>Membros ativos, ranking e presenca por categoria.</span>
+                            <strong>Visão da bandeira</strong>
+                            <span>Membros ativos, ranking e presença por categoria.</span>
                         </div>
                         <div className={styles.asideItem}>
-                            <strong>Visao de crescimento</strong>
+                            <strong>Visão de crescimento</strong>
                             <span>Um funil claro para atrair novos grupos, crews e assessorias.</span>
                         </div>
                     </div>
@@ -211,7 +211,7 @@ export default function LoginPage() {
 
                     <div className={styles.footer}>
                         <p>
-                            Nao tem uma conta? <Link href="/register">Criar conta</Link>
+                            Não tem uma conta? <Link href="/register">Criar conta</Link>
                         </p>
                     </div>
                 </div>

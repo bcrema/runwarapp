@@ -90,7 +90,7 @@ export default function MapPage() {
             else failedRequests += 1
 
             if (failedRequests > 0) {
-                setError('Parte dos indicadores nao carregou. O painel segue com os dados disponiveis.')
+                setError('Parte dos indicadores não carregou. O painel segue com os dados disponíveis.')
             }
 
             setLoading(false)
@@ -141,12 +141,12 @@ export default function MapPage() {
                     <span className="section-kicker">Painel Central</span>
                     <h1 className="section-title">
                         Tudo o que o corredor e a bandeira precisam ler antes
-                        da proxima semana.
+                        da próxima semana.
                     </h1>
                     <p className="section-copy">
-                        O foco aqui nao e iniciar corrida no navegador. E
-                        entender momento, recorrencia, territorio e expansao da
-                        comunidade a partir dos dados que voce ja gera.
+                        O foco aqui não é iniciar corrida no navegador. É
+                        entender momento, recorrência, território e expansão da
+                        comunidade a partir dos dados que você já gera.
                     </p>
 
                     <div className={styles.heroTags}>
@@ -157,7 +157,7 @@ export default function MapPage() {
                             {user?.bandeiraName ?? 'Sem bandeira no momento'}
                         </span>
                         <span className="tag tag-warn">
-                            {territorySnapshot.userActionsRemaining ?? 0} acoes restantes hoje
+                            {territorySnapshot.userActionsRemaining ?? 0} ações restantes hoje
                         </span>
                     </div>
                 </div>
@@ -169,14 +169,14 @@ export default function MapPage() {
                             {formatDistance(runnerSnapshot.weeklyDistance)}
                         </strong>
                         <span className="metric-detail">
-                            {runnerSnapshot.activeDays} dias ativos nos ultimos 7 dias e
-                            ritmo medio de {runnerSnapshot.averagePace}.
+                            {runnerSnapshot.activeDays} dias ativos nos últimos 7 dias e
+                            ritmo médio de {runnerSnapshot.averagePace}.
                         </span>
                     </div>
 
                     <div className={styles.heroAsideList}>
                         <div className={styles.heroAsideItem}>
-                            <span>Ultima sessao</span>
+                            <span>Última sessão</span>
                             <strong>{formatDateLabel(runnerSnapshot.lastRunAt)}</strong>
                         </div>
                         <div className={styles.heroAsideItem}>
@@ -195,7 +195,7 @@ export default function MapPage() {
 
                     <div className={styles.heroAsideActions}>
                         <Link href="/run" className="btn btn-secondary">
-                            Ver sessoes
+                            Ver sessões
                         </Link>
                         <Link href="/bandeira" className="btn btn-outline">
                             Abrir hub de bandeiras
@@ -208,12 +208,12 @@ export default function MapPage() {
 
             <section className="metric-grid">
                 <article className="panel metric-card">
-                    <span className="metric-label">Distancia total</span>
+                    <span className="metric-label">Distância total</span>
                     <strong className="metric-value">
                         {formatDistance(runnerSnapshot.totalDistance)}
                     </strong>
                     <span className="metric-detail">
-                        Historico do corredor consolidado para leitura rapida.
+                        Histórico do corredor consolidado para leitura rápida.
                     </span>
                 </article>
                 <article className="panel metric-card">
@@ -222,16 +222,16 @@ export default function MapPage() {
                         {formatPercentage(runnerSnapshot.validatedRate)}
                     </strong>
                     <span className="metric-detail">
-                        Taxa de sessoes aprovadas na analise de consistencia.
+                        Taxa de sessões aprovadas na análise de consistência.
                     </span>
                 </article>
                 <article className="panel metric-card">
-                    <span className="metric-label">Territorio em disputa</span>
+                    <span className="metric-label">Território em disputa</span>
                     <strong className="metric-value">
                         {formatPercentage(territorySnapshot.disputedShare)}
                     </strong>
                     <span className="metric-detail">
-                        Leitura do quanto o mapa esta pedindo resposta da comunidade.
+                        Leitura do quanto o mapa está pedindo resposta da comunidade.
                     </span>
                 </article>
                 <article className="panel metric-card">
@@ -252,7 +252,7 @@ export default function MapPage() {
                             <span className="section-kicker">Mapa Operacional</span>
                             <h2>Leitura territorial sem sair do painel.</h2>
                             <p className="section-copy">
-                                Use o mapa como contexto de decisao, nao como
+                                Use o mapa como contexto de decisão, não como
                                 tela principal do produto.
                             </p>
                         </div>
@@ -267,18 +267,18 @@ export default function MapPage() {
                     <article className="panel">
                         <div className="section-header">
                             <span className="section-kicker">Tile selecionado</span>
-                            <h2>Contexto rapido</h2>
+                            <h2>Contexto rápido</h2>
                         </div>
 
                         {selectedTile ? (
                             <div className={styles.tileDetails}>
                                 <div className={styles.tileRow}>
-                                    <span>Dominio</span>
+                                    <span>Domínio</span>
                                     <strong>{selectedTile.ownerName ?? 'Neutro'}</strong>
                                 </div>
                                 <div className={styles.tileRow}>
                                     <span>Tipo</span>
-                                    <strong>{selectedTile.ownerType ?? 'Disponivel'}</strong>
+                                    <strong>{selectedTile.ownerType ?? 'Disponível'}</strong>
                                 </div>
                                 <div className={styles.tileRow}>
                                     <span>Escudo</span>
@@ -291,7 +291,7 @@ export default function MapPage() {
                                             ? 'Em disputa'
                                             : selectedTile.isInCooldown
                                               ? 'Cooldown'
-                                              : 'Estavel'}
+                                              : 'Estável'}
                                     </strong>
                                 </div>
                             </div>
@@ -300,7 +300,7 @@ export default function MapPage() {
                                 <strong>Selecione um tile no mapa.</strong>
                                 <span>
                                     O painel mostra dados mais completos quando
-                                    voce clica em um territorio.
+                                    você clica em um território.
                                 </span>
                             </div>
                         )}
@@ -308,7 +308,7 @@ export default function MapPage() {
 
                     <article className="panel">
                         <div className="section-header">
-                            <span className="section-kicker">Acoes do dia</span>
+                            <span className="section-kicker">Ações do dia</span>
                             <h2>Capacidade operacional</h2>
                         </div>
                         <div className={styles.tileDetails}>
@@ -325,11 +325,11 @@ export default function MapPage() {
                                 </strong>
                             </div>
                             <div className={styles.tileRow}>
-                                <span>Conquistas validas</span>
+                                <span>Conquistas válidas</span>
                                 <strong>{territorySnapshot.conquestRuns}</strong>
                             </div>
                             <div className={styles.tileRow}>
-                                <span>Defesas validas</span>
+                                <span>Defesas válidas</span>
                                 <strong>{territorySnapshot.defenseRuns}</strong>
                             </div>
                         </div>
@@ -356,9 +356,9 @@ export default function MapPage() {
                         </div>
                         <div className="list-item">
                             <div>
-                                <div className="list-title">Melhor sessao recente</div>
+                                <div className="list-title">Melhor sessão recente</div>
                                 <div className="list-subtle">
-                                    Maior distancia registrada nesta amostra.
+                                    Maior distância registrada nesta amostra.
                                 </div>
                             </div>
                             <strong>{formatDistance(runnerSnapshot.longestRun)}</strong>
@@ -367,7 +367,7 @@ export default function MapPage() {
                             <div>
                                 <div className="list-title">Efeito territorial</div>
                                 <div className="list-subtle">
-                                    Conversao das corridas validadas em acao de mapa.
+                                    Conversão das corridas validadas em ação de mapa.
                                 </div>
                             </div>
                             <strong>{formatPercentage(runnerSnapshot.territoryConversion)}</strong>
@@ -378,14 +378,14 @@ export default function MapPage() {
                 <article className="panel">
                     <div className="section-header">
                         <span className="section-kicker">Leitura da bandeira</span>
-                        <h2>Peso coletivo e recorrencia da equipe.</h2>
+                        <h2>Peso coletivo e recorrência da equipe.</h2>
                     </div>
 
                     {user?.bandeiraName ? (
                         <div className="list">
                             <div className="list-item">
                                 <div>
-                                    <div className="list-title">Posicao no radar</div>
+                                    <div className="list-title">Posição no radar</div>
                                     <div className="list-subtle">
                                         Comparativo com as bandeiras mais ativas.
                                     </div>
@@ -396,7 +396,7 @@ export default function MapPage() {
                                 <div>
                                     <div className="list-title">Membro com mais tiles</div>
                                     <div className="list-subtle">
-                                        Destaque interno para comunicacao da equipe.
+                                        Destaque interno para comunicação da equipe.
                                     </div>
                                 </div>
                                 <strong>{topMember?.username ?? 'Sem dado'}</strong>
@@ -411,10 +411,10 @@ export default function MapPage() {
                         </div>
                     ) : (
                         <div className="empty-state">
-                            <strong>Voce ainda nao esta em uma bandeira.</strong>
+                            <strong>Você ainda não está em uma bandeira.</strong>
                             <span>
                                 Entre em uma equipe para desbloquear leitura de
-                                ranking, roster e operacao coletiva.
+                                ranking, roster e operação coletiva.
                             </span>
                             <Link href="/bandeira" className="btn btn-primary btn-sm">
                                 Encontrar bandeira
@@ -426,7 +426,7 @@ export default function MapPage() {
                 <article className="panel">
                     <div className="section-header">
                         <span className="section-kicker">Leitura de crescimento</span>
-                        <h2>Onde a plataforma pode ganhar tracao.</h2>
+                        <h2>Onde a plataforma pode ganhar tração.</h2>
                     </div>
 
                     <div className="list">
@@ -449,7 +449,7 @@ export default function MapPage() {
                 <article className={`${styles.featuredCard} panel panel-dark`}>
                     <div className="section-header">
                         <span className="section-kicker">Bandeiras em destaque</span>
-                        <h2>Quem esta puxando a conversa agora.</h2>
+                        <h2>Quem está puxando a conversa agora.</h2>
                     </div>
 
                     <div className="list">
@@ -471,8 +471,8 @@ export default function MapPage() {
 
                 <article className="panel panel-strong">
                     <div className="section-header">
-                        <span className="section-kicker">Proxima acao</span>
-                        <h2>Use o web para aprofundar relacao com a comunidade.</h2>
+                        <span className="section-kicker">Próxima ação</span>
+                        <h2>Use o web para aprofundar relação com a comunidade.</h2>
                         <p className="section-copy">
                             O produto fica mais forte quando a leitura do
                             corredor alimenta a narrativa da bandeira e gera um
