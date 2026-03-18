@@ -101,7 +101,7 @@ describe('LoginPage', () => {
                     provider: 'google',
                     emailMasked: 'u***@example.com',
                 },
-                'Vinculo necessario'
+                'Vínculo necessário'
             )
         )
 
@@ -112,7 +112,7 @@ describe('LoginPage', () => {
         expect(
             await screen.findByRole('heading', { name: 'Confirme sua conta para continuar com Google' })
         ).toBeInTheDocument()
-        expect(screen.getByText('Acao necessaria')).toBeInTheDocument()
+        expect(screen.getByText('Ação necessária')).toBeInTheDocument()
         expect(screen.getByText('3. Clique em Vincular e entrar.')).toBeInTheDocument()
         expect(screen.getByPlaceholderText('Email da conta existente')).toBeInTheDocument()
         expect(screen.getByRole('button', { name: 'Vincular e entrar' })).toBeInTheDocument()

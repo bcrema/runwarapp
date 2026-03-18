@@ -45,7 +45,7 @@ export default function SocialLinkRequiredPanel({
             role="alert"
             aria-live="assertive"
         >
-            <div className={styles.linkBadge}>Acao necessaria</div>
+            <div className={styles.linkBadge}>Ação necessária</div>
             <div className={styles.linkHeader}>
                 <h3>Confirme sua conta para continuar com {providerLabel}</h3>
                 <p>

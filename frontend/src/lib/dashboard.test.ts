@@ -97,7 +97,7 @@ describe('dashboard helpers', () => {
         expect(formatDistance(14200)).toBe('14.2 km')
         expect(formatPace(10000, 3000)).toBe('5:00/km')
         expect(getRunStatusLabel(baseRuns[0])).toBe('Validada')
-        expect(getRunOutcomeLabel(baseRuns[2])).toBe('Fora de territorio')
+        expect(getRunOutcomeLabel(baseRuns[2])).toBe('Fora de território')
     })
 
 

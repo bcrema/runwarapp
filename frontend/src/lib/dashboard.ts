@@ -10,7 +10,7 @@ const BANDEIRA_CATEGORY_LABELS: Record<Bandeira['category'], string> = {
 }
 
 const ROLE_LABELS: Record<User['role'], string> = {
-    ADMIN: 'Capitao',
+    ADMIN: 'Capitão',
     COACH: 'Coach',
     MEMBER: 'Membro',
 }
@@ -227,6 +227,6 @@ export function getRunOutcomeLabel(run: Run): string {
         case 'DEFENSE':
             return 'Defesa'
         default:
-            return run.isValidForTerritory ? 'Sem acao' : 'Fora de territorio'
+            return run.isValidForTerritory ? 'Sem ação' : 'Fora de território'
     }
 }

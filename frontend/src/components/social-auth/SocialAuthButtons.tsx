@@ -80,7 +80,7 @@ export default function SocialAuthButtons({
             const idToken = authorization?.id_token
             const code = authorization?.code
 
-            if (!idToken) throw new Error('Apple nao retornou um token.')
+            if (!idToken) throw new Error('Apple não retornou um token.')
 
             await onSocialSignIn({
                 provider: 'apple',
@@ -96,7 +96,7 @@ export default function SocialAuthButtons({
 
     return (
         <div className={styles.wrapper}>
-            <p className={styles.lead}>Use Google ou Apple para entrar mais rapido.</p>
+            <p className={styles.lead}>Use Google ou Apple para entrar mais rápido.</p>
             <div className={styles.buttons}>
                 <button
                     type="button"
@@ -156,7 +156,7 @@ async function ensureAppleLibrary() {
 function loadScript(src: string) {
     return new Promise<void>((resolve, reject) => {
         if (typeof document === 'undefined') {
-            reject(new Error('Document nao esta disponivel.'))
+            reject(new Error('Document não está disponível.'))
             return
         }
 
@@ -180,4 +180,3 @@ declare global {
         AppleID?: any
     }
 }
-

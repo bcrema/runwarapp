@@ -57,7 +57,7 @@ describe('RankingsPage', () => {
         await waitFor(() =>
             expect(
                 screen.getByRole('heading', {
-                    name: /O ranking agora serve para leitura e captacao/i,
+                    name: /O ranking agora serve para leitura e captação/i,
                 })
             ).toBeInTheDocument()
         )

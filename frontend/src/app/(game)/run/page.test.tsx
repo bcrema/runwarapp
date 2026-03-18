@@ -66,12 +66,12 @@ describe('RunPage', () => {
         await waitFor(() =>
             expect(
                 screen.getByRole('heading', {
-                    name: /O navegador nao grava corrida/i,
+                    name: /O navegador não grava corrida/i,
                 })
             ).toBeInTheDocument()
         )
 
-        expect(screen.getByText(/Ultimas sessoes lidas pelo sistema/i)).toBeInTheDocument()
+        expect(screen.getByText(/Últimas sessões lidas pelo sistema/i)).toBeInTheDocument()
         expect(screen.queryByText('Upload GPX')).not.toBeInTheDocument()
         expect(screen.getByText('Conquista')).toBeInTheDocument()
     })

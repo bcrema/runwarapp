@@ -58,7 +58,7 @@ describe('RegisterPage', () => {
         render(<RegisterPage />)
 
         await user.type(screen.getByLabelText('Email'), 'user@example.com')
-        await user.type(screen.getByLabelText('Nome de usuario'), 'runner')
+        await user.type(screen.getByLabelText('Nome de usuário'), 'runner')
         await user.type(screen.getByLabelText('Senha'), 'secret1')
         await user.type(screen.getByLabelText('Confirmar senha'), 'secret1')
         await user.click(screen.getByRole('button', { name: 'Criar conta' }))
@@ -80,7 +80,7 @@ describe('RegisterPage', () => {
                     provider: 'google',
                     emailMasked: 'u***@example.com',
                 },
-                'Vinculo necessario'
+                'Vínculo necessário'
             )
         )
 
@@ -91,7 +91,7 @@ describe('RegisterPage', () => {
         expect(
             await screen.findByRole('heading', { name: 'Confirme sua conta para continuar com Google' })
         ).toBeInTheDocument()
-        expect(screen.getByText('Acao necessaria')).toBeInTheDocument()
+        expect(screen.getByText('Ação necessária')).toBeInTheDocument()
         expect(screen.getByText('2. Informe a senha atual dessa conta.')).toBeInTheDocument()
         expect(screen.getByPlaceholderText('Senha atual da conta')).toBeInTheDocument()
         expect(screen.getByRole('button', { name: 'Vincular e entrar' })).toBeInTheDocument()
